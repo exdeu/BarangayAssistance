@@ -1,116 +1,104 @@
 ﻿using System;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace BarangayAssistance
 {
-    public partial class Assistance_Application : System.Web.UI.Page
+    public partial class Assistance_Application : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            // Redirect to login if not logged in as Beneficiary
+            if (!IsPostBack)
+            {
+                if (Session["role"] == null || Session["role"].ToString() != "Beneficiary")
+                {
+                    Response.Redirect("Login.aspx");
+                }
+            }
         }
 
         protected void btnSubmit_Click(object sender, EventArgs e)
+{
+    // Guard: check session
+    if (Session["beneficiary_id"] == null || Session["role"]?.ToString() != "Beneficiary")
+    {
+        lblError.Text = "❌ Session expired. Please log in again.";
+        lblError.Visible = true;
+        return;
+    }
+
+    if (Page.IsValid)
+    {
+        try
         {
-            if (!Page.IsValid)
+            int beneficiaryId = Convert.ToInt32(Session["beneficiary_id"].ToString());
+            string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
+
+            using (SqlConnection conn = new SqlConnection(connStr))
             {
-                lblError.Text = "Please complete all required fields correctly.";
-                lblError.Visible = true;
-                lblSuccess.Visible = false;
-                return;
-            }
+                conn.Open();
 
-            if (Session["username"] == null)
-            {
-                lblError.Text = "Session expired. Please login again.";
-                lblError.Visible = true;
-                lblSuccess.Visible = false;
-                return;
-            }
+                string query = @"
+                    INSERT INTO assistance_applications 
+                    (
+                        beneficiary_id, full_name, beneficiary_type,
+                        contact_number, assistance_type, preferred_date,
+                        estimated_amount_requested, urgency_level,
+                        reason_for_application, additional_notes,
+                        status, date_submitted
+                    )
+                    VALUES 
+                    (
+                        @beneficiary_id, @full_name, @beneficiary_type,
+                        @contact_number, @assistance_type, @preferred_date,
+                        @estimated_amount, @urgency_level,
+                        @reason, @notes,
+                        'Pending', GETDATE()
+                    )";
 
-            string username = Session["username"].ToString();
-
-            string connStr = System.Configuration.ConfigurationManager
-                .ConnectionStrings["BarangayDB"].ConnectionString;
-
-            string query = @"
-                INSERT INTO assistance_applications
-                (
-                    beneficiary_id,
-                    full_name,
-                    beneficiary_type,
-                    contact_number,
-                    assistance_type,
-                    preferred_date,
-                    estimated_amount_requested,
-                    urgency_level,
-                    reason_for_application,
-                    additional_notes
-                )
-                SELECT
-                    b.beneficiary_id,
-                    b.first_name + ' ' + ISNULL(b.middle_name + ' ', '') + b.last_name,
-                    @beneficiary_type,
-                    b.contact_number,
-                    @assistance_type,
-                    @preferred_date,
-                    @amount,
-                    @urgency,
-                    @reason,
-                    @notes
-                FROM beneficiaries b
-                WHERE b.username = @username";
-
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(connStr))
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@username", username);
+                    cmd.Parameters.AddWithValue("@beneficiary_id", beneficiaryId);
+                    cmd.Parameters.AddWithValue("@full_name", txtFullName.Text.Trim());
                     cmd.Parameters.AddWithValue("@beneficiary_type", ddlBeneficiaryType.SelectedValue);
+                    cmd.Parameters.AddWithValue("@contact_number", txtContactNumber.Text.Trim());
                     cmd.Parameters.AddWithValue("@assistance_type", ddlAssistanceType.SelectedValue);
                     cmd.Parameters.AddWithValue("@preferred_date", DateTime.Parse(txtPreferredDate.Text));
-
-                    cmd.Parameters.AddWithValue("@amount",
-                        string.IsNullOrWhiteSpace(txtRequestedAmount.Text)
-                        ? (object)DBNull.Value
-                        : Convert.ToDecimal(txtRequestedAmount.Text));
-
-                    cmd.Parameters.AddWithValue("@urgency", ddlUrgency.SelectedValue);
+                    cmd.Parameters.AddWithValue("@urgency_level", ddlUrgency.SelectedValue);
                     cmd.Parameters.AddWithValue("@reason", txtReason.Text.Trim());
+                    cmd.Parameters.AddWithValue("@notes", string.IsNullOrEmpty(txtNotes.Text) ? (object)DBNull.Value : txtNotes.Text.Trim());
 
-                    cmd.Parameters.AddWithValue("@notes",
-                        string.IsNullOrWhiteSpace(txtNotes.Text)
-                        ? (object)DBNull.Value
-                        : txtNotes.Text.Trim());
-
-                    conn.Open();
-
-                    int rowsAffected = cmd.ExecuteNonQuery();
-
-                    if (rowsAffected > 0)
-                    {
-                        lblSuccess.Text = "Application submitted successfully.";
-                        lblSuccess.Visible = true;
-                        lblError.Visible = false;
-                        ClearFields();
-                    }
+                    if (!string.IsNullOrEmpty(txtRequestedAmount.Text))
+                        cmd.Parameters.AddWithValue("@estimated_amount", decimal.Parse(txtRequestedAmount.Text, System.Globalization.CultureInfo.InvariantCulture));
                     else
-                    {
-                        lblError.Text = "Application failed. Username was not found in beneficiaries table.";
-                        lblError.Visible = true;
-                        lblSuccess.Visible = false;
-                    }
+                        cmd.Parameters.AddWithValue("@estimated_amount", DBNull.Value);
+
+                    cmd.ExecuteNonQuery();
                 }
             }
-            catch (Exception ex)
-            {
-                lblError.Text = "Error: " + ex.Message;
-                lblError.Visible = true;
-                lblSuccess.Visible = false;
-            }
+
+            lblSuccess.Text = "✅ Application submitted successfully! It is now pending for review.";
+            lblSuccess.Visible = true;
+            lblError.Visible = false;
+            ClearFields();
         }
+        catch (Exception ex)
+        {
+            lblError.Text = "❌ Error: " + ex.Message;
+            lblError.Visible = true;
+            lblSuccess.Visible = false;
+        }
+    }
+    else
+    {
+        lblError.Text = "⚠️ Please complete all required fields correctly.";
+        lblError.Visible = true;
+        lblSuccess.Visible = false;
+    }
+}
 
         protected void btnClear_Click(object sender, EventArgs e)
         {
@@ -124,17 +112,23 @@ namespace BarangayAssistance
             args.IsValid = chkDeclaration.Checked;
         }
 
+        protected void btnBack_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("Dashboard.aspx");
+        }
+
         private void ClearFields()
         {
+            txtFullName.Text = "";
+            txtReferenceNo.Text = "";
+            txtContactNumber.Text = "";
             txtPreferredDate.Text = "";
             txtRequestedAmount.Text = "";
             txtReason.Text = "";
             txtNotes.Text = "";
-
             ddlBeneficiaryType.SelectedIndex = 0;
             ddlAssistanceType.SelectedIndex = 0;
             ddlUrgency.SelectedIndex = 0;
-
             chkDeclaration.Checked = false;
         }
     }

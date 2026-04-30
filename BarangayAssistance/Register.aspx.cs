@@ -9,19 +9,56 @@ namespace BarangayAssistance
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             if (Page.IsValid)
             {
-                string connectionString = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
+                // Check passwords match
+                if (txtPassword.Text.Trim() != txtConfirmPassword.Text.Trim())
+                {
+                    lblError.Text = "❌ Passwords do not match.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
+                // Check sex selected
+                if (!rbMale.Checked && !rbFemale.Checked)
+                {
+                    lblError.Text = "❌ Please select your sex.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
+                string connectionString = ConfigurationManager
+                    .ConnectionStrings["BarangayDB"].ConnectionString;
 
                 try
                 {
                     using (SqlConnection con = new SqlConnection(connectionString))
                     {
+                        con.Open();
+
+                        // Check if username already exists
+                        string checkQuery = "SELECT COUNT(*) FROM beneficiaries WHERE username = @username";
+                        using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
+                        {
+                            checkCmd.Parameters.AddWithValue("@username", txtUsername.Text.Trim());
+                            int count = (int)checkCmd.ExecuteScalar();
+
+                            if (count > 0)
+                            {
+                                lblError.Text = "❌ Username already exists. Please choose another.";
+                                lblError.Visible = true;
+                                lblSuccess.Visible = false;
+                                return;
+                            }
+                        }
+
+                        // Insert new beneficiary
                         string query = @"
                             INSERT INTO beneficiaries
                             (
@@ -39,7 +76,9 @@ namespace BarangayAssistance
                                 household_members,
                                 monthly_income,
                                 beneficiary_type,
-                                government_id_presented
+                                government_id_presented,
+                                date_registered,
+                                status
                             )
                             VALUES
                             (
@@ -57,55 +96,63 @@ namespace BarangayAssistance
                                 @household_members,
                                 @monthly_income,
                                 @beneficiary_type,
-                                @government_id_presented
+                                @government_id_presented,
+                                GETDATE(),
+                                'Active'
                             )";
 
                         using (SqlCommand cmd = new SqlCommand(query, con))
                         {
-                            string sex = rbMale.Checked ? "Male" : rbFemale.Checked ? "Female" : "";
+                            string sex = rbMale.Checked ? "Male" : "Female";
 
                             cmd.Parameters.AddWithValue("@username", txtUsername.Text.Trim());
                             cmd.Parameters.AddWithValue("@password_hash", txtPassword.Text.Trim());
-
                             cmd.Parameters.AddWithValue("@last_name", txtLastName.Text.Trim());
                             cmd.Parameters.AddWithValue("@first_name", txtFirstName.Text.Trim());
                             cmd.Parameters.AddWithValue("@middle_name", txtMiddleName.Text.Trim());
-
                             cmd.Parameters.AddWithValue("@date_of_birth", DateTime.Parse(txtDateOfBirth.Text));
-                            cmd.Parameters.AddWithValue("@age", string.IsNullOrWhiteSpace(txtAge.Text) ? (object)DBNull.Value : int.Parse(txtAge.Text));
+                            cmd.Parameters.AddWithValue("@age",
+                                string.IsNullOrWhiteSpace(txtAge.Text)
+                                ? (object)DBNull.Value
+                                : int.Parse(txtAge.Text));
                             cmd.Parameters.AddWithValue("@sex", sex);
-
                             cmd.Parameters.AddWithValue("@contact_number", txtContact.Text.Trim());
                             cmd.Parameters.AddWithValue("@civil_status", ddlCivilStatus.SelectedValue);
-
                             cmd.Parameters.AddWithValue("@purok_street", txtPurok.Text.Trim());
-                            cmd.Parameters.AddWithValue("@household_members", int.Parse(txtHouseholdSize.Text));
-                            cmd.Parameters.AddWithValue("@monthly_income", string.IsNullOrWhiteSpace(txtIncome.Text) ? (object)DBNull.Value : decimal.Parse(txtIncome.Text));
+                            cmd.Parameters.AddWithValue("@household_members",
+                                int.Parse(txtHouseholdSize.Text));
+                            cmd.Parameters.AddWithValue("@monthly_income",
+                                string.IsNullOrWhiteSpace(txtIncome.Text)
+                                ? (object)DBNull.Value
+                                : decimal.Parse(txtIncome.Text));
+                            cmd.Parameters.AddWithValue("@beneficiary_type",
+                                ddlBeneficiaryType.SelectedValue);
+                            cmd.Parameters.AddWithValue("@government_id_presented",
+                                ddlGovID.SelectedValue);
 
-                            cmd.Parameters.AddWithValue("@beneficiary_type", ddlBeneficiaryType.SelectedValue);
-                            cmd.Parameters.AddWithValue("@government_id_presented", ddlGovID.SelectedValue);
-
-                            con.Open();
                             cmd.ExecuteNonQuery();
                         }
                     }
 
-                    lblSuccess.Text = "Registration successful!";
+                    // Success — redirect to login after 2 seconds
+                    lblSuccess.Text = "✅ Registration successful! Redirecting to login...";
                     lblSuccess.Visible = true;
                     lblError.Visible = false;
-
                     ClearFields();
+
+                    // Redirect to login page
+                    Response.AddHeader("REFRESH", "2;URL=Login.aspx");
                 }
                 catch (Exception ex)
                 {
-                    lblError.Text = "Registration failed: " + ex.Message;
+                    lblError.Text = "❌ Registration failed: " + ex.Message;
                     lblError.Visible = true;
                     lblSuccess.Visible = false;
                 }
             }
             else
             {
-                lblError.Text = "Please complete all required fields correctly.";
+                lblError.Text = "⚠️ Please complete all required fields correctly.";
                 lblError.Visible = true;
                 lblSuccess.Visible = false;
             }
@@ -128,14 +175,12 @@ namespace BarangayAssistance
             txtUsername.Text = "";
             txtPassword.Text = "";
             txtConfirmPassword.Text = "";
-
             txtLastName.Text = "";
             txtFirstName.Text = "";
             txtMiddleName.Text = "";
             txtDateOfBirth.Text = "";
             txtAge.Text = "";
             txtContact.Text = "";
-
             txtPurok.Text = "";
             txtHouseholdSize.Text = "";
             txtIncome.Text = "";
@@ -146,7 +191,6 @@ namespace BarangayAssistance
 
             rbMale.Checked = false;
             rbFemale.Checked = false;
-
             chkConsent.Checked = false;
         }
     }

@@ -3,216 +3,358 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>User Profile - AssistSys</title>
+    <title>Profile - AssistSys</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            color: #222;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+            color: #2c3e4e;
+            line-height: 1.6;
         }
 
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 230px;
-            background-color: #1f3b57;
-            color: white;
-            transition: 0.3s;
-            overflow: hidden;
-        }
-
-        .sidebar.collapsed {
-            width: 70px;
-        }
-
-        .logo {
-            padding: 20px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .sidebar.collapsed .logo span {
-            display: none;
-        }
-
-        .nav-links {
-            padding: 10px 0;
-        }
-
-        .nav-links a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 14px 20px;
-            font-size: 14px;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            background-color: #2f557a;
-        }
-
-        .sidebar.collapsed .nav-links a span {
-            display: none;
-        }
-
-        .main {
-            flex: 1;
-            padding: 20px;
-        }
-
-        .topbar {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .menu-btn {
-            font-size: 20px;
-            cursor: pointer;
-            background: #1f3b57;
-            color: white;
-            border: none;
-            padding: 8px 12px;
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3498db, #1a364e);
             border-radius: 5px;
         }
 
-        .profile-card {
-            background: #fff;
-            border: 1px solid #dde1e7;
-            border-radius: 14px;
+        .wrapper { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1a364e 0%, #152c40 100%);
+            color: white;
+            transition: width 0.3s ease;
             overflow: hidden;
-            box-shadow: 0 8px 24px rgba(31, 59, 87, 0.12);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
         }
 
+        .sidebar.collapsed { width: 70px; }
+
+        .logo {
+            padding: 25px 20px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, #fff, #a8c8e8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .logo span { display: none; }
+
+        .nav-links { padding: 15px 0; flex: 1; }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-links a .icon { font-size: 1.2rem; flex-shrink: 0; }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: rgba(52,152,219,0.2);
+            color: #5dade2;
+            padding-left: 28px;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: #3498db;
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-links a:hover::before,
+        .nav-links a.active::before { transform: scaleY(1); }
+
+                /* FIXED: only hide text, not icons */
+        .sidebar.collapsed .nav-links a span:not(.icon) {
+            display: none;
+        }
+        .sidebar.collapsed .nav-links a { justify-content: center; padding: 14px; }
+
+        /* Main */
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
+
+        /* Topbar */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .menu-btn {
+            font-size: 1.2rem;
+            cursor: pointer;
+            background: linear-gradient(135deg, #1a364e, #2980b9);
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .menu-btn:hover { transform: translateY(-2px); }
+
+        .topbar h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a364e;
+        }
+
+        /* Profile card */
         .profile-header {
-            background: linear-gradient(135deg, #1f3b57, #2f557a);
-            padding: 28px;
+            background: linear-gradient(135deg, #1a364e, #2980b9);
+            padding: 35px 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
             color: white;
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 25px;
+            box-shadow: 0 10px 30px rgba(26,54,78,0.3);
+            animation: fadeInUp 0.7s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::after {
+            content: '👤';
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 6rem;
+            opacity: 0.08;
         }
 
         .avatar {
-            width: 72px;
-            height: 72px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
             border-radius: 50%;
-            background: #ffffff;
-            color: #1f3b57;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 34px;
-            font-weight: bold;
-            border: 4px solid rgba(255,255,255,0.35);
+            font-size: 2.5rem;
+            flex-shrink: 0;
+            border: 3px solid rgba(255,255,255,0.3);
         }
 
-        .profile-header h2 {
-            font-size: 24px;
-            margin-bottom: 6px;
+        .profile-info h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 5px;
         }
 
-        .profile-header p {
-            font-size: 13px;
-            color: #d7e6f5;
+        .profile-info p {
+            opacity: 0.85;
+            font-size: 0.95rem;
         }
 
-        .content {
-            padding: 26px;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .message {
-            color: #791f1f;
-            background: #fcebeb;
-            border: 1px solid #f09595;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 18px;
-            display: block;
+        /* Section */
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+            border: 1px solid rgba(52,152,219,0.1);
+            margin-bottom: 25px;
+            animation: fadeInUp 0.7s ease-out 0.2s backwards;
         }
 
         .section-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #888;
-            font-weight: bold;
-            margin-bottom: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a364e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #3498db, #5dade2) 1;
         }
 
-        .grid {
+        /* Info grid */
+        .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
+            gap: 20px;
         }
 
-        .info-box {
-            background: #f8f9fa;
-            border: 1px solid #dde1e7;
+        .info-item {
+            background: linear-gradient(135deg, #f5f7fa, #e9edf2);
+            padding: 15px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(52,152,219,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            border-color: rgba(52,152,219,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .info-item .label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #5d6d7e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a364e;
+        }
+
+        /* Form fields */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #5d6d7e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 11px 14px;
+            border: 2px solid #e1e8ed;
             border-radius: 10px;
-            padding: 14px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: #f8f9fa;
+            color: #2c3e4e;
+            transition: all 0.3s ease;
         }
 
-        .info-box .label {
-            font-size: 12px;
-            font-weight: bold;
-            color: #666;
-            margin-bottom: 6px;
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
         }
 
-        .info-box .value {
-            font-size: 15px;
-            color: #1f3b57;
-            font-weight: bold;
-            min-height: 20px;
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        .full {
-            grid-column: span 2;
+        .btn {
+            background: linear-gradient(135deg, #1a364e, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            font-family: inherit;
         }
 
-        @media (max-width: 650px) {
-            .wrapper {
-                flex-direction: column;
-            }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
 
-            .sidebar {
-                width: 100%;
-            }
+        /* Message */
+        .msg-success {
+            background: #d1e7dd;
+            border: 1px solid #a3cfbb;
+            color: #0f5132;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
 
-            .sidebar.collapsed {
-                width: 100%;
-            }
+        .msg-error {
+            background: #f8d7da;
+            border: 1px solid #f1aeb5;
+            color: #842029;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
 
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .full {
-                grid-column: span 1;
-            }
+        @media (max-width: 768px) {
+            .main { padding: 15px; }
+            .info-grid, .form-grid { grid-template-columns: 1fr; }
+            .profile-header { flex-direction: column; text-align: center; }
         }
     </style>
 
     <script>
         function toggleSidebar() {
-            var sidebar = document.getElementById("sidebar");
-            sidebar.classList.toggle("collapsed");
+            document.getElementById("sidebar").classList.toggle("collapsed");
         }
     </script>
 </head>
@@ -222,134 +364,168 @@
 
     <div class="wrapper">
 
-        <div class="sidebar" id="sidebar">
-            <div class="logo">
-                🏥 <span>AssistSys</span>
-            </div>
-
+        <!-- Sidebar -->
+        <div class="sidebar collapsed" id="sidebar">
+            <div class="logo">🏥 <span>AssistSys</span></div>
             <div class="nav-links">
                 <a href="Dashboard.aspx">
-                    <span class="icon">🏠</span>
-                    <span>Dashboard</span>
+                    <span class="icon">📊</span><span>Dashboard</span>
                 </a>
                 <a href="Assistance_Application.aspx">
-                    <span class="icon">📄</span>
-                    <span>Apply</span>
+                    <span class="icon">📄</span><span>Apply</span>
                 </a>
                 <a href="Transactions.aspx">
-                    <span class="icon">💳</span>
-                    <span>My Transactions</span>
+                    <span class="icon">💳</span><span>My Transactions</span>
                 </a>
-                <a href="Profile.aspx" class="active">👤 <span>Profile</span></a>
                 <a href="Notifications.aspx">
-                    <span class="icon">🔔</span>
-                    <span>Notifications</span>
+                    <span class="icon">🔔</span><span>Notifications</span>
+                </a>
+                <a href="Profile.aspx" class="active">
+                    <span class="icon">👤</span><span>Profile</span>
+                </a>
+                <a href="Logout.aspx">
+                    <span class="icon">🚪</span><span>Logout</span>
                 </a>
             </div>
-            
-                <a href="Logout.aspx">
-                    <span class="icon">🚪</span>
-                    <span>Logout</span>
-                </a>
         </div>
 
+        <!-- Main Content -->
         <div class="main">
 
             <div class="topbar">
                 <button type="button" class="menu-btn" onclick="toggleSidebar()">☰</button>
-                <h3>User Profile</h3>
+                <h3>👤 My Profile</h3>
+                <div></div>
             </div>
 
-            <div class="profile-card">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="avatar">👤</div>
+                <div class="profile-info">
+                    <h2><asp:Label ID="lblFullName" runat="server" Text="Loading..." /></h2>
+                    <p>
+                        <asp:Label ID="lblBeneficiaryType" runat="server" Text="" /> •
+                        <asp:Label ID="lblUsername" runat="server" Text="" />
+                    </p>
+                </div>
+            </div>
 
-                <div class="profile-header">
-                    <div class="avatar">👤</div>
-                    <div>
-                        <h2>My Profile</h2>
-                        <p>Beneficiary information registered in AssistSys</p>
+            <!-- Messages -->
+            <asp:Label ID="lblSuccess" runat="server" CssClass="msg-success" Visible="false" />
+            <asp:Label ID="lblError"   runat="server" CssClass="msg-error"   Visible="false" />
+
+            <!-- Personal Information -->
+            <div class="section">
+                <div class="section-title">📋 Personal Information</div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Last Name</div>
+                        <div class="value"><asp:Label ID="lblLastName" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">First Name</div>
+                        <div class="value"><asp:Label ID="lblFirstName" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Middle Name</div>
+                        <div class="value"><asp:Label ID="lblMiddleName" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Date of Birth</div>
+                        <div class="value"><asp:Label ID="lblDOB" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Age</div>
+                        <div class="value"><asp:Label ID="lblAge" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Sex</div>
+                        <div class="value"><asp:Label ID="lblSex" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Civil Status</div>
+                        <div class="value"><asp:Label ID="lblCivilStatus" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Contact Number</div>
+                        <div class="value"><asp:Label ID="lblContact" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Purok / Street</div>
+                        <div class="value"><asp:Label ID="lblPurok" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Household Members</div>
+                        <div class="value"><asp:Label ID="lblHousehold" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Monthly Income</div>
+                        <div class="value"><asp:Label ID="lblIncome" runat="server" /></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Government ID</div>
+                        <div class="value"><asp:Label ID="lblGovID" runat="server" /></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Contact Info -->
+            <div class="section">
+                <div class="section-title">✏️ Update Contact Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Contact Number</label>
+                        <asp:TextBox ID="txtContact" runat="server" placeholder="09XXXXXXXXX" />
+                    </div>
+                    <div class="form-group">
+                        <label>Purok / Street</label>
+                        <asp:TextBox ID="txtPurok" runat="server" placeholder="Purok or street name" />
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Income</label>
+                        <asp:TextBox ID="txtIncome" runat="server" placeholder="0.00" />
+                    </div>
+                    <div class="form-group">
+                        <label>Household Members</label>
+                        <asp:TextBox ID="txtHousehold" runat="server" placeholder="0" TextMode="Number" />
                     </div>
                 </div>
 
-                <div class="content">
-                    <asp:Label ID="lblMessage" runat="server" CssClass="message" />
+                <div class="btn-row">
+                    <asp:Button ID="btnUpdate" runat="server"
+                        Text="💾 Save Changes"
+                        CssClass="btn"
+                        OnClick="btnUpdate_Click" />
+                </div>
+            </div>
 
-                    <div class="section-title">Account Information</div>
-
-                    <div class="grid">
-                        <div class="info-box">
-                            <div class="label">Username</div>
-                            <div class="value"><asp:Label ID="lblUsername" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Beneficiary Type</div>
-                            <div class="value"><asp:Label ID="lblBeneficiaryType" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box full">
-                            <div class="label">Full Name</div>
-                            <div class="value"><asp:Label ID="lblFullName" runat="server" /></div>
-                        </div>
+            <!-- Change Password -->
+            <div class="section">
+                <div class="section-title">🔐 Change Password</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <asp:TextBox ID="txtCurrentPassword" runat="server"
+                            TextMode="Password" placeholder="Enter current password" />
                     </div>
-
-                    <br />
-
-                    <div class="section-title">Personal Details</div>
-
-                    <div class="grid">
-                        <div class="info-box">
-                            <div class="label">Date of Birth</div>
-                            <div class="value"><asp:Label ID="lblDOB" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Age</div>
-                            <div class="value"><asp:Label ID="lblAge" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Sex</div>
-                            <div class="value"><asp:Label ID="lblSex" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Civil Status</div>
-                            <div class="value"><asp:Label ID="lblCivilStatus" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Contact Number</div>
-                            <div class="value"><asp:Label ID="lblContact" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Government ID</div>
-                            <div class="value"><asp:Label ID="lblGovID" runat="server" /></div>
-                        </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <asp:TextBox ID="txtNewPassword" runat="server"
+                            TextMode="Password" placeholder="Enter new password" />
                     </div>
-
-                    <br />
-
-                    <div class="section-title">Household Information</div>
-
-                    <div class="grid">
-                        <div class="info-box full">
-                            <div class="label">Purok / Street</div>
-                            <div class="value"><asp:Label ID="lblPurok" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Household Members</div>
-                            <div class="value"><asp:Label ID="lblHousehold" runat="server" /></div>
-                        </div>
-
-                        <div class="info-box">
-                            <div class="label">Monthly Income</div>
-                            <div class="value"><asp:Label ID="lblIncome" runat="server" /></div>
-                        </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <asp:TextBox ID="txtConfirmPassword" runat="server"
+                            TextMode="Password" placeholder="Confirm new password" />
                     </div>
                 </div>
 
+                <div class="btn-row">
+                    <asp:Button ID="btnChangePassword" runat="server"
+                        Text="🔐 Change Password"
+                        CssClass="btn"
+                        OnClick="btnChangePassword_Click" />
+                </div>
             </div>
 
         </div>

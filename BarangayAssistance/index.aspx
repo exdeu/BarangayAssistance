@@ -424,6 +424,7 @@
                 <a href="index.aspx">Home</a>
                 <a href="Login.aspx">Login</a>
                 <a href="Register.aspx">Register</a>
+                <a href="Transactions.aspx">Transactions</a>
                
             </div>
         </div>

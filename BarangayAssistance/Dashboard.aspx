@@ -123,8 +123,8 @@
             transform: scaleY(1);
         }
 
-        .sidebar.collapsed .nav-links a span,
-        .sidebar.collapsed .nav-links a .icon + span {
+        /* FIXED: only hide text, not icons */
+        .sidebar.collapsed .nav-links a span:not(.icon) {
             display: none;
         }
 
@@ -350,7 +350,7 @@
     <div class="wrapper">
 
         <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
+        <div class="sidebar collapsed" id="sidebar">
             <div class="logo">
                 🏥 <span>AssistSys</span>
             </div>
@@ -381,10 +381,13 @@
                         <span class="icon">💳</span>
                         <span>My Transactions</span>
                     </a>
-                    <a href="Profile.aspx" class="active">👤 <span>Profile</span></a>
                     <a href="Notifications.aspx">
                         <span class="icon">🔔</span>
                         <span>Notifications</span>
+                    </a>
+                   <a href="Profile.aspx">
+                        <span class="icon">👤</span>
+                        <span>Profile</span>
                     </a>
                 </asp:Panel>
 

@@ -131,7 +131,10 @@
         .nav-links a:hover::before,
         .nav-links a.active::before { transform: scaleY(1); }
 
-        .sidebar.collapsed .nav-links a span { display: none; }
+                /* FIXED: only hide text, not icons */
+        .sidebar.collapsed .nav-links a span:not(.icon) {
+            display: none;
+        }
         .sidebar.collapsed .nav-links a { justify-content: center; padding: 14px; }
 
         /* Main */
@@ -406,9 +409,38 @@
                 <a href="index.aspx">Home</a>
                 <a href="Login.aspx">Login</a>
                 <a href="Register.aspx">Register</a>
+                <a accesskey="t" href="Transactions.aspx">Transactions</a>
             </div>
         </div>
     </asp:Panel>
+    <asp:Panel ID="pnlPublicTransactions" runat="server" Visible="false">
+    <div class="main" style="padding:40px 5%;">
+        <div class="section">
+            <div class="section-title">🌐 Public Transactions Overview</div>
+
+            <p style="margin-bottom:20px; color:#5d6d7e;">
+                View approved and released assistance records. Login to manage or apply.
+            </p>
+
+            <div class="grid-container">
+                <asp:GridView ID="gvPublicTransactions" runat="server"
+                    AutoGenerateColumns="False"
+                    CssClass="gridview"
+                    GridLines="None"
+                    EmptyDataText="No public records available.">
+                    <Columns>
+                        <asp:BoundField DataField="full_name" HeaderText="Beneficiary" />
+                        <asp:BoundField DataField="assistance_type" HeaderText="Type" />
+                        <asp:BoundField DataField="estimated_amount_requested" HeaderText="Amount" DataFormatString="{0:₱#,##0.00}" />
+                        <asp:BoundField DataField="date_submitted" HeaderText="Date" DataFormatString="{0:MMM dd, yyyy}" />
+                        <asp:BoundField DataField="status" HeaderText="Status" />
+                    </Columns>
+                </asp:GridView>
+            </div>
+        </div>
+    </div>
+</asp:Panel>
+
 
     <%-- Dashboard layout (logged in) --%>
     <asp:Panel ID="pnlDashboardLayout" runat="server">
@@ -416,7 +448,7 @@
 
             <%-- Sidebar --%>
             <asp:Panel ID="pnlSidebar" runat="server">
-                <div class="sidebar" id="sidebar">
+                <div class="sidebar collapsed" id="sidebar">
                     <div class="logo">🏥 <span>AssistSys</span></div>
                     <div class="nav-links">
 
@@ -431,24 +463,23 @@
                         </asp:Panel>
 
                         <asp:Panel ID="navBeneficiary" runat="server" Visible="false">
-                           
-                             <a href="Dashboard.aspx">
-                                 <span class="icon">🏠</span>
-                                 <span>Dashboard</span>
-                             </a>
-                             <a href="Assistance_Application.aspx">
-                                 <span class="icon">📄</span>
-                                 <span>Apply</span>
-                             </a>
-                             <a href="Transactions.aspx">
-                                 <span class="icon">💳</span>
-                                 <span>My Transactions</span>
-                             </a>
-                             <a href="Profile.aspx" class="active">👤 <span>Profile</span></a>
-                             <a href="Notifications.aspx">
-                                 <span class="icon">🔔</span>
-                                 <span>Notifications</span>
-                             </a>
+                            
+                            <a href="Dashboard.aspx">
+                                <span class="icon">📊</span><span>Dashboard</span>
+                            </a>
+                            <a href="Assistance_Application.aspx">
+                                <span class="icon">📄</span><span>Apply</span>
+                            </a>
+                            <a href="Transactions.aspx" class="active">
+                                <span class="icon">💳</span><span>My Transactions</span>
+                            </a>
+                            <a href="Notifications.aspx">
+                                <span class="icon">🔔</span><span>Notifications</span>
+                            </a>
+                            <a href="Profile.aspx">
+                             <span class="icon">👤</span>
+                             <span>Profile</span>
+                         </a>
                         </asp:Panel>
 
                         <a href="Logout.aspx">
@@ -578,6 +609,7 @@
             </div>
         </div>
     </asp:Panel>
+
 
 </form>
 </body>

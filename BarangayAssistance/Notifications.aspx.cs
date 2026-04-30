@@ -7,7 +7,8 @@ namespace BarangayAssistance
 {
     public partial class Notifications : System.Web.UI.Page
     {
-        string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
+        string connStr = ConfigurationManager
+            .ConnectionStrings["BarangayDB"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -17,16 +18,18 @@ namespace BarangayAssistance
 
                 if (role == "Admin")
                 {
+                    navAdmin.Visible = true;
+                    navUser.Visible = false;
                     pnlAdminNotifications.Visible = true;
                     pnlBeneficiaryNotifications.Visible = false;
-
                     LoadAdminNotifications();
                 }
                 else if (role == "Beneficiary")
                 {
+                    navAdmin.Visible = false;
+                    navUser.Visible = true;
                     pnlAdminNotifications.Visible = false;
                     pnlBeneficiaryNotifications.Visible = true;
-
                     LoadUserNotifications();
                 }
                 else
@@ -36,7 +39,7 @@ namespace BarangayAssistance
             }
         }
 
-        // ================= ADMIN =================
+        // ===== ADMIN =====
         private void LoadAdminNotifications()
         {
             using (SqlConnection con = new SqlConnection(connStr))
@@ -44,7 +47,7 @@ namespace BarangayAssistance
                 string query = @"
                     SELECT * FROM notifications
                     WHERE type = 'Admin'
-                    ORDER BY date_created DESC";
+                    ORDER BY is_read ASC, date_created DESC";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, con);
                 DataTable dt = new DataTable();
@@ -53,7 +56,7 @@ namespace BarangayAssistance
                 rptAdminNotifications.DataSource = dt;
                 rptAdminNotifications.DataBind();
 
-                pnlNoAdminNotifications.Visible = dt.Rows.Count == 0;
+                pnlNoAdminNotifications.Visible = (dt.Rows.Count == 0);
             }
         }
 
@@ -61,33 +64,35 @@ namespace BarangayAssistance
         {
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = "UPDATE notifications SET is_read = 1 WHERE type = 'Admin'";
+                string query = @"UPDATE notifications 
+                                 SET is_read = 1, date_read = GETDATE() 
+                                 WHERE type = 'Admin'";
                 SqlCommand cmd = new SqlCommand(query, con);
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
-
             LoadAdminNotifications();
         }
 
         protected void btnAdminMarkRead_Click(object sender, EventArgs e)
         {
-            int id = Convert.ToInt32(((System.Web.UI.WebControls.Button)sender).CommandArgument);
+            int id = Convert.ToInt32(
+                ((System.Web.UI.WebControls.Button)sender).CommandArgument);
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = "UPDATE notifications SET is_read = 1 WHERE notification_id = @id";
+                string query = @"UPDATE notifications 
+                                 SET is_read = 1, date_read = GETDATE() 
+                                 WHERE notification_id = @id";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", id);
-
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
-
             LoadAdminNotifications();
         }
 
-        // ================= USER =================
+        // ===== BENEFICIARY =====
         private void LoadUserNotifications()
         {
             if (Session["beneficiary_id"] == null) return;
@@ -99,7 +104,7 @@ namespace BarangayAssistance
                 string query = @"
                     SELECT * FROM notifications
                     WHERE beneficiary_id = @id
-                    ORDER BY date_created DESC";
+                    ORDER BY is_read ASC, date_created DESC";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", beneficiaryId);
@@ -111,7 +116,7 @@ namespace BarangayAssistance
                 rptUserNotifications.DataSource = dt;
                 rptUserNotifications.DataBind();
 
-                pnlNoUserNotifications.Visible = dt.Rows.Count == 0;
+                pnlNoUserNotifications.Visible = (dt.Rows.Count == 0);
             }
         }
 
@@ -123,31 +128,32 @@ namespace BarangayAssistance
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = "UPDATE notifications SET is_read = 1 WHERE beneficiary_id = @id";
+                string query = @"UPDATE notifications 
+                                 SET is_read = 1, date_read = GETDATE() 
+                                 WHERE beneficiary_id = @id";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", beneficiaryId);
-
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
-
             LoadUserNotifications();
         }
 
         protected void btnUserMarkRead_Click(object sender, EventArgs e)
         {
-            int id = Convert.ToInt32(((System.Web.UI.WebControls.Button)sender).CommandArgument);
+            int id = Convert.ToInt32(
+                ((System.Web.UI.WebControls.Button)sender).CommandArgument);
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = "UPDATE notifications SET is_read = 1 WHERE notification_id = @id";
+                string query = @"UPDATE notifications 
+                                 SET is_read = 1, date_read = GETDATE() 
+                                 WHERE notification_id = @id";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", id);
-
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
-
             LoadUserNotifications();
         }
     }

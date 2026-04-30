@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Web.UI;
 
 namespace BarangayAssistance
 {
-    public partial class Profile : System.Web.UI.Page
+    public partial class Profile : Page
     {
+        string connStr = ConfigurationManager
+            .ConnectionStrings["BarangayDB"].ConnectionString;
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["username"] == null)
+            // Redirect if not logged in as Beneficiary
+            if (Session["role"] == null || Session["role"].ToString() != "Beneficiary")
             {
                 Response.Redirect("Login.aspx");
                 return;
@@ -22,80 +27,182 @@ namespace BarangayAssistance
 
         private void LoadProfile()
         {
-            string username = Session["username"].ToString();
+            int beneficiaryId = Convert.ToInt32(Session["beneficiary_id"]);
 
-            string connStr = ConfigurationManager
-                .ConnectionStrings["BarangayDB"].ConnectionString;
-
-            string query = @"
-                SELECT 
-                    username,
-                    first_name,
-                    middle_name,
-                    last_name,
-                    date_of_birth,
-                    age,
-                    sex,
-                    contact_number,
-                    civil_status,
-                    purok_street,
-                    household_members,
-                    monthly_income,
-                    beneficiary_type,
-                    government_id_presented
-                FROM beneficiaries
-                WHERE username = @username";
-
-            try
+            using (SqlConnection con = new SqlConnection(connStr))
             {
-                using (SqlConnection conn = new SqlConnection(connStr))
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                string query = @"
+                    SELECT 
+                        username, first_name, last_name, middle_name,
+                        date_of_birth, age, sex, civil_status,
+                        contact_number, purok_street, household_members,
+                        monthly_income, beneficiary_type, government_id_presented
+                    FROM beneficiaries
+                    WHERE beneficiary_id = @id";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
                 {
-                    cmd.Parameters.AddWithValue("@username", username);
+                    cmd.Parameters.AddWithValue("@id", beneficiaryId);
+                    con.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
 
-                    conn.Open();
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (reader.Read())
                     {
-                        if (reader.Read())
-                        {
-                            string middleName = reader["middle_name"] == DBNull.Value ? "" : reader["middle_name"].ToString();
+                        // Header
+                        lblFullName.Text = reader["first_name"] + " " + reader["last_name"];
+                        lblBeneficiaryType.Text = reader["beneficiary_type"].ToString();
+                        lblUsername.Text = "@" + reader["username"].ToString();
 
-                            lblUsername.Text = reader["username"].ToString();
-                            lblFullName.Text = reader["first_name"] + " " +
-                                               (string.IsNullOrWhiteSpace(middleName) ? "" : middleName + " ") +
-                                               reader["last_name"];
+                        // Info grid
+                        lblLastName.Text = reader["last_name"].ToString();
+                        lblFirstName.Text = reader["first_name"].ToString();
+                        lblMiddleName.Text = reader["middle_name"].ToString();
+                        lblDOB.Text = Convert.ToDateTime(reader["date_of_birth"])
+                                                .ToString("MMMM dd, yyyy");
+                        lblAge.Text = reader["age"].ToString();
+                        lblSex.Text = reader["sex"].ToString();
+                        lblCivilStatus.Text = reader["civil_status"].ToString();
+                        lblContact.Text = reader["contact_number"].ToString();
+                        lblPurok.Text = reader["purok_street"].ToString();
+                        lblHousehold.Text = reader["household_members"].ToString();
+                        lblIncome.Text = "₱" + Convert.ToDecimal(reader["monthly_income"])
+                                                .ToString("N2");
+                        lblGovID.Text = reader["government_id_presented"].ToString();
 
-                            lblDOB.Text = Convert.ToDateTime(reader["date_of_birth"]).ToString("yyyy-MM-dd");
-                            lblAge.Text = reader["age"] == DBNull.Value ? "" : reader["age"].ToString();
-                            lblSex.Text = reader["sex"].ToString();
-                            lblContact.Text = reader["contact_number"].ToString();
-                            lblCivilStatus.Text = reader["civil_status"].ToString();
-                            lblPurok.Text = reader["purok_street"].ToString();
-                            lblHousehold.Text = reader["household_members"].ToString();
-
-                            lblIncome.Text = reader["monthly_income"] == DBNull.Value
-                                ? "Not provided"
-                                : "₱" + Convert.ToDecimal(reader["monthly_income"]).ToString("N2");
-
-                            lblBeneficiaryType.Text = reader["beneficiary_type"].ToString();
-
-                            lblGovID.Text = reader["government_id_presented"] == DBNull.Value
-                                ? "Not provided"
-                                : reader["government_id_presented"].ToString();
-                        }
-                        else
-                        {
-                            lblMessage.Text = "Profile not found.";
-                        }
+                        // Pre-fill edit fields
+                        txtContact.Text = reader["contact_number"].ToString();
+                        txtPurok.Text = reader["purok_street"].ToString();
+                        txtIncome.Text = reader["monthly_income"].ToString();
+                        txtHousehold.Text = reader["household_members"].ToString();
                     }
                 }
             }
+        }
+
+        protected void btnUpdate_Click(object sender, EventArgs e)
+        {
+            int beneficiaryId = Convert.ToInt32(Session["beneficiary_id"]);
+
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connStr))
+                {
+                    string query = @"
+                        UPDATE beneficiaries
+                        SET contact_number    = @contact,
+                            purok_street      = @purok,
+                            monthly_income    = @income,
+                            household_members = @household
+                        WHERE beneficiary_id  = @id";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@contact", txtContact.Text.Trim());
+                        cmd.Parameters.AddWithValue("@purok", txtPurok.Text.Trim());
+                        cmd.Parameters.AddWithValue("@income",
+                            string.IsNullOrWhiteSpace(txtIncome.Text)
+                            ? (object)DBNull.Value
+                            : decimal.Parse(txtIncome.Text));
+                        cmd.Parameters.AddWithValue("@household",
+                            string.IsNullOrWhiteSpace(txtHousehold.Text)
+                            ? (object)DBNull.Value
+                            : int.Parse(txtHousehold.Text));
+                        cmd.Parameters.AddWithValue("@id", beneficiaryId);
+
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                lblSuccess.Text = "✅ Profile updated successfully!";
+                lblSuccess.Visible = true;
+                lblError.Visible = false;
+                LoadProfile();
+            }
             catch (Exception ex)
             {
-                lblMessage.Text = "Error: " + ex.Message;
+                lblError.Text = "❌ Error updating profile: " + ex.Message;
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
             }
         }
 
+        protected void btnChangePassword_Click(object sender, EventArgs e)
+        {
+            int beneficiaryId = Convert.ToInt32(Session["beneficiary_id"]);
+
+            if (string.IsNullOrWhiteSpace(txtCurrentPassword.Text) ||
+                string.IsNullOrWhiteSpace(txtNewPassword.Text) ||
+                string.IsNullOrWhiteSpace(txtConfirmPassword.Text))
+            {
+                lblError.Text = "⚠️ Please fill in all password fields.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (txtNewPassword.Text != txtConfirmPassword.Text)
+            {
+                lblError.Text = "❌ New passwords do not match.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connStr))
+                {
+                    // Verify current password
+                    string checkQuery = @"
+                        SELECT COUNT(*) FROM beneficiaries
+                        WHERE beneficiary_id = @id
+                        AND   password_hash  = @current";
+
+                    using (SqlCommand cmd = new SqlCommand(checkQuery, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id", beneficiaryId);
+                        cmd.Parameters.AddWithValue("@current", txtCurrentPassword.Text.Trim());
+                        con.Open();
+                        int count = (int)cmd.ExecuteScalar();
+
+                        if (count == 0)
+                        {
+                            lblError.Text = "❌ Current password is incorrect.";
+                            lblError.Visible = true;
+                            lblSuccess.Visible = false;
+                            return;
+                        }
+                    }
+
+                    // Update password
+                    string updateQuery = @"
+                        UPDATE beneficiaries
+                        SET password_hash   = @newpass
+                        WHERE beneficiary_id = @id";
+
+                    using (SqlCommand cmd2 = new SqlCommand(updateQuery, con))
+                    {
+                        cmd2.Parameters.AddWithValue("@newpass", txtNewPassword.Text.Trim());
+                        cmd2.Parameters.AddWithValue("@id", beneficiaryId);
+                        cmd2.ExecuteNonQuery();
+                    }
+                }
+
+                lblSuccess.Text = "✅ Password changed successfully!";
+                lblSuccess.Visible = true;
+                lblError.Visible = false;
+
+                txtCurrentPassword.Text = "";
+                txtNewPassword.Text = "";
+                txtConfirmPassword.Text = "";
+            }
+            catch (Exception ex)
+            {
+                lblError.Text = "❌ Error changing password: " + ex.Message;
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+            }
+        }
     }
 }
