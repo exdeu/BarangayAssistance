@@ -13,6 +13,7 @@ namespace BarangayAssistance
 
         protected void Page_Load(object sender, EventArgs e)
         {
+
             if (!IsPostBack)
             {
                 string role = Session["role"] != null ? Session["role"].ToString() : "";
@@ -37,9 +38,6 @@ namespace BarangayAssistance
             pnlAdmin.Visible = true;
             pnlUser.Visible = false;
 
-            navAdmin.Visible = true;
-            navUser.Visible = false;
-
             lblWelcome.Text = "Administrator";
 
             LoadAdminStats();
@@ -50,9 +48,6 @@ namespace BarangayAssistance
         {
             pnlAdmin.Visible = false;
             pnlUser.Visible = true;
-
-            navAdmin.Visible = false;
-            navUser.Visible = true;
 
             lblWelcome.Text = "Beneficiary";
 

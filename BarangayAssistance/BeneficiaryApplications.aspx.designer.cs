@@ -11,7 +11,7 @@ namespace BarangayAssistance
 {
 
 
-    public partial class Notifications
+    public partial class BeneficiaryApplications
     {
 
         /// <summary>
@@ -42,75 +42,48 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.Label lblWelcome;
 
         /// <summary>
-        /// pnlAdminNotifications control.
+        /// txtSearch control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlAdminNotifications;
+        protected global::System.Web.UI.WebControls.TextBox txtSearch;
 
         /// <summary>
-        /// btnAdminMarkAllRead control.
+        /// btnSearch control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAdminMarkAllRead;
+        protected global::System.Web.UI.WebControls.Button btnSearch;
 
         /// <summary>
-        /// rptAdminNotifications control.
+        /// btnClear control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptAdminNotifications;
+        protected global::System.Web.UI.WebControls.Button btnClear;
 
         /// <summary>
-        /// pnlNoAdminNotifications control.
+        /// gvBeneficiaries control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlNoAdminNotifications;
+        protected global::System.Web.UI.WebControls.GridView gvBeneficiaries;
 
         /// <summary>
-        /// pnlBeneficiaryNotifications control.
+        /// lblMessage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlBeneficiaryNotifications;
-
-        /// <summary>
-        /// btnUserMarkAllRead control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnUserMarkAllRead;
-
-        /// <summary>
-        /// rptUserNotifications control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptUserNotifications;
-
-        /// <summary>
-        /// pnlNoUserNotifications control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlNoUserNotifications;
+        protected global::System.Web.UI.WebControls.Label lblMessage;
     }
 }

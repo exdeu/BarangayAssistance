@@ -98,7 +98,7 @@ namespace BarangayAssistance
                                 @beneficiary_type,
                                 @government_id_presented,
                                 GETDATE(),
-                                'Active'
+                                'Inactive'
                             )";
 
                         using (SqlCommand cmd = new SqlCommand(query, con))
@@ -131,6 +131,39 @@ namespace BarangayAssistance
                                 ddlGovID.SelectedValue);
 
                             cmd.ExecuteNonQuery();
+                        }
+                        // Insert notification for admin
+                        string notifQuery = @"
+                            INSERT INTO notifications
+                            (
+                                beneficiary_id,
+                                title,
+                                message,
+                                type,
+                                is_read,
+                                date_created
+                            )
+                            VALUES
+                            (
+                                NULL,
+                                @title,
+                                @message,
+                                'Registration',
+                                0,
+                                GETDATE()
+                            )";
+                        using (SqlCommand notifCmd = new SqlCommand(notifQuery, con))
+                        {
+                            notifCmd.Parameters.AddWithValue(
+                                "@title",
+                                "🆕 New Beneficiary Registration");
+
+                            notifCmd.Parameters.AddWithValue(
+                                "@message",
+                                txtFirstName.Text.Trim() + " "
+                                + txtLastName.Text.Trim()
+                                + " has submitted a new beneficiary registration request.");
+                            notifCmd.ExecuteNonQuery();
                         }
                     }
 

@@ -24,22 +24,13 @@ namespace BarangayAssistance
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
-        /// navAdmin control.
+        /// Sidebar control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel navAdmin;
-
-        /// <summary>
-        /// navUser control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel navUser;
+        protected global::BarangayAssistance.Sidebar Sidebar;
 
         /// <summary>
         /// lblWelcome control.

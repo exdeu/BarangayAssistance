@@ -59,8 +59,6 @@ namespace BarangayAssistance
                     pnlPublicNav.Visible = false;
                     pnlPublicTransactions.Visible = false;
 
-                    navAdmin.Visible = (role == "Admin");
-                    navBeneficiary.Visible = (role == "Beneficiary");
 
                     if (role == "Beneficiary")
                     {
@@ -227,121 +225,148 @@ namespace BarangayAssistance
             LoadTransactions(true);
         }
 
-        protected void gvTransactions_RowCommand(
-    object sender,
-    System.Web.UI.WebControls.GridViewCommandEventArgs e)
+        protected void gvTransactions_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
         {
-            if (e.CommandName == "ApproveApplication" || e.CommandName == "RejectApplication")
+            if (e.CommandName != "ApproveApplication" && e.CommandName != "RejectApplication")
+                return;
+
+            if (!IsAdmin())
             {
-                if (!IsAdmin())
+                lblMessage.Text = "⚠️ Only admins can do this.";
+                return;
+            }
+
+            int appId = Convert.ToInt32(e.CommandArgument);
+            bool isApprove = e.CommandName == "ApproveApplication";
+            string newStatus = isApprove ? "Approved" : "Rejected";
+
+            string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+
+                SqlTransaction transaction = conn.BeginTransaction();
+
+                try
                 {
-                    lblMessage.Text = "⚠️ Only admins can do this.";
-                    return;
-                }
-
-                int appId = Convert.ToInt32(e.CommandArgument);
-                bool isApprove = e.CommandName == "ApproveApplication";
-                string newStatus = isApprove ? "Approved" : "Rejected";
-
-                string connStr = ConfigurationManager
-                    .ConnectionStrings["BarangayDB"].ConnectionString;
-
-                using (SqlConnection conn = new SqlConnection(connStr))
-                {
-                    conn.Open();
-
-                    // Step 1 — Update application status
                     string updateQuery = @"
                 UPDATE assistance_applications
-                SET    status       = @status,
-                       date_updated = GETDATE()
-                WHERE  application_id = @application_id
-                  AND  status = 'Pending'";
+                SET status = @status,
+                    date_updated = GETDATE()
+                WHERE application_id = @application_id
+                AND status = 'Pending'";
 
-                    using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
+                    int rowsAffected;
+
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, conn, transaction))
                     {
                         cmd.Parameters.AddWithValue("@status", newStatus);
                         cmd.Parameters.AddWithValue("@application_id", appId);
-                        cmd.ExecuteNonQuery();
+
+                        rowsAffected = cmd.ExecuteNonQuery();
                     }
 
-                    // Step 2 — Get beneficiary_id and full_name for the notification
+                    if (rowsAffected == 0)
+                    {
+                        transaction.Rollback();
+                        lblMessage.Text = "⚠️ This application was already processed or does not exist.";
+                        return;
+                    }
+
                     int beneficiaryId = 0;
                     string fullName = "";
                     string assistanceType = "";
 
                     string selectQuery = @"
                 SELECT beneficiary_id, full_name, assistance_type
-                FROM   assistance_applications
-                WHERE  application_id = @application_id";
+                FROM assistance_applications
+                WHERE application_id = @application_id";
 
-                    using (SqlCommand cmd2 = new SqlCommand(selectQuery, conn))
+                    using (SqlCommand cmd = new SqlCommand(selectQuery, conn, transaction))
                     {
-                        cmd2.Parameters.AddWithValue("@application_id", appId);
-                        SqlDataReader reader = cmd2.ExecuteReader();
-                        if (reader.Read())
+                        cmd.Parameters.AddWithValue("@application_id", appId);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            beneficiaryId = Convert.ToInt32(reader["beneficiary_id"]);
-                            fullName = reader["full_name"].ToString();
-                            assistanceType = reader["assistance_type"].ToString();
-                        }
-                        reader.Close();
-                    }
-
-                    // Step 3 — Insert notification for beneficiary
-                    if (beneficiaryId > 0)
-                    {
-                        string notifTitle = isApprove
-                            ? "✅ Application Approved"
-                            : "❌ Application Rejected";
-
-                        string notifMessage = isApprove
-                            ? $"Your {assistanceType} assistance application has been approved. Please visit the barangay hall to claim your assistance."
-                            : $"We regret to inform you that your {assistanceType} assistance application has been rejected. Please visit the barangay hall for more information.";
-
-                        string notifQuery = @"
-                    INSERT INTO notifications
-                    (beneficiary_id, title, message, type, is_read, date_created)
-                    VALUES
-                    (@beneficiary_id, @title, @message, 'Beneficiary', 0, GETDATE())";
-
-                        using (SqlCommand cmd3 = new SqlCommand(notifQuery, conn))
-                        {
-                            cmd3.Parameters.AddWithValue("@beneficiary_id", beneficiaryId);
-                            cmd3.Parameters.AddWithValue("@title", notifTitle);
-                            cmd3.Parameters.AddWithValue("@message", notifMessage);
-                            cmd3.ExecuteNonQuery();
+                            if (reader.Read())
+                            {
+                                beneficiaryId = Convert.ToInt32(reader["beneficiary_id"]);
+                                fullName = reader["full_name"].ToString();
+                                assistanceType = reader["assistance_type"].ToString();
+                            }
                         }
                     }
 
-                    // Step 4 — Insert admin notification
-                    string adminNotifQuery = @"
-                INSERT INTO notifications
-                (beneficiary_id, title, message, type, is_read, date_created)
-                VALUES
-                (NULL, @title, @message, 'Admin', 0, GETDATE())";
+                    string beneficiaryTitle = isApprove
+                        ? "Application Approved"
+                        : "Application Rejected";
+
+                    string beneficiaryMessage = isApprove
+                        ? "Your " + assistanceType + " assistance application has been approved. Please wait for claiming instructions from the barangay office."
+                        : "Your " + assistanceType + " assistance application has been rejected. Please visit the barangay office for more information.";
+
+                    InsertNotification(
+                        conn,
+                        transaction,
+                        beneficiaryId,
+                        beneficiaryTitle,
+                        beneficiaryMessage,
+                        "Beneficiary"
+                    );
 
                     string adminTitle = isApprove
-                        ? "✅ Application Approved"
-                        : "❌ Application Rejected";
+                        ? "Application Approved"
+                        : "Application Rejected";
 
                     string adminMessage = isApprove
-                        ? $"Application #{appId} for {fullName} ({assistanceType}) has been approved."
-                        : $"Application #{appId} for {fullName} ({assistanceType}) has been rejected.";
+                        ? "Application #" + appId + " for " + fullName + " (" + assistanceType + ") has been approved."
+                        : "Application #" + appId + " for " + fullName + " (" + assistanceType + ") has been rejected.";
 
-                    using (SqlCommand cmd4 = new SqlCommand(adminNotifQuery, conn))
-                    {
-                        cmd4.Parameters.AddWithValue("@title", adminTitle);
-                        cmd4.Parameters.AddWithValue("@message", adminMessage);
-                        cmd4.ExecuteNonQuery();
-                    }
+                    InsertNotification(
+                        conn,
+                        transaction,
+                        null,
+                        adminTitle,
+                        adminMessage,
+                        "Admin"
+                    );
+
+                    transaction.Commit();
+
+                    lblMessage.Text = isApprove
+                        ? "✅ Application approved and notification saved."
+                        : "❌ Application rejected and notification saved.";
+
+                    LoadTransactions(ShowingMyTransactions);
                 }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    lblMessage.Text = "Error: " + ex.Message;
+                }
+            }
+        }
+        private void InsertNotification( SqlConnection conn, SqlTransaction transaction, int? beneficiaryId, string title, string message, string type)
+        {
+            string query = @"
+        INSERT INTO notifications
+        (beneficiary_id, title, message, type, is_read, date_created, date_read)
+        VALUES
+        (@beneficiary_id, @title, @message, @type, 0, GETDATE(), NULL)";
 
-                lblMessage.Text = isApprove
-                    ? "✅ Application approved. Beneficiary has been notified."
-                    : "❌ Application rejected. Beneficiary has been notified.";
+            using (SqlCommand cmd = new SqlCommand(query, conn, transaction))
+            {
+                if (beneficiaryId.HasValue)
+                    cmd.Parameters.AddWithValue("@beneficiary_id", beneficiaryId.Value);
+                else
+                    cmd.Parameters.AddWithValue("@beneficiary_id", DBNull.Value);
 
-                LoadTransactions(ShowingMyTransactions);
+                cmd.Parameters.AddWithValue("@title", title);
+                cmd.Parameters.AddWithValue("@message", message);
+                cmd.Parameters.AddWithValue("@type", type);
+
+                cmd.ExecuteNonQuery();
             }
         }
     }

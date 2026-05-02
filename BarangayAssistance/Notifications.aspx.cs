@@ -18,16 +18,14 @@ namespace BarangayAssistance
 
                 if (role == "Admin")
                 {
-                    navAdmin.Visible = true;
-                    navUser.Visible = false;
+
                     pnlAdminNotifications.Visible = true;
                     pnlBeneficiaryNotifications.Visible = false;
                     LoadAdminNotifications();
                 }
                 else if (role == "Beneficiary")
                 {
-                    navAdmin.Visible = false;
-                    navUser.Visible = true;
+  
                     pnlAdminNotifications.Visible = false;
                     pnlBeneficiaryNotifications.Visible = true;
                     LoadUserNotifications();
@@ -39,14 +37,14 @@ namespace BarangayAssistance
             }
         }
 
-        // ===== ADMIN =====
         private void LoadAdminNotifications()
         {
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-                    SELECT * FROM notifications
-                    WHERE type = 'Admin'
+                    SELECT *
+                    FROM notifications
+                    WHERE type IN ('Admin', 'Registration', 'Assistance')
                     ORDER BY is_read ASC, date_created DESC";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, con);
@@ -64,13 +62,17 @@ namespace BarangayAssistance
         {
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = @"UPDATE notifications 
-                                 SET is_read = 1, date_read = GETDATE() 
-                                 WHERE type = 'Admin'";
+                string query = @"
+                    UPDATE notifications
+                    SET is_read = 1,
+                        date_read = GETDATE()
+                    WHERE type IN ('Admin', 'Registration', 'Assistance')";
+
                 SqlCommand cmd = new SqlCommand(query, con);
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
+
             LoadAdminNotifications();
         }
 
@@ -81,18 +83,21 @@ namespace BarangayAssistance
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = @"UPDATE notifications 
-                                 SET is_read = 1, date_read = GETDATE() 
-                                 WHERE notification_id = @id";
+                string query = @"
+                    UPDATE notifications
+                    SET is_read = 1,
+                        date_read = GETDATE()
+                    WHERE notification_id = @id";
+
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", id);
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
+
             LoadAdminNotifications();
         }
 
-        // ===== BENEFICIARY =====
         private void LoadUserNotifications()
         {
             if (Session["beneficiary_id"] == null) return;
@@ -102,7 +107,8 @@ namespace BarangayAssistance
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-                    SELECT * FROM notifications
+                    SELECT *
+                    FROM notifications
                     WHERE beneficiary_id = @id
                     ORDER BY is_read ASC, date_created DESC";
 
@@ -128,14 +134,18 @@ namespace BarangayAssistance
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = @"UPDATE notifications 
-                                 SET is_read = 1, date_read = GETDATE() 
-                                 WHERE beneficiary_id = @id";
+                string query = @"
+                    UPDATE notifications
+                    SET is_read = 1,
+                        date_read = GETDATE()
+                    WHERE beneficiary_id = @id";
+
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", beneficiaryId);
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
+
             LoadUserNotifications();
         }
 
@@ -146,14 +156,18 @@ namespace BarangayAssistance
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string query = @"UPDATE notifications 
-                                 SET is_read = 1, date_read = GETDATE() 
-                                 WHERE notification_id = @id";
+                string query = @"
+                    UPDATE notifications
+                    SET is_read = 1,
+                        date_read = GETDATE()
+                    WHERE notification_id = @id";
+
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", id);
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
+
             LoadUserNotifications();
         }
     }

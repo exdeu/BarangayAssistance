@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Transactions.aspx.cs" Inherits="BarangayAssistance.Transactions" %>
+<%@ Register Src="~/Sidebar.ascx" TagPrefix="uc" TagName="Sidebar" %>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -8,12 +9,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
             color: #2c3e4e;
+            line-height: 1.6;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         ::-webkit-scrollbar { width: 10px; }
@@ -22,8 +32,10 @@
             background: linear-gradient(135deg, #3498db, #1a364e);
             border-radius: 5px;
         }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2980b9, #152c40);
+        }
 
-        /* Public navbar */
         .navbar {
             background: rgba(26,54,78,0.95);
             backdrop-filter: blur(10px);
@@ -56,91 +68,21 @@
             transition: color 0.3s;
         }
 
-        .public-nav-links a:hover { color: #5dade2; }
-
-        /* Layout */
-        .wrapper { display: flex; min-height: 100vh; }
-
-        /* Sidebar */
-        .sidebar {
-            width: 240px;
-            background: linear-gradient(180deg, #1a364e 0%, #152c40 100%);
-            color: white;
-            transition: width 0.3s ease;
-            overflow: hidden;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-        }
-
-        .sidebar.collapsed { width: 70px; }
-
-        .logo {
-            padding: 25px 20px;
-            font-size: 1.4rem;
-            font-weight: 700;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: linear-gradient(135deg, #fff, #a8c8e8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            white-space: nowrap;
-        }
-
-        .sidebar.collapsed .logo span { display: none; }
-
-        .nav-links { padding: 15px 0; flex: 1; }
-
-        .nav-links a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #ecf0f1;
-            text-decoration: none;
-            padding: 14px 20px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            white-space: nowrap;
-        }
-
-        .nav-links a .icon { font-size: 1.2rem; flex-shrink: 0; }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            background: rgba(52,152,219,0.2);
+        .public-nav-links a:hover {
             color: #5dade2;
-            padding-left: 28px;
         }
 
-        .nav-links a::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 3px;
-            background: #3498db;
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-            border-radius: 0 3px 3px 0;
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
         }
 
-        .nav-links a:hover::before,
-        .nav-links a.active::before { transform: scaleY(1); }
-
-                /* FIXED: only hide text, not icons */
-        .sidebar.collapsed .nav-links a span:not(.icon) {
-            display: none;
+        .main {
+            flex: 1;
+            padding: 30px;
+            overflow-x: auto;
         }
-        .sidebar.collapsed .nav-links a { justify-content: center; padding: 14px; }
 
-        /* Main */
-        .main { flex: 1; padding: 30px; overflow-x: auto; }
-
-        /* Topbar */
         .topbar {
             display: flex;
             align-items: center;
@@ -150,6 +92,12 @@
             padding: 15px 25px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .menu-btn {
@@ -164,7 +112,10 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .menu-btn:hover { transform: translateY(-2px); }
+        .menu-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        }
 
         .topbar h3 {
             font-size: 1.3rem;
@@ -172,26 +123,31 @@
             color: #1a364e;
         }
 
-        /* Section */
         .section {
             background: white;
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.07);
-            border: 1px solid rgba(52,152,219,0.1);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            margin-top: 20px;
+            animation: fadeInUp 0.7s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .section-title {
             font-size: 1.3rem;
             font-weight: 700;
             color: #1a364e;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 3px solid transparent;
             border-image: linear-gradient(90deg, #3498db, #5dade2) 1;
         }
 
-        /* Filters */
         .filters {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -200,28 +156,34 @@
         }
 
         .filter-box {
-            background: linear-gradient(135deg, #f5f7fa, #e9edf2);
-            border: 1px solid rgba(52,152,219,0.15);
-            border-radius: 15px;
-            padding: 20px;
+            background: white;
+            padding: 22px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(52, 152, 219, 0.12);
             transition: all 0.3s ease;
         }
 
         .filter-box:hover {
-            border-color: rgba(52,152,219,0.3);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.09);
+            border-color: rgba(52, 152, 219, 0.3);
         }
 
         .filter-box h4 {
             margin-bottom: 15px;
-            color: #1a364e;
+            color: #5d6d7e;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 700;
         }
 
-        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+        .checkbox-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+        }
 
         .checkbox-item {
             display: flex;
@@ -238,7 +200,11 @@
             height: 15px;
         }
 
-        .date-row { display: flex; flex-direction: column; gap: 10px; }
+        .date-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
         .date-row input {
             padding: 10px 12px;
@@ -257,7 +223,6 @@
             box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
         }
 
-        /* Action buttons */
         .actions {
             display: flex;
             gap: 12px;
@@ -294,13 +259,15 @@
             background: #f5f7fa;
         }
 
-        /* GridView */
-        .grid-container { overflow-x: auto; margin-top: 10px; }
+        .grid-container {
+            overflow-x: auto;
+        }
 
         .gridview {
             width: 100%;
+            min-width: 800px;
             border-collapse: collapse;
-            min-width: 700px;
+            margin-top: 10px;
         }
 
         .gridview th {
@@ -308,28 +275,36 @@
             color: white;
             padding: 14px 12px;
             text-align: left;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .gridview th:first-child { border-radius: 10px 0 0 10px; }
-        .gridview th:last-child  { border-radius: 0 10px 10px 0; }
+        .gridview th:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .gridview th:last-child {
+            border-radius: 0 10px 10px 0;
+        }
 
         .gridview td {
             padding: 12px;
-            border-bottom: 1px solid rgba(52,152,219,0.08);
+            border-bottom: 1px solid rgba(52, 152, 219, 0.08);
             font-size: 0.9rem;
+            color: #2c3e4e;
         }
 
-        .gridview tr:nth-child(even) td { background: #f8fafd; }
+        .gridview tr:nth-child(even) td {
+            background-color: #f8fafd;
+        }
+
         .gridview tr:hover td {
-            background: #eef4fb;
+            background-color: #eef4fb;
             transition: background 0.2s ease;
         }
 
-        /* Status badges */
         .badge {
             padding: 4px 12px;
             border-radius: 50px;
@@ -343,12 +318,11 @@
         .badge-rejected { background: #f8d7da; color: #842029; }
         .badge-released { background: #cff4fc; color: #055160; }
 
-        /* Approve/Reject buttons */
         .btn-approve {
             background: linear-gradient(135deg, #198754, #157347);
             color: white;
             border: none;
-            padding: 6px 14px;
+            padding: 7px 15px;
             border-radius: 50px;
             cursor: pointer;
             font-size: 0.8rem;
@@ -358,13 +332,16 @@
             font-family: inherit;
         }
 
-        .btn-approve:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-approve:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
 
         .btn-reject {
             background: linear-gradient(135deg, #dc3545, #b02a37);
             color: white;
             border: none;
-            padding: 6px 14px;
+            padding: 7px 15px;
             border-radius: 50px;
             cursor: pointer;
             font-size: 0.8rem;
@@ -373,9 +350,11 @@
             font-family: inherit;
         }
 
-        .btn-reject:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-reject:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
 
-        /* Message */
         .message {
             display: block;
             margin-top: 15px;
@@ -384,10 +363,35 @@
             font-size: 0.9rem;
         }
 
+        @media (max-width: 1100px) {
+            .filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 900px) {
-            .filters { grid-template-columns: 1fr; }
-            .main { padding: 15px; }
-            .navbar { flex-direction: column; gap: 10px; }
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .main {
+                padding: 15px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .topbar h3 {
+                font-size: 1rem;
+            }
         }
     </style>
 
@@ -401,7 +405,6 @@
 <body>
 <form id="form1" runat="server">
 
-    <%-- Public navbar (not logged in) --%>
     <asp:Panel ID="pnlPublicNav" runat="server" Visible="false">
         <div class="navbar">
             <div class="public-logo">🏥 AssistSys</div>
@@ -413,83 +416,40 @@
             </div>
         </div>
     </asp:Panel>
+
     <asp:Panel ID="pnlPublicTransactions" runat="server" Visible="false">
-    <div class="main" style="padding:40px 5%;">
-        <div class="section">
-            <div class="section-title">🌐 Public Transactions Overview</div>
+        <div class="main" style="padding:40px 5%;">
+            <div class="section">
+                <div class="section-title">🌐 Public Transactions Overview</div>
 
-            <p style="margin-bottom:20px; color:#5d6d7e;">
-                View approved and released assistance records. Login to manage or apply.
-            </p>
+                <p style="margin-bottom:20px; color:#5d6d7e;">
+                    View approved and released assistance records. Login to manage or apply.
+                </p>
 
-            <div class="grid-container">
-                <asp:GridView ID="gvPublicTransactions" runat="server"
-                    AutoGenerateColumns="False"
-                    CssClass="gridview"
-                    GridLines="None"
-                    EmptyDataText="No public records available.">
-                    <Columns>
-                        <asp:BoundField DataField="full_name" HeaderText="Beneficiary" />
-                        <asp:BoundField DataField="assistance_type" HeaderText="Type" />
-                        <asp:BoundField DataField="estimated_amount_requested" HeaderText="Amount" DataFormatString="{0:₱#,##0.00}" />
-                        <asp:BoundField DataField="date_submitted" HeaderText="Date" DataFormatString="{0:MMM dd, yyyy}" />
-                        <asp:BoundField DataField="status" HeaderText="Status" />
-                    </Columns>
-                </asp:GridView>
+                <div class="grid-container">
+                    <asp:GridView ID="gvPublicTransactions" runat="server"
+                        AutoGenerateColumns="False"
+                        CssClass="gridview"
+                        GridLines="None"
+                        EmptyDataText="No public records available.">
+                        <Columns>
+                            <asp:BoundField DataField="full_name" HeaderText="Beneficiary" />
+                            <asp:BoundField DataField="assistance_type" HeaderText="Type" />
+                            <asp:BoundField DataField="estimated_amount_requested" HeaderText="Amount" DataFormatString="{0:₱#,##0.00}" />
+                            <asp:BoundField DataField="date_submitted" HeaderText="Date" DataFormatString="{0:MMM dd, yyyy}" />
+                            <asp:BoundField DataField="status" HeaderText="Status" />
+                        </Columns>
+                    </asp:GridView>
+                </div>
             </div>
         </div>
-    </div>
-</asp:Panel>
+    </asp:Panel>
 
-
-    <%-- Dashboard layout (logged in) --%>
     <asp:Panel ID="pnlDashboardLayout" runat="server">
         <div class="wrapper">
 
-            <%-- Sidebar --%>
-            <asp:Panel ID="pnlSidebar" runat="server">
-                <div class="sidebar collapsed" id="sidebar">
-                    <div class="logo">🏥 <span>AssistSys</span></div>
-                    <div class="nav-links">
+            <uc:Sidebar ID="Sidebar" runat="server" />
 
-                        <asp:Panel ID="navAdmin" runat="server" Visible="false">
-                            
-                            <a href="Dashboard.aspx">
-                                <span class="icon">📊</span><span>Dashboard</span>
-                            </a>
-                            <a href="Transactions.aspx" class="active">
-                                <span class="icon">💳</span><span>Transactions</span>
-                            </a>
-                        </asp:Panel>
-
-                        <asp:Panel ID="navBeneficiary" runat="server" Visible="false">
-                            
-                            <a href="Dashboard.aspx">
-                                <span class="icon">📊</span><span>Dashboard</span>
-                            </a>
-                            <a href="Assistance_Application.aspx">
-                                <span class="icon">📄</span><span>Apply</span>
-                            </a>
-                            <a href="Transactions.aspx" class="active">
-                                <span class="icon">💳</span><span>My Transactions</span>
-                            </a>
-                            <a href="Notifications.aspx">
-                                <span class="icon">🔔</span><span>Notifications</span>
-                            </a>
-                            <a href="Profile.aspx">
-                             <span class="icon">👤</span>
-                             <span>Profile</span>
-                         </a>
-                        </asp:Panel>
-
-                        <a href="Logout.aspx">
-                            <span class="icon">🚪</span><span>Logout</span>
-                        </a>
-                    </div>
-                </div>
-            </asp:Panel>
-
-            <%-- Main content --%>
             <div class="main">
 
                 <asp:Panel ID="pnlTopbar" runat="server">
@@ -550,7 +510,7 @@
                             <h4>Date Range</h4>
                             <div class="date-row">
                                 <asp:TextBox ID="txtDateFrom" runat="server" TextMode="Date" />
-                                <asp:TextBox ID="txtDateTo"   runat="server" TextMode="Date" />
+                                <asp:TextBox ID="txtDateTo" runat="server" TextMode="Date" />
                             </div>
                         </div>
                     </div>
@@ -576,13 +536,13 @@
                             EmptyDataText="No transactions found."
                             OnRowCommand="gvTransactions_RowCommand">
                             <Columns>
-                                <asp:BoundField DataField="application_id"             HeaderText="ID" />
-                                <asp:BoundField DataField="full_name"                  HeaderText="Name" />
-                                <asp:BoundField DataField="assistance_type"            HeaderText="Type" />
+                                <asp:BoundField DataField="application_id" HeaderText="ID" />
+                                <asp:BoundField DataField="full_name" HeaderText="Name" />
+                                <asp:BoundField DataField="assistance_type" HeaderText="Type" />
                                 <asp:BoundField DataField="estimated_amount_requested" HeaderText="Amount" DataFormatString="{0:₱#,##0.00}" />
-                                <asp:BoundField DataField="urgency_level"              HeaderText="Urgency" />
-                                <asp:BoundField DataField="date_submitted"             HeaderText="Date" DataFormatString="{0:MMM dd, yyyy}" />
-                                <asp:BoundField DataField="status"                     HeaderText="Status" />
+                                <asp:BoundField DataField="urgency_level" HeaderText="Urgency" />
+                                <asp:BoundField DataField="date_submitted" HeaderText="Date" DataFormatString="{0:MMM dd, yyyy}" />
+                                <asp:BoundField DataField="status" HeaderText="Status" />
 
                                 <asp:TemplateField HeaderText="Action">
                                     <ItemTemplate>
@@ -609,7 +569,6 @@
             </div>
         </div>
     </asp:Panel>
-
 
 </form>
 </body>

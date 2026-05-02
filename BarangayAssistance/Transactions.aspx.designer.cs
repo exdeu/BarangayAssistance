@@ -60,31 +60,13 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.Panel pnlDashboardLayout;
 
         /// <summary>
-        /// pnlSidebar control.
+        /// Sidebar control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlSidebar;
-
-        /// <summary>
-        /// navAdmin control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel navAdmin;
-
-        /// <summary>
-        /// navBeneficiary control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel navBeneficiary;
+        protected global::BarangayAssistance.Sidebar Sidebar;
 
         /// <summary>
         /// pnlTopbar control.

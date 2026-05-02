@@ -170,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assistance_Application.aspx" />
+    <Content Include="BeneficiaryApplications.aspx" />
     <Content Include="Dashboard.aspx" />
     <Content Include="index.aspx" />
     <Content Include="Login.aspx" />
@@ -177,6 +178,7 @@
     <Content Include="Notifications.aspx" />
     <Content Include="Profile.aspx" />
     <Content Include="Register.aspx" />
+    <Content Include="Sidebar.ascx" />
     <Content Include="Transactions.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -187,6 +189,13 @@
     </Compile>
     <Compile Include="Assistance_Application.aspx.designer.cs">
       <DependentUpon>Assistance_Application.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="BeneficiaryApplications.aspx.cs">
+      <DependentUpon>BeneficiaryApplications.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="BeneficiaryApplications.aspx.designer.cs">
+      <DependentUpon>BeneficiaryApplications.aspx</DependentUpon>
     </Compile>
     <Compile Include="Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
@@ -237,6 +246,13 @@
     </Compile>
     <Compile Include="Register.aspx.designer.cs">
       <DependentUpon>Register.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Sidebar.ascx.cs">
+      <DependentUpon>Sidebar.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sidebar.ascx.designer.cs">
+      <DependentUpon>Sidebar.ascx</DependentUpon>
     </Compile>
     <Compile Include="Transactions.aspx.cs">
       <DependentUpon>Transactions.aspx</DependentUpon>
