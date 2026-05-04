@@ -223,7 +223,24 @@
             color: white;
             transform: translateY(-1px);
         }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
 
+        .btn-delete:hover {
+            background: #b02a37;
+            transform: translateY(-1px);
+        }
         .empty-box {
             background: linear-gradient(135deg, #f5f7fa, #e9edf2);
             border: 2px dashed rgba(52,152,219,0.3);
@@ -307,6 +324,12 @@
                                         CommandArgument='<%# Eval("notification_id") %>'
                                         Visible='<%# !Convert.ToBoolean(Eval("is_read")) %>'
                                         OnClick="btnAdminMarkRead_Click" />
+                                    <asp:Button ID="btnAdminDelete" runat="server"
+                                        Text="🗑 Delete"
+                                        CssClass="btn-delete"
+                                        CommandArgument='<%# Eval("notification_id") %>'
+                                        OnClick="btnAdminDelete_Click"
+                                        OnClientClick="return confirm('Delete this notification?');" />
                                 </div>
                             </ItemTemplate>
                         </asp:Repeater>
@@ -355,6 +378,12 @@
                                         CommandArgument='<%# Eval("notification_id") %>'
                                         Visible='<%# !Convert.ToBoolean(Eval("is_read")) %>'
                                         OnClick="btnUserMarkRead_Click" />
+                                   <asp:Button ID="btnUserDelete" runat="server"
+                                        Text="🗑 Delete"
+                                        CssClass="btn-delete"
+                                        CommandArgument='<%# Eval("notification_id") %>'
+                                        OnClick="btnUserDelete_Click"
+                                        OnClientClick="return confirm('Delete this notification?');" />
                                 </div>
                             </ItemTemplate>
                         </asp:Repeater>

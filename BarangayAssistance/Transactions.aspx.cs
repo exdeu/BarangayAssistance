@@ -17,7 +17,7 @@ namespace BarangayAssistance
         {
             string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
 
-            string query = @"
+            StringBuilder query = new StringBuilder(@"
         SELECT
             full_name,
             assistance_type,
@@ -26,17 +26,39 @@ namespace BarangayAssistance
             status
         FROM assistance_applications
         WHERE status IN ('Approved', 'Released')
-        ORDER BY date_submitted DESC";
+    ");
 
             using (SqlConnection conn = new SqlConnection(connStr))
-            using (SqlCommand cmd = new SqlCommand(query, conn))
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (SqlCommand cmd = new SqlCommand())
             {
+                cmd.Connection = conn;
+
+                AddPublicTypeFilter(query, cmd);
+                AddPublicStatusFilter(query, cmd);
+
+                if (!string.IsNullOrWhiteSpace(pubDateFrom.Text))
+                {
+                    query.Append(" AND CAST(date_submitted AS DATE) >= @pubDateFrom");
+                    cmd.Parameters.AddWithValue("@pubDateFrom", DateTime.Parse(pubDateFrom.Text).Date);
+                }
+
+                if (!string.IsNullOrWhiteSpace(pubDateTo.Text))
+                {
+                    query.Append(" AND CAST(date_submitted AS DATE) <= @pubDateTo");
+                    cmd.Parameters.AddWithValue("@pubDateTo", DateTime.Parse(pubDateTo.Text).Date);
+                }
+
+                query.Append(" ORDER BY date_submitted DESC");
+                cmd.CommandText = query.ToString();
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
                 gvPublicTransactions.DataSource = dt;
                 gvPublicTransactions.DataBind();
+
+                LoadPublicDashboardSummary();
             }
         }
         protected void Page_Load(object sender, EventArgs e)
@@ -350,10 +372,10 @@ namespace BarangayAssistance
         private void InsertNotification( SqlConnection conn, SqlTransaction transaction, int? beneficiaryId, string title, string message, string type)
         {
             string query = @"
-        INSERT INTO notifications
-        (beneficiary_id, title, message, type, is_read, date_created, date_read)
-        VALUES
-        (@beneficiary_id, @title, @message, @type, 0, GETDATE(), NULL)";
+                INSERT INTO notifications
+                (beneficiary_id, title, message, type, is_read, date_created, date_read)
+                VALUES
+                (@beneficiary_id, @title, @message, @type, 0, GETDATE(), NULL)";
 
             using (SqlCommand cmd = new SqlCommand(query, conn, transaction))
             {
@@ -368,6 +390,87 @@ namespace BarangayAssistance
 
                 cmd.ExecuteNonQuery();
             }
+        }
+        private void AddPublicTypeFilter(StringBuilder query, SqlCommand cmd)
+        {
+            StringBuilder values = new StringBuilder();
+            int count = 0;
+
+            AddFilterValue(values, cmd, ref count, pubChkMedical.Checked, "Medical", "pubType");
+            AddFilterValue(values, cmd, ref count, pubChkFinancial.Checked, "Financial", "pubType");
+            AddFilterValue(values, cmd, ref count, pubChkBurial.Checked, "Burial", "pubType");
+            AddFilterValue(values, cmd, ref count, pubChkEducational.Checked, "Educational", "pubType");
+            AddFilterValue(values, cmd, ref count, pubChkFood.Checked, "Food", "pubType");
+            AddFilterValue(values, cmd, ref count, pubChkEmergency.Checked, "Emergency", "pubType");
+
+            if (count > 0)
+                query.Append(" AND assistance_type IN (" + values + ")");
+        }
+
+        private void AddPublicStatusFilter(StringBuilder query, SqlCommand cmd)
+        {
+            StringBuilder values = new StringBuilder();
+            int count = 0;
+
+            AddFilterValue(values, cmd, ref count, pubChkApproved.Checked, "Approved", "pubStatus");
+            AddFilterValue(values, cmd, ref count, pubChkReleased.Checked, "Released", "pubStatus");
+
+            if (count > 0)
+                query.Append(" AND status IN (" + values + ")");
+        }
+        private void LoadPublicDashboardSummary()
+        {
+            string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
+
+            string query = @"
+                SELECT
+                    COUNT(*) AS TotalRecords,
+                    SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS ApprovedCount,
+                    SUM(CASE WHEN status = 'Released' THEN 1 ELSE 0 END) AS ReleasedCount,
+                    ISNULL(SUM(estimated_amount_requested), 0) AS TotalAmount
+                FROM assistance_applications
+                WHERE status IN ('Approved', 'Released')";
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                conn.Open();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        lblPublicTotal.Text = reader["TotalRecords"].ToString();
+                        lblPublicApproved.Text = reader["ApprovedCount"].ToString();
+                        lblPublicReleased.Text = reader["ReleasedCount"].ToString();
+
+                        decimal totalAmount = Convert.ToDecimal(reader["TotalAmount"]);
+                        lblPublicAmount.Text = "₱" + totalAmount.ToString("N2");
+                    }
+                }
+            }
+        }
+        protected void btnPublicApplyFilter_Click(object sender, EventArgs e)
+        {
+            LoadPublicTransactions();
+        }
+
+        protected void btnPublicClearFilter_Click(object sender, EventArgs e)
+        {
+            pubChkMedical.Checked = false;
+            pubChkFinancial.Checked = false;
+            pubChkBurial.Checked = false;
+            pubChkEducational.Checked = false;
+            pubChkFood.Checked = false;
+            pubChkEmergency.Checked = false;
+
+            pubChkApproved.Checked = false;
+            pubChkReleased.Checked = false;
+
+            pubDateFrom.Text = "";
+            pubDateTo.Text = "";
+
+            LoadPublicTransactions();
         }
     }
 }

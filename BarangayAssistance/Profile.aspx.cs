@@ -17,7 +17,8 @@ namespace BarangayAssistance
             // Redirect if not logged in as Beneficiary
             if (Session["role"] == null || Session["role"].ToString() != "Beneficiary")
             {
-                Response.Redirect("Login.aspx");
+                Response.Redirect("Login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
                 return;
             }
 
@@ -74,7 +75,7 @@ namespace BarangayAssistance
                         // Pre-fill edit fields
                         txtContact.Text = reader["contact_number"].ToString();
                         txtPurok.Text = reader["purok_street"].ToString();
-                        txtIncome.Text = txtIncome.Text = reader["monthly_income"] == DBNull.Value ? "" : reader["monthly_income"].ToString();
+                        txtIncome.Text = reader["monthly_income"] == DBNull.Value ? "" : reader["monthly_income"].ToString();
                         txtHousehold.Text = reader["household_members"].ToString();
 
                         string profilePicture = reader["profile_picture"] == DBNull.Value ? "" : reader["profile_picture"].ToString();
@@ -88,7 +89,8 @@ namespace BarangayAssistance
         {
             if (Session["beneficiary_id"] == null)
             {
-                Response.Redirect("Login.aspx");
+                Response.Redirect("Login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
                 return;
             }
 
@@ -130,6 +132,18 @@ namespace BarangayAssistance
                     Directory.CreateDirectory(folderPath);
                 }
 
+                // 🔥 DELETE ALL OLD FILES FOR THIS USER (any extension)
+                string[] oldFiles = Directory.GetFiles(folderPath, "beneficiary_" + beneficiaryId + ".*");
+
+                foreach (string oldFile in oldFiles)
+                {
+                    if (File.Exists(oldFile))
+                    {
+                        File.Delete(oldFile);
+                    }
+                }
+
+                // SAVE NEW FILE
                 string fileName = "beneficiary_" + beneficiaryId + extension;
                 string fullPath = Path.Combine(folderPath, fileName);
                 string dbPath = "Uploads/ProfilePictures/" + fileName;

@@ -170,5 +170,52 @@ namespace BarangayAssistance
 
             LoadUserNotifications();
         }
+        protected void btnAdminDelete_Click(object sender, EventArgs e)
+        {
+            int id = Convert.ToInt32(
+                ((System.Web.UI.WebControls.Button)sender).CommandArgument);
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+            DELETE FROM notifications
+            WHERE notification_id = @id
+            AND type IN ('Admin', 'Registration', 'Assistance')";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@id", id);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            LoadAdminNotifications();
+        }
+
+        protected void btnUserDelete_Click(object sender, EventArgs e)
+        {
+            if (Session["beneficiary_id"] == null) return;
+
+            int beneficiaryId = Convert.ToInt32(Session["beneficiary_id"]);
+            int id = Convert.ToInt32(
+                ((System.Web.UI.WebControls.Button)sender).CommandArgument);
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+            DELETE FROM notifications
+            WHERE notification_id = @id
+            AND beneficiary_id = @beneficiary_id";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Parameters.AddWithValue("@beneficiary_id", beneficiaryId);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            LoadUserNotifications();
+        }
     }
 }

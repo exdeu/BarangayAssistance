@@ -425,7 +425,76 @@
                 <p style="margin-bottom:20px; color:#5d6d7e;">
                     View approved and released assistance records. Login to manage or apply.
                 </p>
+                <div class="cards" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:25px;">
+                    <div class="filter-box">
+                        <h4>Total Public Records</h4>
+                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+                            <asp:Label ID="lblPublicTotal" runat="server" Text="0" />
+                        </p>
+                    </div>
 
+                    <div class="filter-box">
+                        <h4>Approved</h4>
+                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+                            <asp:Label ID="lblPublicApproved" runat="server" Text="0" />
+                        </p>
+                    </div>
+
+                    <div class="filter-box">
+                        <h4>Released</h4>
+                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+                            <asp:Label ID="lblPublicReleased" runat="server" Text="0" />
+                        </p>
+                    </div>
+
+                    <div class="filter-box">
+                        <h4>Total Amount</h4>
+                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+                            <asp:Label ID="lblPublicAmount" runat="server" Text="₱0.00" />
+                        </p>
+                    </div>
+                </div>
+                <div class="filters">
+                    <div class="filter-box">
+                        <h4>Assistance Type</h4>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkMedical" runat="server" />Medical</label>
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkFinancial" runat="server" />Financial</label>
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkBurial" runat="server" />Burial</label>
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkEducational" runat="server" />Educational</label>
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkFood" runat="server" />Food</label>
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkEmergency" runat="server" />Emergency</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-box">
+                        <h4>Status</h4>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkApproved" runat="server" />Approved</label>
+                            <label class="checkbox-item"><asp:CheckBox ID="pubChkReleased" runat="server" />Released</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-box">
+                        <h4>Date Range</h4>
+                        <div class="date-row">
+                            <asp:TextBox ID="pubDateFrom" runat="server" TextMode="Date" />
+                            <asp:TextBox ID="pubDateTo" runat="server" TextMode="Date" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <asp:Button ID="btnPublicApplyFilter" runat="server"
+                        Text="🔍 Apply Filter"
+                        CssClass="btn"
+                        OnClick="btnPublicApplyFilter_Click" />
+
+                    <asp:Button ID="btnPublicClearFilter" runat="server"
+                        Text="✖ Clear Filter"
+                        CssClass="btn btn-outline"
+                        OnClick="btnPublicClearFilter_Click" />
+                </div>
                 <div class="grid-container">
                     <asp:GridView ID="gvPublicTransactions" runat="server"
                         AutoGenerateColumns="False"
