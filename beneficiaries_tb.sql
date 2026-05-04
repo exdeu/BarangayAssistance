@@ -22,6 +22,8 @@
     beneficiary_type VARCHAR(50) NOT NULL,
     government_id_presented VARCHAR(50) NULL,
 
+    profile_picture VARCHAR(255) NULL,
+
     date_registered DATETIME NOT NULL DEFAULT GETDATE(),
     status VARCHAR(30) NOT NULL DEFAULT 'Active'
 );

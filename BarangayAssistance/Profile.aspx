@@ -279,6 +279,12 @@
             .info-grid, .form-grid { grid-template-columns: 1fr; }
             .profile-header { flex-direction: column; text-align: center; }
         }
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
     </style>
 
     <script>
@@ -289,7 +295,7 @@
 </head>
 
 <body>
-<form id="form1" runat="server">
+<form id="form1" runat="server" enctype="multipart/form-data">
 
     <div class="wrapper">
 
@@ -307,7 +313,9 @@
 
             <!-- Profile Header -->
             <div class="profile-header">
-                <div class="avatar">👤</div>
+                <div class="avatar">
+                    <asp:Image ID="imgProfilePicture" runat="server" CssClass="profile-img" />
+                </div>
                 <div class="profile-info">
                     <h2><asp:Label ID="lblFullName" runat="server" Text="Loading..." /></h2>
                     <p>
@@ -316,7 +324,24 @@
                     </p>
                 </div>
             </div>
+            <div class="section">
+                <div class="section-title">🖼️ Profile Picture</div>
 
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Upload Profile Picture</label>
+                        <asp:FileUpload ID="fuProfilePicture" runat="server" />
+                     </div>
+               </div>
+
+
+    <div class="btn-row">
+        <asp:Button ID="btnUploadPicture" runat="server"
+            Text="📤 Upload Picture"
+            CssClass="btn"
+            OnClick="btnUploadPicture_Click" />
+    </div>
+    </div>
             <!-- Messages -->
             <asp:Label ID="lblSuccess" runat="server" CssClass="msg-success" Visible="false" />
             <asp:Label ID="lblError"   runat="server" CssClass="msg-error"   Visible="false" />
