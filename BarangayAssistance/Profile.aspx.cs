@@ -79,7 +79,7 @@ namespace BarangayAssistance
 
                         string profilePicture = reader["profile_picture"] == DBNull.Value ? "" : reader["profile_picture"].ToString();
 
-                        imgProfilePicture.ImageUrl = string.IsNullOrWhiteSpace(profilePicture) ? "~/Uploads/ProfilePictures/default.png": "~/" + profilePicture;
+                        imgProfilePicture.ImageUrl = string.IsNullOrWhiteSpace(profilePicture) ? "~/Uploads/ProfilePictures/default.jpg": "~/" + profilePicture;
                     }
                 }
             }
