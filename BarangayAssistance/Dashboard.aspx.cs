@@ -78,6 +78,24 @@ namespace BarangayAssistance
                 lblApproved.Text = GetScalarValue(con,
                     "SELECT COUNT(*) FROM assistance_applications WHERE status = 'Approved'").ToString();
 
+                lblRejected.Text = GetScalarValue(con,
+                    "SELECT COUNT(*) FROM assistance_applications WHERE status = 'Rejected'").ToString();
+
+                lblThisMonth.Text = GetScalarValue(con, @"
+            SELECT COUNT(*) 
+            FROM assistance_applications 
+            WHERE MONTH(date_submitted) = MONTH(GETDATE())
+            AND YEAR(date_submitted) = YEAR(GETDATE())").ToString();
+
+                lblUrgent.Text = GetScalarValue(con,
+                    "SELECT COUNT(*) FROM assistance_applications WHERE urgency_level = 'High'").ToString();
+
+                lblTopType.Text = Convert.ToString(GetScalarValue(con, @"
+            SELECT TOP 1 assistance_type 
+            FROM assistance_applications 
+            GROUP BY assistance_type 
+            ORDER BY COUNT(*) DESC"));
+
                 object totalFunds = GetScalarValue(con,
                     "SELECT ISNULL(SUM(estimated_amount_requested), 0) FROM assistance_applications WHERE status = 'Approved'");
 
@@ -129,6 +147,33 @@ namespace BarangayAssistance
                 lblUserApproved.Text = GetScalarValue(con,
                     "SELECT COUNT(*) FROM assistance_applications WHERE beneficiary_id = @BeneficiaryID AND status = 'Approved'",
                     beneficiaryId).ToString();
+
+                lblUserRejected.Text = GetScalarValue(con,
+                    "SELECT COUNT(*) FROM assistance_applications WHERE beneficiary_id = @BeneficiaryID AND status = 'Rejected'",
+                    beneficiaryId).ToString();
+
+                lblLatestStatus.Text = Convert.ToString(GetScalarValue(con, @"
+            SELECT TOP 1 status 
+            FROM assistance_applications 
+            WHERE beneficiary_id = @BeneficiaryID 
+            ORDER BY date_submitted DESC", beneficiaryId));
+
+                object lastDate = GetScalarValue(con, @"
+            SELECT TOP 1 date_submitted 
+            FROM assistance_applications 
+            WHERE beneficiary_id = @BeneficiaryID 
+            ORDER BY date_submitted DESC", beneficiaryId);
+
+                lblLastApplied.Text = lastDate != null
+                    ? Convert.ToDateTime(lastDate).ToString("MMM dd, yyyy")
+                    : "-";
+
+                lblUserTopType.Text = Convert.ToString(GetScalarValue(con, @"
+            SELECT TOP 1 assistance_type 
+            FROM assistance_applications 
+            WHERE beneficiary_id = @BeneficiaryID
+            GROUP BY assistance_type 
+            ORDER BY COUNT(*) DESC", beneficiaryId));
 
                 object totalReceived = GetScalarValue(con,
                     "SELECT ISNULL(SUM(estimated_amount_requested), 0) FROM assistance_applications WHERE beneficiary_id = @BeneficiaryID AND status = 'Approved'",

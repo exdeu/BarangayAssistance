@@ -78,6 +78,60 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.Label lblPublicAmount;
 
         /// <summary>
+        /// lblPublicAverage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPublicAverage;
+
+        /// <summary>
+        /// lblPublicHighest control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPublicHighest;
+
+        /// <summary>
+        /// lblPublicMedical control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPublicMedical;
+
+        /// <summary>
+        /// lblPublicFinancial control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPublicFinancial;
+
+        /// <summary>
+        /// lblPublicRecent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPublicRecent;
+
+        /// <summary>
+        /// lblPublicApprovalRate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPublicApprovalRate;
+
+        /// <summary>
         /// pubChkMedical control.
         /// </summary>
         /// <remarks>

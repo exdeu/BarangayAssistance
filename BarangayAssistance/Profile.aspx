@@ -29,12 +29,8 @@
 
         .wrapper { display: flex; min-height: 100vh; }
 
-      
-
-        /* Main */
         .main { flex: 1; padding: 30px; overflow-y: auto; }
 
-        /* Topbar */
         .topbar {
             display: flex;
             align-items: center;
@@ -72,7 +68,6 @@
             color: #1a364e;
         }
 
-        /* Profile card */
         .profile-header {
             background: linear-gradient(135deg, #1a364e, #2980b9);
             padding: 35px 30px;
@@ -98,6 +93,7 @@
             opacity: 0.08;
         }
 
+        /* Clickable Avatar */
         .avatar {
             width: 80px;
             height: 80px;
@@ -109,6 +105,35 @@
             font-size: 2.5rem;
             flex-shrink: 0;
             border: 3px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .avatar:hover { border-color: rgba(255,255,255,0.8); }
+
+        .avatar .camera-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.55);
+            color: white;
+            font-size: 10px;
+            text-align: center;
+            padding: 5px 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .avatar:hover .camera-overlay { opacity: 1; }
+
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .profile-info h2 {
@@ -127,7 +152,6 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Section */
         .section {
             background: white;
             padding: 30px;
@@ -148,7 +172,6 @@
             border-image: linear-gradient(90deg, #3498db, #5dade2) 1;
         }
 
-        /* Info grid */
         .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -183,7 +206,6 @@
             color: #1a364e;
         }
 
-        /* Form fields */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -224,7 +246,6 @@
             box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
         }
 
-        /* Buttons */
         .btn-row {
             display: flex;
             gap: 12px;
@@ -251,7 +272,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
-        /* Message */
         .msg-success {
             background: #d1e7dd;
             border: 1px solid #a3cfbb;
@@ -279,17 +299,19 @@
             .info-grid, .form-grid { grid-template-columns: 1fr; }
             .profile-header { flex-direction: column; text-align: center; }
         }
-        .profile-img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
     </style>
 
     <script>
         function toggleSidebar() {
             document.getElementById("sidebar").classList.toggle("collapsed");
+        }
+
+        function triggerUpload() {
+            document.getElementById('<%= fuProfilePicture.ClientID %>').click();
+        }
+
+        function autoUpload() {
+            document.getElementById('<%= btnUploadPicture.ClientID %>').click();
         }
     </script>
 </head>
@@ -302,6 +324,15 @@
         <!-- Sidebar -->
         <uc:Sidebar ID="Sidebar" runat="server" />
 
+        <!-- Hidden upload controls (invisible but still work in code-behind) -->
+        <asp:FileUpload ID="fuProfilePicture" runat="server"
+            style="display:none;"
+            onchange="autoUpload()" />
+        <asp:Button ID="btnUploadPicture" runat="server"
+            Text="Upload"
+            style="display:none;"
+            OnClick="btnUploadPicture_Click" />
+
         <!-- Main Content -->
         <div class="main">
 
@@ -311,10 +342,11 @@
                 <div></div>
             </div>
 
-            <!-- Profile Header -->
+            <!-- Profile Header with Clickable Avatar -->
             <div class="profile-header">
-                <div class="avatar">
+                <div class="avatar" onclick="triggerUpload()" title="Click to change profile picture">
                     <asp:Image ID="imgProfilePicture" runat="server" CssClass="profile-img" />
+                    <div class="camera-overlay">📷 Change</div>
                 </div>
                 <div class="profile-info">
                     <h2><asp:Label ID="lblFullName" runat="server" Text="Loading..." /></h2>
@@ -324,24 +356,7 @@
                     </p>
                 </div>
             </div>
-            <div class="section">
-                <div class="section-title">🖼️ Profile Picture</div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Upload Profile Picture</label>
-                        <asp:FileUpload ID="fuProfilePicture" runat="server" />
-                     </div>
-               </div>
-
-
-    <div class="btn-row">
-        <asp:Button ID="btnUploadPicture" runat="server"
-            Text="📤 Upload Picture"
-            CssClass="btn"
-            OnClick="btnUploadPicture_Click" />
-    </div>
-    </div>
             <!-- Messages -->
             <asp:Label ID="lblSuccess" runat="server" CssClass="msg-success" Visible="false" />
             <asp:Label ID="lblError"   runat="server" CssClass="msg-error"   Visible="false" />

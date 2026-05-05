@@ -425,35 +425,90 @@
                 <p style="margin-bottom:20px; color:#5d6d7e;">
                     View approved and released assistance records. Login to manage or apply.
                 </p>
-                <div class="cards" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:25px;">
-                    <div class="filter-box">
-                        <h4>Total Public Records</h4>
-                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-                            <asp:Label ID="lblPublicTotal" runat="server" Text="0" />
-                        </p>
-                    </div>
+               <!-- PUBLIC DASHBOARD CARDS -->
+<div class="cards" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:25px;">
 
-                    <div class="filter-box">
-                        <h4>Approved</h4>
-                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-                            <asp:Label ID="lblPublicApproved" runat="server" Text="0" />
-                        </p>
-                    </div>
+    <div class="filter-box">
+        <h4>Total Public Records</h4>
+        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+            <asp:Label ID="lblPublicTotal" runat="server" Text="0" />
+        </p>
+    </div>
 
-                    <div class="filter-box">
-                        <h4>Released</h4>
-                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-                            <asp:Label ID="lblPublicReleased" runat="server" Text="0" />
-                        </p>
-                    </div>
+    <div class="filter-box">
+        <h4>Approved</h4>
+        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+            <asp:Label ID="lblPublicApproved" runat="server" Text="0" />
+        </p>
+    </div>
 
-                    <div class="filter-box">
-                        <h4>Total Amount</h4>
-                        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-                            <asp:Label ID="lblPublicAmount" runat="server" Text="₱0.00" />
-                        </p>
-                    </div>
-                </div>
+    <div class="filter-box">
+        <h4>Released</h4>
+        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+            <asp:Label ID="lblPublicReleased" runat="server" Text="0" />
+        </p>
+    </div>
+
+    <div class="filter-box">
+        <h4>Total Amount</h4>
+        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
+            <asp:Label ID="lblPublicAmount" runat="server" Text="₱0.00" />
+        </p>
+    </div>
+
+</div>
+
+<!-- NEW INSIGHT CARDS -->
+<div class="cards" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:25px;">
+
+    <div class="filter-box">
+        <h4>Average Assistance</h4>
+        <p style="font-size:1.8rem;font-weight:800;color:#2980b9;">
+            <asp:Label ID="lblPublicAverage" runat="server" Text="₱0.00" />
+        </p>
+    </div>
+
+    <div class="filter-box">
+        <h4>Highest Assistance</h4>
+        <p style="font-size:1.8rem;font-weight:800;color:#27ae60;">
+            <asp:Label ID="lblPublicHighest" runat="server" Text="₱0.00" />
+        </p>
+    </div>
+
+    <div class="filter-box">
+        <h4>Medical Cases</h4>
+        <p style="font-size:1.8rem;font-weight:800;color:#8e44ad;">
+            <asp:Label ID="lblPublicMedical" runat="server" Text="0" />
+        </p>
+    </div>
+
+    <div class="filter-box">
+        <h4>Financial Cases</h4>
+        <p style="font-size:1.8rem;font-weight:800;color:#e67e22;">
+            <asp:Label ID="lblPublicFinancial" runat="server" Text="0" />
+        </p>
+    </div>
+
+</div>
+
+<!-- THIRD ROW -->
+<div class="cards" style="display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-bottom:25px;">
+
+    <div class="filter-box">
+        <h4>Last 7 Days Transactions</h4>
+        <p style="font-size:1.8rem;font-weight:800;color:#c0392b;">
+            <asp:Label ID="lblPublicRecent" runat="server" Text="0" />
+        </p>
+    </div>
+
+    <div class="filter-box">
+        <h4>Approval Rate</h4>
+        <p style="font-size:1.8rem;font-weight:800;color:#16a085;">
+            <asp:Label ID="lblPublicApprovalRate" runat="server" Text="0%" />
+        </p>
+    </div>
+
+</div>
                 <div class="filters">
                     <div class="filter-box">
                         <h4>Assistance Type</h4>

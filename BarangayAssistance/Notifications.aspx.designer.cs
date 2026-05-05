@@ -60,6 +60,15 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.Button btnAdminMarkAllRead;
 
         /// <summary>
+        /// btnAdminDeleteAllReal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAdminDeleteAllReal;
+
+        /// <summary>
         /// rptAdminNotifications control.
         /// </summary>
         /// <remarks>
@@ -94,6 +103,15 @@ namespace BarangayAssistance
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnUserMarkAllRead;
+
+        /// <summary>
+        /// btnUserDeleteAllReal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnUserDeleteAllReal;
 
         /// <summary>
         /// rptUserNotifications control.

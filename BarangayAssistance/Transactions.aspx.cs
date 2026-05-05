@@ -423,13 +423,27 @@ namespace BarangayAssistance
             string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
 
             string query = @"
-                SELECT
-                    COUNT(*) AS TotalRecords,
-                    SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS ApprovedCount,
-                    SUM(CASE WHEN status = 'Released' THEN 1 ELSE 0 END) AS ReleasedCount,
-                    ISNULL(SUM(estimated_amount_requested), 0) AS TotalAmount
-                FROM assistance_applications
-                WHERE status IN ('Approved', 'Released')";
+        SELECT
+            COUNT(*) AS TotalRecords,
+
+            SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS ApprovedCount,
+            SUM(CASE WHEN status = 'Released' THEN 1 ELSE 0 END) AS ReleasedCount,
+
+            ISNULL(SUM(estimated_amount_requested), 0) AS TotalAmount,
+
+            ISNULL(AVG(estimated_amount_requested), 0) AS AvgAmount,
+            ISNULL(MAX(estimated_amount_requested), 0) AS MaxAmount,
+
+            SUM(CASE WHEN assistance_type = 'Medical' THEN 1 ELSE 0 END) AS MedicalCount,
+            SUM(CASE WHEN assistance_type = 'Financial' THEN 1 ELSE 0 END) AS FinancialCount,
+
+            SUM(CASE 
+                WHEN date_submitted >= DATEADD(DAY, -7, GETDATE()) 
+                THEN 1 ELSE 0 END) AS RecentCount
+
+        FROM assistance_applications
+        WHERE status IN ('Approved', 'Released')
+    ";
 
             using (SqlConnection conn = new SqlConnection(connStr))
             using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -440,12 +454,34 @@ namespace BarangayAssistance
                 {
                     if (reader.Read())
                     {
-                        lblPublicTotal.Text = reader["TotalRecords"].ToString();
-                        lblPublicApproved.Text = reader["ApprovedCount"].ToString();
-                        lblPublicReleased.Text = reader["ReleasedCount"].ToString();
+                        int total = Convert.ToInt32(reader["TotalRecords"]);
+                        int approved = Convert.ToInt32(reader["ApprovedCount"]);
+                        int released = Convert.ToInt32(reader["ReleasedCount"]);
 
                         decimal totalAmount = Convert.ToDecimal(reader["TotalAmount"]);
+                        decimal avgAmount = Convert.ToDecimal(reader["AvgAmount"]);
+                        decimal maxAmount = Convert.ToDecimal(reader["MaxAmount"]);
+
+                        int medical = Convert.ToInt32(reader["MedicalCount"]);
+                        int financial = Convert.ToInt32(reader["FinancialCount"]);
+                        int recent = Convert.ToInt32(reader["RecentCount"]);
+
+                        // existing
+                        lblPublicTotal.Text = total.ToString();
+                        lblPublicApproved.Text = approved.ToString();
+                        lblPublicReleased.Text = released.ToString();
                         lblPublicAmount.Text = "₱" + totalAmount.ToString("N2");
+
+                        // new
+                        lblPublicAverage.Text = "₱" + avgAmount.ToString("N2");
+                        lblPublicHighest.Text = "₱" + maxAmount.ToString("N2");
+                        lblPublicMedical.Text = medical.ToString();
+                        lblPublicFinancial.Text = financial.ToString();
+                        lblPublicRecent.Text = recent.ToString();
+
+                        // approval rate
+                        double rate = total > 0 ? (approved * 100.0) / total : 0;
+                        lblPublicApprovalRate.Text = rate.ToString("0.00") + "%";
                     }
                 }
             }

@@ -274,25 +274,42 @@
             <!-- Admin Panel -->
             <asp:Panel ID="pnlAdmin" runat="server">
 
-                <div class="cards">
-                    <div class="card">
-                        <h4>Total Applications</h4>
-                        <p><asp:Label ID="lblTotalApps" runat="server" Text="0" /></p>
-                    </div>
-                    <div class="card">
-                        <h4>Pending Applications</h4>
-                        <p><asp:Label ID="lblPending" runat="server" Text="0" /></p>
-                    </div>
-                    <div class="card">
-                        <h4>Approved Applications</h4>
-                        <p><asp:Label ID="lblApproved" runat="server" Text="0" /></p>
-                    </div>
-                    <div class="card">
-                        <h4>Total Released</h4>
-                        <p><asp:Label ID="lblFunds" runat="server" Text="₱0" /></p>
-                    </div>
+              <div class="cards">
+                <div class="card">
+                    <h4>Total Applications</h4>
+                    <p><asp:Label ID="lblTotalApps" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Pending</h4>
+                    <p><asp:Label ID="lblPending" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Approved</h4>
+                    <p><asp:Label ID="lblApproved" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Total Released</h4>
+                    <p><asp:Label ID="lblFunds" runat="server" /></p>
                 </div>
 
+                <!-- NEW CARDS -->
+                <div class="card">
+                    <h4>This Month</h4>
+                    <p><asp:Label ID="lblThisMonth" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Rejected</h4>
+                    <p><asp:Label ID="lblRejected" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>High Priority</h4>
+                    <p><asp:Label ID="lblUrgent" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Top Assistance</h4>
+                    <p><asp:Label ID="lblTopType" runat="server" /></p>
+                </div>
+            </div>
                 <div class="section">
                     <div class="section-title">📋 All Transactions</div>
                     <div class="grid-container">
@@ -319,23 +336,41 @@
             <asp:Panel ID="pnlUser" runat="server" Visible="false">
 
                 <div class="cards">
-                    <div class="card">
-                        <h4>My Applications</h4>
-                        <p><asp:Label ID="lblUserApps" runat="server" Text="0" /></p>
-                    </div>
-                    <div class="card">
-                        <h4>Pending</h4>
-                        <p><asp:Label ID="lblUserPending" runat="server" Text="0" /></p>
-                    </div>
-                    <div class="card">
-                        <h4>Approved</h4>
-                        <p><asp:Label ID="lblUserApproved" runat="server" Text="0" /></p>
-                    </div>
-                    <div class="card">
-                        <h4>Total Received</h4>
-                        <p><asp:Label ID="lblUserFunds" runat="server" Text="₱0" /></p>
-                    </div>
-                </div>
+    <div class="card">
+        <h4>My Applications</h4>
+        <p><asp:Label ID="lblUserApps" runat="server" /></p>
+    </div>
+    <div class="card">
+        <h4>Pending</h4>
+        <p><asp:Label ID="lblUserPending" runat="server" /></p>
+    </div>
+    <div class="card">
+        <h4>Approved</h4>
+        <p><asp:Label ID="lblUserApproved" runat="server" /></p>
+    </div>
+    <div class="card">
+        <h4>Total Received</h4>
+        <p><asp:Label ID="lblUserFunds" runat="server" /></p>
+    </div>
+
+    <!-- NEW CARDS -->
+    <div class="card">
+        <h4>Rejected</h4>
+        <p><asp:Label ID="lblUserRejected" runat="server" /></p>
+    </div>
+    <div class="card">
+        <h4>Latest Status</h4>
+        <p><asp:Label ID="lblLatestStatus" runat="server" /></p>
+    </div>
+    <div class="card">
+        <h4>Last Applied</h4>
+        <p><asp:Label ID="lblLastApplied" runat="server" /></p>
+    </div>
+    <div class="card">
+        <h4>Most Requested</h4>
+        <p><asp:Label ID="lblUserTopType" runat="server" /></p>
+    </div>
+</div>
 
                 <div class="section">
                     <div class="section-title">💳 My Transactions</div>

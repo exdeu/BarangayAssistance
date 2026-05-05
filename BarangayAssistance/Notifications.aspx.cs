@@ -18,14 +18,12 @@ namespace BarangayAssistance
 
                 if (role == "Admin")
                 {
-
                     pnlAdminNotifications.Visible = true;
                     pnlBeneficiaryNotifications.Visible = false;
                     LoadAdminNotifications();
                 }
                 else if (role == "Beneficiary")
                 {
-  
                     pnlAdminNotifications.Visible = false;
                     pnlBeneficiaryNotifications.Visible = true;
                     LoadUserNotifications();
@@ -37,6 +35,7 @@ namespace BarangayAssistance
             }
         }
 
+        // ===== ADMIN =====
         private void LoadAdminNotifications()
         {
             using (SqlConnection con = new SqlConnection(connStr))
@@ -98,6 +97,43 @@ namespace BarangayAssistance
             LoadAdminNotifications();
         }
 
+        protected void btnAdminDeleteOne_Click(object sender, EventArgs e)
+        {
+            int id = Convert.ToInt32(
+                ((System.Web.UI.WebControls.Button)sender).CommandArgument);
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+                    DELETE FROM notifications
+                    WHERE notification_id = @id";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@id", id);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            LoadAdminNotifications();
+        }
+
+        protected void btnAdminDeleteAll_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+                    DELETE FROM notifications
+                    WHERE type IN ('Admin', 'Registration', 'Assistance')";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            LoadAdminNotifications();
+        }
+
+        // ===== BENEFICIARY =====
         private void LoadUserNotifications()
         {
             if (Session["beneficiary_id"] == null) return;
@@ -170,7 +206,8 @@ namespace BarangayAssistance
 
             LoadUserNotifications();
         }
-        protected void btnAdminDelete_Click(object sender, EventArgs e)
+
+        protected void btnUserDeleteOne_Click(object sender, EventArgs e)
         {
             int id = Convert.ToInt32(
                 ((System.Web.UI.WebControls.Button)sender).CommandArgument);
@@ -178,39 +215,32 @@ namespace BarangayAssistance
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-            DELETE FROM notifications
-            WHERE notification_id = @id
-            AND type IN ('Admin', 'Registration', 'Assistance')";
+                    DELETE FROM notifications
+                    WHERE notification_id = @id";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", id);
-
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
 
-            LoadAdminNotifications();
+            LoadUserNotifications();
         }
 
-        protected void btnUserDelete_Click(object sender, EventArgs e)
+        protected void btnUserDeleteAll_Click(object sender, EventArgs e)
         {
             if (Session["beneficiary_id"] == null) return;
 
             int beneficiaryId = Convert.ToInt32(Session["beneficiary_id"]);
-            int id = Convert.ToInt32(
-                ((System.Web.UI.WebControls.Button)sender).CommandArgument);
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-            DELETE FROM notifications
-            WHERE notification_id = @id
-            AND beneficiary_id = @beneficiary_id";
+                    DELETE FROM notifications
+                    WHERE beneficiary_id = @id";
 
                 SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@id", id);
-                cmd.Parameters.AddWithValue("@beneficiary_id", beneficiaryId);
-
+                cmd.Parameters.AddWithValue("@id", beneficiaryId);
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
