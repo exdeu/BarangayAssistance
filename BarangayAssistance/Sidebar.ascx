@@ -173,7 +173,10 @@
                 <span class="icon">📊</span>
                 <span>Dashboard</span>
             </a>
-
+              <a href="Profile.aspx">
+                  <span class="icon">👤</span>
+                  <span>Profile</span>
+              </a>
             <a href="Assistance_Application.aspx">
                 <span class="icon">📄</span>
                 <span>Apply</span>
@@ -193,11 +196,6 @@
                     Visible="false"
                     CssClass="notif-badge">
                 </asp:Label>
-            </a>
-
-            <a href="Profile.aspx">
-                <span class="icon">👤</span>
-                <span>Profile</span>
             </a>
               </div>
         </asp:Panel>

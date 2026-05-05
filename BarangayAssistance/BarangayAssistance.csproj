@@ -171,6 +171,7 @@
   <ItemGroup>
     <Content Include="Assistance_Application.aspx" />
     <Content Include="BeneficiaryApplications.aspx" />
+    <Content Include="Contact.aspx" />
     <Content Include="Dashboard.aspx" />
     <Content Include="index.aspx" />
     <Content Include="Login.aspx" />
@@ -196,6 +197,13 @@
     </Compile>
     <Compile Include="BeneficiaryApplications.aspx.designer.cs">
       <DependentUpon>BeneficiaryApplications.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Contact.aspx.cs">
+      <DependentUpon>Contact.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Contact.aspx.designer.cs">
+      <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
     <Compile Include="Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>

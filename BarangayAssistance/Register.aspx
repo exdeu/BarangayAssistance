@@ -21,7 +21,6 @@
             position: relative;
         }
 
-        /* Decorative background pattern */
         body::before {
             content: '';
             position: fixed;
@@ -43,14 +42,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .card {
@@ -58,13 +51,13 @@
             border: 1px solid rgba(52, 152, 219, 0.2);
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 5px 15px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.12);
         }
 
         .hdr {
@@ -174,7 +167,7 @@
         .f select:focus {
             border-color: #3498db;
             background: white;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
         }
 
         .f input:hover,
@@ -333,7 +326,7 @@
         .btn-primary:hover {
             background: linear-gradient(135deg, #152c40, #0f2333);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .btn-home {
@@ -345,7 +338,7 @@
         .btn-home:hover {
             background: linear-gradient(135deg, #152c40, #0f2333);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .val-error {
@@ -355,66 +348,62 @@
             font-weight: 600;
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
+        /* Age field read-only style */
+        .f input[readonly] {
+            background: #eef4fb;
+            color: #1a364e;
+            cursor: not-allowed;
+            border-color: #b0c4de;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #3498db, #1a364e);
             border-radius: 5px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, #2980b9, #152c40);
         }
 
         @media (max-width: 640px) {
-            .wrap {
-                max-width: 100%;
-            }
-            
-            .body {
-                padding: 1.5rem;
-            }
-            
-            .row2 {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            
-            .footer {
-                padding: 1rem 1.5rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .hdr h1 {
-                font-size: 1.4rem;
-            }
+            .wrap { max-width: 100%; }
+            .body { padding: 1.5rem; }
+            .row2 { grid-template-columns: 1fr; gap: 0; }
+            .footer { padding: 1rem 1.5rem; flex-wrap: wrap; justify-content: center; }
+            .hdr h1 { font-size: 1.4rem; }
         }
 
-        /* Input placeholder styling */
-        ::-webkit-input-placeholder {
-            color: #bdc3c7;
-            font-size: 0.85rem;
-        }
-        
-        ::-moz-placeholder {
-            color: #bdc3c7;
-            font-size: 0.85rem;
-        }
-        
-        :-ms-input-placeholder {
-            color: #bdc3c7;
-            font-size: 0.85rem;
-        }
+        ::-webkit-input-placeholder { color: #bdc3c7; font-size: 0.85rem; }
+        ::-moz-placeholder          { color: #bdc3c7; font-size: 0.85rem; }
+        :-ms-input-placeholder      { color: #bdc3c7; font-size: 0.85rem; }
     </style>
+
+    <script>
+        function calculateAge(dateValue) {
+            if (!dateValue) return;
+
+            var today     = new Date();
+            var birthDate = new Date(dateValue);
+            var age       = today.getFullYear() - birthDate.getFullYear();
+            var monthDiff = today.getMonth() - birthDate.getMonth();
+
+            // Adjust if birthday hasn't occurred yet this year
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+
+            // Don't allow negative or impossible ages
+            if (age < 0 || age > 120) {
+                document.getElementById('<%= txtAge.ClientID %>').value = '';
+                return;
+            }
+
+            document.getElementById('<%= txtAge.ClientID %>').value = age;
+        }
+    </script>
 </head>
+
 <body>
     <form id="form1" runat="server">
         <div class="wrap">
@@ -428,8 +417,9 @@
 
                 <div class="body">
                     <asp:Label ID="lblSuccess" runat="server" CssClass="msg-success" Visible="false" />
-                    <asp:Label ID="lblError" runat="server" CssClass="msg-error" Visible="false" />
+                    <asp:Label ID="lblError"   runat="server" CssClass="msg-error"   Visible="false" />
 
+                    <!-- Account Information -->
                     <div class="sec">Account Information</div>
 
                     <div class="row2">
@@ -468,6 +458,7 @@
 
                     <div class="divider"></div>
 
+                    <!-- Personal Information -->
                     <div class="sec">Personal Information</div>
 
                     <div class="row2">
@@ -498,7 +489,8 @@
 
                         <div class="f">
                             <label>Date of Birth <span>*</span></label>
-                            <asp:TextBox ID="txtDateOfBirth" runat="server" TextMode="Date" />
+                            <asp:TextBox ID="txtDateOfBirth" runat="server" TextMode="Date"
+                                onchange="calculateAge(this.value)" />
                             <asp:RequiredFieldValidator ID="rfvDOB" runat="server"
                                 ControlToValidate="txtDateOfBirth"
                                 ErrorMessage="Date of birth is required."
@@ -509,7 +501,9 @@
                     <div class="row2">
                         <div class="f">
                             <label>Age</label>
-                            <asp:TextBox ID="txtAge" runat="server" TextMode="Number" placeholder="Edad" />
+                            <!-- readonly: auto-filled by calculateAge() -->
+                            <asp:TextBox ID="txtAge" runat="server" TextMode="Number"
+                                placeholder="Age" ReadOnly="true" />
                             <asp:RangeValidator ID="rvAge" runat="server"
                                 ControlToValidate="txtAge"
                                 MinimumValue="1" MaximumValue="120" Type="Integer"
@@ -555,6 +549,7 @@
 
                     <div class="divider"></div>
 
+                    <!-- Address -->
                     <div class="sec">Address</div>
 
                     <div class="f">
@@ -594,6 +589,7 @@
 
                     <div class="divider"></div>
 
+                    <!-- Classification -->
                     <div class="sec">Classification</div>
 
                     <div class="f">
@@ -641,8 +637,8 @@
                 </div>
 
                 <div class="footer">
-                    <asp:HyperLink ID="hlBackToHome" runat="server" 
-                        NavigateUrl="index.aspx" 
+                    <asp:HyperLink ID="hlBackToHome" runat="server"
+                        NavigateUrl="index.aspx"
                         CssClass="btn btn-home"
                         Text="Back to Home" />
                     <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn"
