@@ -173,6 +173,7 @@
     <Content Include="BeneficiaryApplications.aspx" />
     <Content Include="Contact.aspx" />
     <Content Include="Dashboard.aspx" />
+    <Content Include="Feedback.aspx" />
     <Content Include="index.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="Logout.aspx" />
@@ -211,6 +212,13 @@
     </Compile>
     <Compile Include="Dashboard.aspx.designer.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Feedback.aspx.cs">
+      <DependentUpon>Feedback.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Feedback.aspx.designer.cs">
+      <DependentUpon>Feedback.aspx</DependentUpon>
     </Compile>
     <Compile Include="index.aspx.cs">
       <DependentUpon>index.aspx</DependentUpon>
