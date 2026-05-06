@@ -1,5 +1,3 @@
-CREATE DATABASE BarangayDB;
-
 USE BarangayDB;
 
 CREATE TABLE beneficiaries (

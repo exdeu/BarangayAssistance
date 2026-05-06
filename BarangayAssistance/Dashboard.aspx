@@ -336,41 +336,41 @@
             <asp:Panel ID="pnlUser" runat="server" Visible="false">
 
                 <div class="cards">
-    <div class="card">
-        <h4>My Applications</h4>
-        <p><asp:Label ID="lblUserApps" runat="server" /></p>
-    </div>
-    <div class="card">
-        <h4>Pending</h4>
-        <p><asp:Label ID="lblUserPending" runat="server" /></p>
-    </div>
-    <div class="card">
-        <h4>Approved</h4>
-        <p><asp:Label ID="lblUserApproved" runat="server" /></p>
-    </div>
-    <div class="card">
-        <h4>Total Received</h4>
-        <p><asp:Label ID="lblUserFunds" runat="server" /></p>
-    </div>
+                <div class="card">
+                    <h4>My Applications</h4>
+                    <p><asp:Label ID="lblUserApps" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Pending</h4>
+                    <p><asp:Label ID="lblUserPending" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Approved</h4>
+                    <p><asp:Label ID="lblUserApproved" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Total Received</h4>
+                    <p><asp:Label ID="lblUserFunds" runat="server" /></p>
+                </div>
 
-    <!-- NEW CARDS -->
-    <div class="card">
-        <h4>Rejected</h4>
-        <p><asp:Label ID="lblUserRejected" runat="server" /></p>
-    </div>
-    <div class="card">
-        <h4>Latest Status</h4>
-        <p><asp:Label ID="lblLatestStatus" runat="server" /></p>
-    </div>
-    <div class="card">
-        <h4>Last Applied</h4>
-        <p><asp:Label ID="lblLastApplied" runat="server" /></p>
-    </div>
-    <div class="card">
-        <h4>Most Requested</h4>
-        <p><asp:Label ID="lblUserTopType" runat="server" /></p>
-    </div>
-</div>
+                <!-- NEW CARDS -->
+                <div class="card">
+                    <h4>Rejected</h4>
+                    <p><asp:Label ID="lblUserRejected" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Latest Status</h4>
+                    <p><asp:Label ID="lblLatestStatus" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Last Applied</h4>
+                    <p><asp:Label ID="lblLastApplied" runat="server" /></p>
+                </div>
+                <div class="card">
+                    <h4>Most Requested</h4>
+                    <p><asp:Label ID="lblUserTopType" runat="server" /></p>
+                </div>
+            </div>
 
                 <div class="section">
                     <div class="section-title">💳 My Transactions</div>
@@ -390,7 +390,31 @@
                         </asp:GridView>
                     </div>
                 </div>
+                <!-- ADD THIS RIGHT BEFORE </div> OF .main -->
 
+                <div style="margin-top:30px; text-align:center;">
+    
+                    <a href="Feedback.aspx"
+                       style="
+                        display:inline-block;
+                        background:linear-gradient(135deg,#1a364e,#2980b9);
+                        color:white;
+                        text-decoration:none;
+                        padding:14px 32px;
+                        border-radius:50px;
+                        font-size:1rem;
+                        font-weight:700;
+                        box-shadow:0 8px 24px rgba(26,54,78,0.25);
+                        transition:all 0.3s ease;
+                       "
+                       onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(26,54,78,0.35)'"
+                       onmouseout="this.style.transform='translateY(0px)';this.style.boxShadow='0 8px 24px rgba(26,54,78,0.25)'">
+
+                        💬 Send Feedback / Complaints
+
+                    </a>
+
+                </div>
             </asp:Panel>
 
         </div>

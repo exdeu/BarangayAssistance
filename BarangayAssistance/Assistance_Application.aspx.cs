@@ -166,7 +166,7 @@ namespace BarangayAssistance
                     {
                         notifCmd.Parameters.AddWithValue(
                             "@title",
-                            "📄 New Assistance Application");
+                            "New Assistance Application");
 
                         notifCmd.Parameters.AddWithValue(
                             "@message",

@@ -412,8 +412,9 @@
                 <a href="index.aspx">Home</a>
                 <a href="Login.aspx">Login</a>
                 <a href="Register.aspx">Register</a>
-                <a accesskey="t" href="Transactions.aspx">Transactions</a>
-                <a href="Contact.aspx">Contact Us</a>
+                <a href="Transactions.aspx">Transactions</a>
+                  <a href="Contact.aspx">Contact Us</a>
+                <a href="Feedback.aspx">Feedback</a>
             </div>
         </div>
     </asp:Panel>
