@@ -423,27 +423,27 @@ namespace BarangayAssistance
             string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
 
             string query = @"
-        SELECT
-            COUNT(*) AS TotalRecords,
+                SELECT
+                    COUNT(*) AS TotalRecords,
 
-            SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS ApprovedCount,
-            SUM(CASE WHEN status = 'Released' THEN 1 ELSE 0 END) AS ReleasedCount,
+                    ISNULL(SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END),0) AS ApprovedCount,
+                    ISNULL(SUM(CASE WHEN status = 'Released' THEN 1 ELSE 0 END),0) AS ReleasedCount,
 
-            ISNULL(SUM(estimated_amount_requested), 0) AS TotalAmount,
+                    ISNULL(SUM(estimated_amount_requested), 0) AS TotalAmount,
 
-            ISNULL(AVG(estimated_amount_requested), 0) AS AvgAmount,
-            ISNULL(MAX(estimated_amount_requested), 0) AS MaxAmount,
+                    ISNULL(AVG(estimated_amount_requested), 0) AS AvgAmount,
+                    ISNULL(MAX(estimated_amount_requested), 0) AS MaxAmount,
 
-            SUM(CASE WHEN assistance_type = 'Medical' THEN 1 ELSE 0 END) AS MedicalCount,
-            SUM(CASE WHEN assistance_type = 'Financial' THEN 1 ELSE 0 END) AS FinancialCount,
+                    ISNULL(SUM(CASE WHEN assistance_type = 'Medical' THEN 1 ELSE 0 END),0) AS MedicalCount,
+                    ISNULL(SUM(CASE WHEN assistance_type = 'Financial' THEN 1 ELSE 0 END),0) AS FinancialCount,
 
-            SUM(CASE 
-                WHEN date_submitted >= DATEADD(DAY, -7, GETDATE()) 
-                THEN 1 ELSE 0 END) AS RecentCount
+                    ISNULL(SUM(CASE 
+                        WHEN date_submitted >= DATEADD(DAY, -7, GETDATE()) 
+                        THEN 1 ELSE 0 END),0) AS RecentCount
 
-        FROM assistance_applications
-        WHERE status IN ('Approved', 'Released')
-    ";
+                FROM assistance_applications
+                WHERE status IN ('Approved', 'Released')
+                ";
 
             using (SqlConnection conn = new SqlConnection(connStr))
             using (SqlCommand cmd = new SqlCommand(query, conn))

@@ -291,7 +291,7 @@ namespace BarangayAssistance
                     using (SqlCommand notifCmd = new SqlCommand(notifQuery, con))
                     {
                         notifCmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value = beneficiaryId;
-                        notifCmd.Parameters.Add("@title", SqlDbType.NVarChar, 100).Value = "✅ Account Activated";
+                        notifCmd.Parameters.Add("@title", SqlDbType.NVarChar, 100).Value = "Account Activated";
                         notifCmd.Parameters.Add("@message", SqlDbType.NVarChar, 500).Value =
                             "Your beneficiary account has been activated. You can now log in and submit assistance applications.";
 

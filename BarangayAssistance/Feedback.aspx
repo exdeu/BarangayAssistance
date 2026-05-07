@@ -777,13 +777,6 @@ input[type="text"] {
                                     </div>
                                 </asp:Panel>
 
-                                <asp:Panel runat="server"
-                                    Visible='<%# Eval("admin_reply") != DBNull.Value && !string.IsNullOrEmpty(Eval("admin_reply")?.ToString()) %>'>
-                                    <div class="admin-reply-box">
-                                        <div class="admin-reply-label">💬 Admin Reply</div>
-                                        <div class="admin-reply-text"><%# Eval("admin_reply") %></div>
-                                    </div>
-                                </asp:Panel>
 
                                 <asp:Panel runat="server"
                                     Visible='<%# Eval("status").ToString() != "Resolved" %>'>
