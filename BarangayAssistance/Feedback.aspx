@@ -528,7 +528,7 @@ input[type="text"] {
                 <a href="Login.aspx">Login</a>
                 <a href="Register.aspx">Register</a>
                 <a href="Transactions.aspx">Transactions</a>
-                <a href="Contact.aspx">Contact Us</a>
+                <a href="Contact.aspx">About Us</a>
                 <a href="Feedback.aspx">Feedback</a>
             </div>
         </div>

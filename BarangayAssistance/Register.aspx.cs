@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 using System.Web.UI.WebControls;
 
 namespace BarangayAssistance
@@ -15,6 +16,38 @@ namespace BarangayAssistance
         {
             if (Page.IsValid)
             {
+                string username = txtUsername.Text.Trim();
+                string password = txtPassword.Text.Trim();
+
+                // Username validation
+                // Rules:
+                // - 5 to 20 characters
+                // - Letters, numbers, underscore only
+                if (!Regex.IsMatch(username, @"^[a-zA-Z0-9_]{5,20}$"))
+                {
+                    lblError.Text = "❌ Username must be 5–20 characters and contain only letters, numbers, or underscores.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
+                // Password validation
+                // Rules:
+                // - Minimum 8 characters
+                // - At least 1 uppercase letter
+                // - At least 1 lowercase letter
+                // - At least 1 number
+                // - At least 1 special character
+                if (!Regex.IsMatch(password,
+                    @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_\-])[A-Za-z\d@$!%*?&.#_\-]{8,}$"))
+                {
+                    lblError.Text =
+                        "❌ Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
                 // Check passwords match
                 if (txtPassword.Text.Trim() != txtConfirmPassword.Text.Trim())
                 {
@@ -42,9 +75,8 @@ namespace BarangayAssistance
                     {
                         con.Open();
 
-                        // Check if username already exists
                         // Check if username already exists in beneficiaries or admins
-                    string checkQuery = @"
+                        string checkQuery = @"
                             SELECT 
                                 (
                                     SELECT COUNT(*) 
@@ -58,20 +90,20 @@ namespace BarangayAssistance
                                     WHERE username = @username
                                 )";
 
-                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
-                    {
-                        checkCmd.Parameters.AddWithValue("@username", txtUsername.Text.Trim());
-
-                        int count = (int)checkCmd.ExecuteScalar();
-
-                        if (count > 0)
+                        using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
                         {
-                            lblError.Text = "❌ Username already exists. Please choose another.";
-                            lblError.Visible = true;
-                            lblSuccess.Visible = false;
-                            return;
+                            checkCmd.Parameters.AddWithValue("@username", username);
+
+                            int count = (int)checkCmd.ExecuteScalar();
+
+                            if (count > 0)
+                            {
+                                lblError.Text = "❌ Username already exists. Please choose another.";
+                                lblError.Visible = true;
+                                lblSuccess.Visible = false;
+                                return;
+                            }
                         }
-                    }
 
                         // Insert new beneficiary
                         string query = @"
@@ -120,33 +152,44 @@ namespace BarangayAssistance
                         {
                             string sex = rbMale.Checked ? "Male" : "Female";
 
-                            cmd.Parameters.AddWithValue("@username", txtUsername.Text.Trim());
-                            cmd.Parameters.AddWithValue("@password_hash", txtPassword.Text.Trim());
+                            cmd.Parameters.AddWithValue("@username", username);
+
+                            // NOTE:
+                            // You should hash passwords before storing in production
+                            cmd.Parameters.AddWithValue("@password_hash", password);
+
                             cmd.Parameters.AddWithValue("@last_name", txtLastName.Text.Trim());
                             cmd.Parameters.AddWithValue("@first_name", txtFirstName.Text.Trim());
                             cmd.Parameters.AddWithValue("@middle_name", txtMiddleName.Text.Trim());
                             cmd.Parameters.AddWithValue("@date_of_birth", DateTime.Parse(txtDateOfBirth.Text));
+
                             cmd.Parameters.AddWithValue("@age",
                                 string.IsNullOrWhiteSpace(txtAge.Text)
                                 ? (object)DBNull.Value
                                 : int.Parse(txtAge.Text));
+
                             cmd.Parameters.AddWithValue("@sex", sex);
                             cmd.Parameters.AddWithValue("@contact_number", txtContact.Text.Trim());
                             cmd.Parameters.AddWithValue("@civil_status", ddlCivilStatus.SelectedValue);
                             cmd.Parameters.AddWithValue("@purok_street", txtPurok.Text.Trim());
+
                             cmd.Parameters.AddWithValue("@household_members",
                                 int.Parse(txtHouseholdSize.Text));
+
                             cmd.Parameters.AddWithValue("@monthly_income",
                                 string.IsNullOrWhiteSpace(txtIncome.Text)
                                 ? (object)DBNull.Value
                                 : decimal.Parse(txtIncome.Text));
+
                             cmd.Parameters.AddWithValue("@beneficiary_type",
                                 ddlBeneficiaryType.SelectedValue);
+
                             cmd.Parameters.AddWithValue("@government_id_presented",
                                 ddlGovID.SelectedValue);
 
                             cmd.ExecuteNonQuery();
                         }
+
                         // Insert notification for admin
                         string notifQuery = @"
                             INSERT INTO notifications
@@ -167,6 +210,7 @@ namespace BarangayAssistance
                                 0,
                                 GETDATE()
                             )";
+
                         using (SqlCommand notifCmd = new SqlCommand(notifQuery, con))
                         {
                             notifCmd.Parameters.AddWithValue(
@@ -178,6 +222,7 @@ namespace BarangayAssistance
                                 txtFirstName.Text.Trim() + " "
                                 + txtLastName.Text.Trim()
                                 + " has submitted a new beneficiary registration request.");
+
                             notifCmd.ExecuteNonQuery();
                         }
                     }
@@ -186,6 +231,7 @@ namespace BarangayAssistance
                     lblSuccess.Text = "✅ Registration successful! Redirecting to login...";
                     lblSuccess.Visible = true;
                     lblError.Visible = false;
+
                     ClearFields();
 
                     // Redirect to login page
