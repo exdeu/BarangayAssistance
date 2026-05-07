@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -39,6 +41,135 @@ namespace BarangayAssistance
                 lblError.Visible = true;
                 lblSuccess.Visible = false;
                 return;
+            }
+
+            if (ddlAssistanceType.SelectedIndex == 0 || string.IsNullOrWhiteSpace(ddlAssistanceType.SelectedValue))
+            {
+                lblError.Text = "⚠️ Please select an assistance type.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (ddlUrgency.SelectedIndex == 0 || string.IsNullOrWhiteSpace(ddlUrgency.SelectedValue))
+            {
+                lblError.Text = "⚠️ Please select an urgency level.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtPreferredDate.Text))
+            {
+                lblError.Text = "⚠️ Please select your preferred date.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (!DateTime.TryParse(txtPreferredDate.Text, out DateTime preferredDate))
+            {
+                lblError.Text = "⚠️ Please enter a valid preferred date.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (preferredDate.Date < DateTime.Today)
+            {
+                lblError.Text = "⚠️ Preferred date cannot be in the past.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            string reason = txtReason.Text.Trim();
+            string notes = txtNotes.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                lblError.Text = "⚠️ Please enter your reason for application.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (reason.Length < 10)
+            {
+                lblError.Text = "⚠️ Reason must be at least 10 characters long.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (reason.Length > 1000)
+            {
+                lblError.Text = "⚠️ Reason must not exceed 1000 characters.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (!Regex.IsMatch(reason, @"^[a-zA-Z0-9\s.,!?()\-'/ñÑ]+$"))
+            {
+                lblError.Text = "⚠️ Reason contains invalid characters.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(notes))
+            {
+                if (notes.Length > 1000)
+                {
+                    lblError.Text = "⚠️ Additional notes must not exceed 1000 characters.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
+                if (!Regex.IsMatch(notes, @"^[a-zA-Z0-9\s.,!?()\-'/ñÑ]+$"))
+                {
+                    lblError.Text = "⚠️ Additional notes contain invalid characters.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+            }
+
+            object requestedAmountValue = DBNull.Value;
+
+            if (!string.IsNullOrWhiteSpace(txtRequestedAmount.Text))
+            {
+                if (!decimal.TryParse(
+                    txtRequestedAmount.Text.Trim(),
+                    NumberStyles.Number,
+                    CultureInfo.InvariantCulture,
+                    out decimal requestedAmount))
+                {
+                    lblError.Text = "⚠️ Please enter a valid requested amount.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
+                if (requestedAmount <= 0)
+                {
+                    lblError.Text = "⚠️ Requested amount must be greater than zero.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
+                if (requestedAmount > 100000)
+                {
+                    lblError.Text = "⚠️ Requested amount is too high. Please enter a reasonable amount.";
+                    lblError.Visible = true;
+                    lblSuccess.Visible = false;
+                    return;
+                }
+
+                requestedAmountValue = requestedAmount;
             }
 
             try
@@ -123,25 +254,15 @@ namespace BarangayAssistance
                         cmd.Parameters.AddWithValue("@beneficiary_type", beneficiaryType);
                         cmd.Parameters.AddWithValue("@contact_number", contactNumber);
                         cmd.Parameters.AddWithValue("@assistance_type", ddlAssistanceType.SelectedValue);
-                        cmd.Parameters.AddWithValue("@preferred_date", DateTime.Parse(txtPreferredDate.Text));
+                        cmd.Parameters.AddWithValue("@preferred_date", preferredDate);
                         cmd.Parameters.AddWithValue("@urgency_level", ddlUrgency.SelectedValue);
-                        cmd.Parameters.AddWithValue("@reason", txtReason.Text.Trim());
-
-                        if (string.IsNullOrWhiteSpace(txtNotes.Text))
-                            cmd.Parameters.AddWithValue("@notes", DBNull.Value);
-                        else
-                            cmd.Parameters.AddWithValue("@notes", txtNotes.Text.Trim());
-
-                        if (string.IsNullOrWhiteSpace(txtRequestedAmount.Text))
-                            cmd.Parameters.AddWithValue("@estimated_amount", DBNull.Value);
-                        else
-                            cmd.Parameters.AddWithValue("@estimated_amount", decimal.Parse(
-                                txtRequestedAmount.Text,
-                                System.Globalization.CultureInfo.InvariantCulture
-                            ));
+                        cmd.Parameters.AddWithValue("@reason", reason);
+                        cmd.Parameters.AddWithValue("@notes", string.IsNullOrWhiteSpace(notes) ? (object)DBNull.Value : notes);
+                        cmd.Parameters.AddWithValue("@estimated_amount", requestedAmountValue);
 
                         cmd.ExecuteNonQuery();
                     }
+
                     // Insert admin notification for new assistance application
                     string notifQuery = @"
                         INSERT INTO notifications

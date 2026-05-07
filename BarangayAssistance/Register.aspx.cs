@@ -43,20 +43,35 @@ namespace BarangayAssistance
                         con.Open();
 
                         // Check if username already exists
-                        string checkQuery = "SELECT COUNT(*) FROM beneficiaries WHERE username = @username";
-                        using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
-                        {
-                            checkCmd.Parameters.AddWithValue("@username", txtUsername.Text.Trim());
-                            int count = (int)checkCmd.ExecuteScalar();
+                        // Check if username already exists in beneficiaries or admins
+                    string checkQuery = @"
+                            SELECT 
+                                (
+                                    SELECT COUNT(*) 
+                                    FROM beneficiaries 
+                                    WHERE username = @username
+                                )
+                                +
+                                (
+                                    SELECT COUNT(*) 
+                                    FROM admins 
+                                    WHERE username = @username
+                                )";
 
-                            if (count > 0)
-                            {
-                                lblError.Text = "❌ Username already exists. Please choose another.";
-                                lblError.Visible = true;
-                                lblSuccess.Visible = false;
-                                return;
-                            }
+                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
+                    {
+                        checkCmd.Parameters.AddWithValue("@username", txtUsername.Text.Trim());
+
+                        int count = (int)checkCmd.ExecuteScalar();
+
+                        if (count > 0)
+                        {
+                            lblError.Text = "❌ Username already exists. Please choose another.";
+                            lblError.Visible = true;
+                            lblSuccess.Visible = false;
+                            return;
                         }
+                    }
 
                         // Insert new beneficiary
                         string query = @"

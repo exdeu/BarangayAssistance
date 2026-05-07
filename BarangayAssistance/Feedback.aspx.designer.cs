@@ -267,6 +267,42 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.Button btnSubmit;
 
         /// <summary>
+        /// pnlAdmin control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlAdmin;
+
+        /// <summary>
+        /// SidebarAdmin control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::BarangayAssistance.Sidebar SidebarAdmin;
+
+        /// <summary>
+        /// lblAdminError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblAdminError;
+
+        /// <summary>
+        /// lblAdminSuccess control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblAdminSuccess;
+
+        /// <summary>
         /// pnlNoSubmissions control.
         /// </summary>
         /// <remarks>

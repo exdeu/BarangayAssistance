@@ -715,6 +715,28 @@ input[type="text"] {
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+    </asp:Panel>
+
+    <asp:Panel ID="pnlAdmin" runat="server" Visible="false">
+
+        <div class="wrapper">
+
+            <uc:Sidebar ID="SidebarAdmin" runat="server" />
+
+            <div class="main">
+
+                <div class="topbar">
+                    <button type="button" class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">☰</button>
+                    <h3>📋 Complaints &amp; Feedback Management</h3>
+                    <div></div>
+                </div>
+
+                <asp:Label ID="lblAdminError" runat="server" CssClass="msg-error" Visible="false" />
+                <asp:Label ID="lblAdminSuccess" runat="server" CssClass="msg-success" Visible="false" />
+
                 <div class="section">
                     <div class="section-title">📋 Submission History</div>
 
@@ -748,6 +770,14 @@ input[type="text"] {
                                 </div>
 
                                 <asp:Panel runat="server"
+                                    Visible='<%# Eval("admin_response") != DBNull.Value && !string.IsNullOrEmpty(Eval("admin_response")?.ToString()) %>'>
+                                    <div class="admin-reply-box">
+                                        <div class="admin-reply-label">💬 Admin Response</div>
+                                        <div class="admin-reply-text"><%# Eval("admin_response") %></div>
+                                    </div>
+                                </asp:Panel>
+
+                                <asp:Panel runat="server"
                                     Visible='<%# Eval("admin_reply") != DBNull.Value && !string.IsNullOrEmpty(Eval("admin_reply")?.ToString()) %>'>
                                     <div class="admin-reply-box">
                                         <div class="admin-reply-label">💬 Admin Reply</div>
@@ -756,18 +786,18 @@ input[type="text"] {
                                 </asp:Panel>
 
                                 <asp:Panel runat="server"
-                                    Visible='<%# Session["role"] != null && Session["role"].ToString() == "Admin" && Eval("status").ToString() != "Resolved" %>'>
+                                    Visible='<%# Eval("status").ToString() != "Resolved" %>'>
                                     <div class="admin-action-panel">
-                                        <div class="admin-action-label">🛡️ Admin – Send Reply</div>
+                                        <div class="admin-action-label">🛡️ Admin – Send Response</div>
 
                                         <asp:TextBox ID="txtReply" runat="server"
                                             TextMode="MultiLine" Rows="2"
-                                            placeholder="Type your reply here..."
+                                            placeholder="Type your response here..."
                                             style="border-radius:10px; border:1.5px solid #adc8e5; font-family:inherit;
                                                    font-size:0.93rem; padding:10px 13px; width:100%; resize:vertical; outline:none;" />
 
                                         <asp:Button ID="btnReply" runat="server"
-                                            Text="Send Reply"
+                                            Text="Send Response"
                                             CommandName="Reply"
                                             CommandArgument='<%# Eval("complaint_id") %>'
                                             CssClass="btn-reply" />

@@ -156,12 +156,15 @@
                  <a href="Notifications.aspx" class="notif-link">
                     <span class="icon">🔔</span>
                     <span>Notifications</span>
-
                     <asp:Label ID="admin_notif"
                         runat="server"
                         Visible="false"
                         CssClass="notif-badge">
                     </asp:Label>
+                </a>
+                <a href="Feedback.aspx">
+                    <span class="icon">💬</span>
+                    <span>Feedback & Complaints</span>
                 </a>
             </div>
 

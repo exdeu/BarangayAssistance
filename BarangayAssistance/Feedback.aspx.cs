@@ -15,12 +15,15 @@ namespace BarangayAssistance
         {
             if (!IsPostBack)
             {
-                bool isLoggedIn = Session["role"] != null;
+                string role = Session["role"] == null ? "" : Session["role"].ToString();
 
-                pnlLoggedIn.Visible = isLoggedIn;
-                pnlLoggedOut.Visible = !isLoggedIn;
+                bool isAdmin = role == "Admin";
 
-                if (isLoggedIn)
+                pnlAdmin.Visible = isAdmin;
+                pnlLoggedIn.Visible = !isAdmin && role != "";
+                pnlLoggedOut.Visible = !isAdmin && role == "";
+
+                if (isAdmin)
                 {
                     LoadSubmissions();
                 }
@@ -70,7 +73,7 @@ namespace BarangayAssistance
                 rating,
                 lblSuccess,
                 lblError,
-                true
+                false
             );
         }
 
@@ -183,7 +186,14 @@ namespace BarangayAssistance
             }
             else
             {
-                ResetPublicForm();
+                if (Session["role"] == null || Session["role"].ToString() == "")
+                {
+                    ResetPublicForm();
+                }
+                else
+                {
+                    ResetLoggedInForm();
+                }
             }
         }
 
@@ -241,9 +251,9 @@ namespace BarangayAssistance
         {
             if (Session["role"] == null || Session["role"].ToString() != "Admin")
             {
-                lblError.Text = "⚠️ You are not authorized to reply.";
-                lblError.Visible = true;
-                lblSuccess.Visible = false;
+                lblAdminError.Text = "⚠️ You are not authorized to reply.";
+                lblAdminError.Visible = true;
+                lblAdminSuccess.Visible = false;
                 return;
             }
 
@@ -255,9 +265,9 @@ namespace BarangayAssistance
 
                 if (txtReply == null)
                 {
-                    lblError.Text = "⚠️ Reply textbox not found.";
-                    lblError.Visible = true;
-                    lblSuccess.Visible = false;
+                    lblAdminError.Text = "⚠️ Reply textbox not found.";
+                    lblAdminError.Visible = true;
+                    lblAdminSuccess.Visible = false;
                     return;
                 }
 
@@ -265,9 +275,9 @@ namespace BarangayAssistance
 
                 if (string.IsNullOrWhiteSpace(replyText))
                 {
-                    lblError.Text = "⚠️ Reply cannot be empty.";
-                    lblError.Visible = true;
-                    lblSuccess.Visible = false;
+                    lblAdminError.Text = "⚠️ Reply cannot be empty.";
+                    lblAdminError.Visible = true;
+                    lblAdminSuccess.Visible = false;
                     return;
                 }
 
@@ -275,8 +285,10 @@ namespace BarangayAssistance
                 {
                     string query = @"
                         UPDATE complaints_feedback
-                        SET admin_reply = @reply,
-                            status = 'Resolved'
+                        SET admin_response = @reply,
+                            admin_reply = @reply,
+                            status = 'Resolved',
+                            date_resolved = GETDATE()
                         WHERE complaint_id = @id";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
@@ -290,15 +302,15 @@ namespace BarangayAssistance
 
                         if (rows > 0)
                         {
-                            lblSuccess.Text = "✅ Reply sent successfully!";
-                            lblSuccess.Visible = true;
-                            lblError.Visible = false;
+                            lblAdminSuccess.Text = "✅ Response sent successfully!";
+                            lblAdminSuccess.Visible = true;
+                            lblAdminError.Visible = false;
                         }
                         else
                         {
-                            lblError.Text = "⚠️ No record updated.";
-                            lblError.Visible = true;
-                            lblSuccess.Visible = false;
+                            lblAdminError.Text = "⚠️ No record updated.";
+                            lblAdminError.Visible = true;
+                            lblAdminSuccess.Visible = false;
                         }
                     }
                 }
