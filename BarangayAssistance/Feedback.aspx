@@ -69,6 +69,7 @@
     animation: fadeInUp 0.7s ease-out 0.2s backwards;
 }
 
+
 .public-main .section:first-child {
     animation-delay: 0.15s;
 }
@@ -606,10 +607,75 @@ input[type="text"] {
                         </div>
                     </div>
 
-                    <div class="full">
-                        <asp:Button ID="btnPublicSubmit" runat="server" Text="📤 Submit Feedback"
-                            CssClass="btn-submit" OnClick="btnPublicSubmit_Click" />
+                   <div class="full">
+    <asp:Button ID="btnPublicSubmit" runat="server" Text="📤 Submit Feedback"
+        CssClass="btn-submit" OnClick="btnPublicSubmit_Click" />
+</div>
+
+</div> <!-- CLOSE form-grid -->
+</div> <!-- CLOSE first section -->
+
+<div class="section">
+                    <div class="section">
+    <div class="section-title">📋 Resolved Complaints & Feedback</div>
+
+    <asp:Panel ID="pnlPublicNoSubmissions" runat="server" Visible="false">
+        <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p>No resolved feedback available.</p>
+        </div>
+    </asp:Panel>
+
+    <asp:Repeater ID="rptPublicSubmissions" runat="server">
+        <ItemTemplate>
+
+            <div class="submission-card">
+
+                <div class="card-header">
+                    <div class="card-subject">
+                        <%# Eval("subject") %>
                     </div>
+
+                    <div class="card-meta">
+                        <span class="badge badge-type">
+                            <%# Eval("type") %>
+                        </span>
+
+                        <span class='badge <%# GetStatusBadgeClass(Eval("status")?.ToString()) %>'>
+                            <%# Eval("status") %>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-details">
+                    <%# Eval("details") %>
+                </div>
+
+                <div class="card-footer">
+                    <span>📂 <%# Eval("category") %></span>
+
+                    <span class="stars-display">
+                        <%# new string('★', Convert.ToInt32(Eval("rating") ?? 0)) %>
+                    </span>
+
+                    <span>🕐 <%# Eval("date_submitted") %></span>
+                </div>
+
+                <div class="admin-reply-box">
+                    <div class="admin-reply-label">
+                        💬 Admin Response
+                    </div>
+
+                    <div class="admin-reply-text">
+                        <%# Eval("admin_response") %>
+                    </div>
+                </div>
+
+            </div>
+
+        </ItemTemplate>
+    </asp:Repeater>
+</div>
 
                 </div>
             </div>
@@ -707,10 +773,80 @@ input[type="text"] {
                             </div>
                         </div>
 
-                        <div class="full">
-                            <asp:Button ID="btnSubmit" runat="server" Text="📤 Submit"
-                                CssClass="btn-submit" OnClick="btnSubmit_Click" />
+                       <div class="full">
+    <asp:Button ID="Button1" runat="server" Text="📤 Submit Feedback"
+        CssClass="btn-submit" OnClick="btnPublicSubmit_Click" />
+</div>
+
+</div> <!-- CLOSE form-grid -->
+</div> <!-- CLOSE first section -->
+
+<div class="section">
+                        <div class="section">
+    <div class="section-title">📋 Complaints & Feedback List</div>
+
+    <asp:Panel ID="pnlUserNoSubmissions" runat="server" Visible="false">
+        <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p>No complaints or feedback found.</p>
+        </div>
+    </asp:Panel>
+
+    <asp:Repeater ID="rptUserSubmissions" runat="server">
+        <ItemTemplate>
+
+            <div class="submission-card">
+
+                <div class="card-header">
+                    <div class="card-subject">
+                        <%# Eval("subject") %>
+                    </div>
+
+                    <div class="card-meta">
+                        <span class="badge badge-type">
+                            <%# Eval("type") %>
+                        </span>
+
+                        <span class='badge <%# GetStatusBadgeClass(Eval("status")?.ToString()) %>'>
+                            <%# Eval("status") %>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-details">
+                    <%# Eval("details") %>
+                </div>
+
+                <div class="card-footer">
+                    <span>📂 <%# Eval("category") %></span>
+
+                    <span class="stars-display">
+                        <%# new string('★', Convert.ToInt32(Eval("rating") ?? 0)) %>
+                    </span>
+
+                    <span>🕐 <%# Eval("date_submitted") %></span>
+                </div>
+
+                <asp:Panel runat="server"
+                    Visible='<%# Eval("admin_response") != DBNull.Value && !string.IsNullOrEmpty(Eval("admin_response")?.ToString()) %>'>
+
+                    <div class="admin-reply-box">
+                        <div class="admin-reply-label">
+                            💬 Admin Response
                         </div>
+
+                        <div class="admin-reply-text">
+                            <%# Eval("admin_response") %>
+                        </div>
+                    </div>
+
+                </asp:Panel>
+
+            </div>
+
+        </ItemTemplate>
+    </asp:Repeater>
+</div>
 
                     </div>
                 </div>
@@ -782,7 +918,7 @@ input[type="text"] {
                                     Visible='<%# Eval("status").ToString() != "Resolved" %>'>
                                     <div class="admin-action-panel">
                                         <div class="admin-action-label">🛡️ Admin – Send Response</div>
-
+                                        w
                                         <asp:TextBox ID="txtReply" runat="server"
                                             TextMode="MultiLine" Rows="2"
                                             placeholder="Type your response here..."

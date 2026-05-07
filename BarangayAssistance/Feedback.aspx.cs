@@ -29,8 +29,10 @@ namespace BarangayAssistance
                 }
                 else
                 {
+                    // LOAD PUBLIC RESOLVED COMPLAINTS
                     LoadPublicSubmissions();
 
+                    // LOAD USER SUBMISSIONS IF LOGGED IN
                     if (role != "")
                     {
                         LoadUserSubmissions();
@@ -38,7 +40,27 @@ namespace BarangayAssistance
                 }
             }
         }
+        private void LoadUserSubmissions()
+        {
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+            SELECT *
+            FROM complaints_feedback
+            ORDER BY date_submitted DESC";
 
+                SqlDataAdapter da = new SqlDataAdapter(query, con);
+
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+
+                rptUserSubmissions.DataSource = dt;
+                rptUserSubmissions.DataBind();
+
+                pnlUserNoSubmissions.Visible = (dt.Rows.Count == 0);
+            }
+        }
         public string GetStatusBadgeClass(string status)
         {
             switch (status)
@@ -93,36 +115,6 @@ namespace BarangayAssistance
                 rptPublicSubmissions.DataBind();
 
                 pnlPublicNoSubmissions.Visible = (dt.Rows.Count == 0);
-            }
-        }
-        private void LoadUserSubmissions()
-        {
-            if (Session["beneficiary_id"] == null)
-                return;
-
-            using (SqlConnection con = new SqlConnection(connStr))
-            {
-                string query = @"
-            SELECT *
-            FROM complaints_feedback
-            ORDER BY date_submitted DESC";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@beneficiary_id",
-                        Session["beneficiary_id"]);
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-
-                    DataTable dt = new DataTable();
-
-                    da.Fill(dt);
-
-                    rptUserSubmissions.DataSource = dt;
-                    rptUserSubmissions.DataBind();
-
-                    pnlUserNoSubmissions.Visible = (dt.Rows.Count == 0);
-                }
             }
         }
         protected void btnSubmit_Click(object sender, EventArgs e)
