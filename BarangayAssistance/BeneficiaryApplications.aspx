@@ -559,18 +559,57 @@
             <div class="section">
                 <div class="section-title">Beneficiary Accounts</div>
 
-                <div class="actions">
-                    <asp:TextBox ID="txtSearch" runat="server" CssClass="search-box"
-                        placeholder="Search name, username, contact, type..." />
+               <div class="actions">
 
-                    <asp:Button ID="btnSearch" runat="server"
-                        Text="🔍 Search" CssClass="btn"
-                        OnClick="btnSearch_Click" />
+    <!-- SEARCH TEXT -->
+    <asp:TextBox ID="txtSearch" runat="server"
+        CssClass="search-box"
+        placeholder="Search name, username, contact..." />
 
-                    <asp:Button ID="btnClear" runat="server"
-                        Text="✖ Clear" CssClass="btn btn-outline"
-                        OnClick="btnClear_Click" />
-                </div>
+    <!-- FILTER: STATUS -->
+    <asp:DropDownList ID="ddlStatus" runat="server" CssClass="search-box">
+        <asp:ListItem Text="All Status" Value="" />
+        <asp:ListItem Text="Active" Value="Active" />
+        <asp:ListItem Text="Inactive" Value="Inactive" />
+    </asp:DropDownList>
+
+    <!-- FILTER: BENEFICIARY TYPE -->
+    <asp:DropDownList ID="ddlBeneficiaryType" runat="server" CssClass="search-box">
+        <asp:ListItem Text="All Beneficiary Types" Value="" />
+        <asp:ListItem Text="Senior Citizen" Value="Senior Citizen" />
+        <asp:ListItem Text="PWD" Value="PWD" />
+        <asp:ListItem Text="Solo Parent" Value="Solo Parent" />
+        <asp:ListItem Text="Low Income Family" Value="Low Income Family" />
+        <asp:ListItem Text="Unemployed" Value="Unemployed" />
+    </asp:DropDownList>
+
+    <!-- FILTER: SEX -->
+    <asp:DropDownList ID="ddlSex" runat="server" CssClass="search-box">
+        <asp:ListItem Text="All Sex" Value="" />
+        <asp:ListItem Text="Male" Value="Male" />
+        <asp:ListItem Text="Female" Value="Female" />
+    </asp:DropDownList>
+
+    <!-- FILTER: CIVIL STATUS -->
+    <asp:DropDownList ID="ddlCivilStatus" runat="server" CssClass="search-box">
+        <asp:ListItem Text="All Civil Status" Value="" />
+        <asp:ListItem Text="Single" Value="Single" />
+        <asp:ListItem Text="Married" Value="Married" />
+        <asp:ListItem Text="Widowed" Value="Widowed" />
+        <asp:ListItem Text="Separated" Value="Separated" />
+    </asp:DropDownList>
+
+    <asp:Button ID="btnSearch" runat="server"
+        Text="🔍 Search"
+        CssClass="btn"
+        OnClick="btnSearch_Click" />
+
+    <asp:Button ID="btnClear" runat="server"
+        Text="✖ Clear"
+        CssClass="btn btn-outline"
+        OnClick="btnClear_Click" />
+
+</div>
 
                 <div class="grid-container">
                     <asp:GridView ID="gvBeneficiaries" runat="server"

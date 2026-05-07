@@ -27,6 +27,15 @@ namespace BarangayAssistance
                 {
                     LoadSubmissions();
                 }
+                else
+                {
+                    LoadPublicSubmissions();
+
+                    if (role != "")
+                    {
+                        LoadUserSubmissions();
+                    }
+                }
             }
         }
 
@@ -60,7 +69,62 @@ namespace BarangayAssistance
                 pnlNoSubmissions.Visible = (dt.Rows.Count == 0);
             }
         }
+        // ADD THIS METHOD BELOW LoadSubmissions()
 
+        private void LoadPublicSubmissions()
+        {
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+            SELECT *
+            FROM complaints_feedback
+            WHERE status = 'Resolved'
+              AND admin_response IS NOT NULL
+              AND admin_response <> ''
+            ORDER BY date_resolved DESC";
+
+                SqlDataAdapter da = new SqlDataAdapter(query, con);
+
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+
+                rptPublicSubmissions.DataSource = dt;
+                rptPublicSubmissions.DataBind();
+
+                pnlPublicNoSubmissions.Visible = (dt.Rows.Count == 0);
+            }
+        }
+        private void LoadUserSubmissions()
+        {
+            if (Session["beneficiary_id"] == null)
+                return;
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+            SELECT *
+            FROM complaints_feedback
+            ORDER BY date_submitted DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@beneficiary_id",
+                        Session["beneficiary_id"]);
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+                    DataTable dt = new DataTable();
+
+                    da.Fill(dt);
+
+                    rptUserSubmissions.DataSource = dt;
+                    rptUserSubmissions.DataBind();
+
+                    pnlUserNoSubmissions.Visible = (dt.Rows.Count == 0);
+                }
+            }
+        }
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             int rating = GetLoggedInRating();
@@ -179,6 +243,8 @@ namespace BarangayAssistance
             successLabel.Visible = true;
             errorLabel.Visible = false;
 
+            // UPDATE THIS PART INSIDE SubmitFeedback()
+
             if (reloadSubmissions)
             {
                 ResetLoggedInForm();
@@ -189,6 +255,9 @@ namespace BarangayAssistance
                 if (Session["role"] == null || Session["role"].ToString() == "")
                 {
                     ResetPublicForm();
+
+                    // ADD THIS
+                    LoadPublicSubmissions();
                 }
                 else
                 {
@@ -196,7 +265,6 @@ namespace BarangayAssistance
                 }
             }
         }
-
         private int GetLoggedInRating()
         {
             if (rbStar5.Checked) return 5;

@@ -141,6 +141,24 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.Button btnPublicSubmit;
 
         /// <summary>
+        /// pnlPublicNoSubmissions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlPublicNoSubmissions;
+
+        /// <summary>
+        /// rptPublicSubmissions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptPublicSubmissions;
+
+        /// <summary>
         /// pnlLoggedIn control.
         /// </summary>
         /// <remarks>
@@ -265,6 +283,24 @@ namespace BarangayAssistance
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnSubmit;
+
+        /// <summary>
+        /// pnlUserNoSubmissions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlUserNoSubmissions;
+
+        /// <summary>
+        /// rptUserSubmissions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptUserSubmissions;
 
         /// <summary>
         /// pnlAdmin control.

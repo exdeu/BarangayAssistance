@@ -28,7 +28,12 @@ namespace BarangayAssistance
             }
         }
 
-        private void LoadBeneficiaries(string search = "")
+        private void LoadBeneficiaries(
+     string search = "",
+     string status = "",
+     string beneficiaryType = "",
+     string sex = "",
+     string civilStatus = "")
         {
             search = search.Trim();
 
@@ -48,59 +53,96 @@ namespace BarangayAssistance
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-                    SELECT
-                        b.beneficiary_id,
-                        b.username,
-                        b.first_name + ' ' + b.last_name AS full_name,
-                        b.contact_number,
-                        b.beneficiary_type,
-                        b.purok_street,
-                        b.date_registered,
-                        b.status
-                    FROM beneficiaries b
-                    WHERE 1 = 1";
+            SELECT
+                b.beneficiary_id,
+                b.username,
+                b.first_name + ' ' + b.last_name AS full_name,
+                b.contact_number,
+                b.beneficiary_type,
+                b.purok_street,
+                b.date_registered,
+                b.status
+            FROM beneficiaries b
+            WHERE 1 = 1";
 
+                // SEARCH
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     query += @"
-                        AND (
-                            b.username LIKE @search OR
-                            b.first_name LIKE @search OR
-                            b.last_name LIKE @search OR
-                            b.contact_number LIKE @search OR
-                            b.beneficiary_type LIKE @search OR
-                            b.purok_street LIKE @search OR
-                            b.status LIKE @search OR
-                            EXISTS
-                            (
-                                SELECT 1
-                                FROM assistance_applications aa
-                                WHERE aa.beneficiary_id = b.beneficiary_id
-                                AND
-                                (
-                                    aa.assistance_type LIKE @search OR
-                                    aa.urgency_level LIKE @search OR
-                                    aa.status LIKE @search OR
-                                    aa.reason_for_application LIKE @search OR
-                                    aa.additional_notes LIKE @search
-                                )
-                            )
-                        )";
+                AND
+                (
+                    b.username LIKE @search OR
+                    b.first_name LIKE @search OR
+                    b.last_name LIKE @search OR
+                    b.contact_number LIKE @search OR
+                    b.purok_street LIKE @search OR
+                    b.beneficiary_type LIKE @search
+                )";
+                }
+
+                // STATUS FILTER
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    query += " AND b.status = @status";
+                }
+
+                // BENEFICIARY TYPE FILTER
+                if (!string.IsNullOrWhiteSpace(beneficiaryType))
+                {
+                    query += " AND b.beneficiary_type = @beneficiaryType";
+                }
+
+                // SEX FILTER
+                if (!string.IsNullOrWhiteSpace(sex))
+                {
+                    query += " AND b.sex = @sex";
+                }
+
+                // CIVIL STATUS FILTER
+                if (!string.IsNullOrWhiteSpace(civilStatus))
+                {
+                    query += " AND b.civil_status = @civilStatus";
                 }
 
                 query += @"
-                    ORDER BY
-                        CASE WHEN b.status = 'Inactive' THEN 0 ELSE 1 END,
-                        b.date_registered DESC";
+            ORDER BY
+                CASE WHEN b.status = 'Inactive' THEN 0 ELSE 1 END,
+                b.date_registered DESC";
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     if (!string.IsNullOrWhiteSpace(search))
                     {
-                        cmd.Parameters.Add("@search", SqlDbType.NVarChar, 150).Value = "%" + search + "%";
+                        cmd.Parameters.Add("@search", SqlDbType.NVarChar, 150)
+                            .Value = "%" + search + "%";
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(status))
+                    {
+                        cmd.Parameters.Add("@status", SqlDbType.NVarChar, 30)
+                            .Value = status;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(beneficiaryType))
+                    {
+                        cmd.Parameters.Add("@beneficiaryType", SqlDbType.NVarChar, 50)
+                            .Value = beneficiaryType;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(sex))
+                    {
+                        cmd.Parameters.Add("@sex", SqlDbType.NVarChar, 10)
+                            .Value = sex;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(civilStatus))
+                    {
+                        cmd.Parameters.Add("@civilStatus", SqlDbType.NVarChar, 30)
+                            .Value = civilStatus;
                     }
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
+
                     DataTable dt = new DataTable();
 
                     da.Fill(dt);
@@ -197,12 +239,23 @@ namespace BarangayAssistance
 
         protected void btnSearch_Click(object sender, EventArgs e)
         {
-            LoadBeneficiaries(txtSearch.Text.Trim());
+            LoadBeneficiaries(
+                txtSearch.Text.Trim(),
+                ddlStatus.SelectedValue,
+                ddlBeneficiaryType.SelectedValue,
+                ddlSex.SelectedValue,
+                ddlCivilStatus.SelectedValue);
         }
 
         protected void btnClear_Click(object sender, EventArgs e)
         {
             txtSearch.Text = "";
+
+            ddlStatus.SelectedIndex = 0;
+            ddlBeneficiaryType.SelectedIndex = 0;
+            ddlSex.SelectedIndex = 0;
+            ddlCivilStatus.SelectedIndex = 0;
+
             LoadBeneficiaries();
         }
 
