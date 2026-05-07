@@ -20,6 +20,7 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
             color: #2c3e4e;
             line-height: 1.6;
+            animation: pageFadeIn 0.55s ease-out;
         }
 
         html {
@@ -36,16 +37,82 @@
             background: linear-gradient(135deg, #2980b9, #152c40);
         }
 
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes scaleFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes softPulse {
+            0% {
+                box-shadow: 0 0 0 rgba(52,152,219,0);
+            }
+            50% {
+                box-shadow: 0 0 0 4px rgba(52,152,219,0.08);
+            }
+            100% {
+                box-shadow: 0 0 0 rgba(52,152,219,0);
+            }
+        }
+
         .wrapper {
             display: flex;
             min-height: 100vh;
+            animation: fadeInLeft 0.55s ease-out;
         }
-
 
         .main {
             flex: 1;
             padding: 30px;
             overflow-x: auto;
+            animation: fadeInUp 0.65s ease-out;
         }
 
         .topbar {
@@ -58,11 +125,12 @@
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.06);
             animation: fadeInDown 0.6s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-15px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .topbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
 
         .menu-btn {
@@ -78,8 +146,12 @@
         }
 
         .menu-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.04);
             box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        }
+
+        .menu-btn:active {
+            transform: scale(0.96);
         }
 
         .topbar h3 {
@@ -95,12 +167,13 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.07);
             border: 1px solid rgba(52, 152, 219, 0.1);
             margin-top: 20px;
-            animation: fadeInUp 0.7s ease-out 0.2s backwards;
+            animation: scaleFadeIn 0.7s ease-out 0.15s backwards;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 34px rgba(0,0,0,0.09);
         }
 
         .section-title {
@@ -111,6 +184,7 @@
             padding-bottom: 15px;
             border-bottom: 3px solid transparent;
             border-image: linear-gradient(90deg, #3498db, #5dade2) 1;
+            animation: fadeInLeft 0.6s ease-out 0.25s backwards;
         }
 
         .actions {
@@ -118,6 +192,7 @@
             gap: 12px;
             flex-wrap: wrap;
             margin-bottom: 25px;
+            animation: fadeInUp 0.6s ease-out 0.3s backwards;
         }
 
         .search-box {
@@ -135,6 +210,8 @@
         .search-box:focus {
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+            transform: translateY(-1px);
+            animation: softPulse 1.2s ease-in-out;
         }
 
         .btn {
@@ -152,8 +229,12 @@
         }
 
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.03);
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.96);
         }
 
         .btn-outline {
@@ -168,6 +249,7 @@
 
         .grid-container {
             overflow-x: auto;
+            animation: fadeInUp 0.7s ease-out 0.4s backwards;
         }
 
         .gridview {
@@ -201,7 +283,21 @@
             border-bottom: 1px solid rgba(52, 152, 219, 0.08);
             font-size: 0.9rem;
             color: #2c3e4e;
+            transition: background 0.25s ease, transform 0.25s ease;
         }
+
+        .gridview tr {
+            animation: fadeInUp 0.45s ease-out backwards;
+        }
+
+        .gridview tr:nth-child(1) { animation-delay: 0.05s; }
+        .gridview tr:nth-child(2) { animation-delay: 0.1s; }
+        .gridview tr:nth-child(3) { animation-delay: 0.15s; }
+        .gridview tr:nth-child(4) { animation-delay: 0.2s; }
+        .gridview tr:nth-child(5) { animation-delay: 0.25s; }
+        .gridview tr:nth-child(6) { animation-delay: 0.3s; }
+        .gridview tr:nth-child(7) { animation-delay: 0.35s; }
+        .gridview tr:nth-child(8) { animation-delay: 0.4s; }
 
         .gridview tr:nth-child(even) td {
             background-color: #f8fafd;
@@ -209,7 +305,6 @@
 
         .gridview tr:hover td {
             background-color: #eef4fb;
-            transition: background 0.2s ease;
         }
 
         .status-active,
@@ -219,6 +314,7 @@
             font-size: 0.78rem;
             font-weight: 700;
             display: inline-block;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .status-active {
@@ -229,6 +325,12 @@
         .status-inactive {
             background: #fff3cd;
             color: #856404;
+        }
+
+        .status-active:hover,
+        .status-inactive:hover {
+            transform: scale(1.06);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
         }
 
         .btn-activate {
@@ -245,8 +347,131 @@
         }
 
         .btn-activate:hover {
-            transform: translateY(-1px);
+            transform: translateY(-1px) scale(1.04);
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn-activate:active {
+            transform: scale(0.95);
+        }
+
+        .btn-details {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            padding: 7px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            margin-right: 6px;
+        }
+
+        .btn-details:hover {
+            transform: translateY(-1px) scale(1.04);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn-details:active {
+            transform: scale(0.95);
+        }
+
+        .application-details-panel {
+            display: none;
+            margin-top: 12px;
+            padding: 15px;
+            background: #f8fafd;
+            border: 1px solid rgba(52, 152, 219, 0.18);
+            border-left: 5px solid #3498db;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            animation: detailsSlideDown 0.35s ease-out;
+            transform-origin: top;
+        }
+
+        @keyframes detailsSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px) scaleY(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scaleY(1);
+            }
+        }
+
+        .application-details-title {
+            font-weight: 700;
+            color: #1a364e;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            animation: fadeInLeft 0.35s ease-out;
+        }
+
+        .application-list {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            animation: fadeInUp 0.4s ease-out 0.1s backwards;
+        }
+
+        .application-list th {
+            background: linear-gradient(135deg, #eef4fb, #dcecf8);
+            color: #1a364e;
+            padding: 10px;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            text-align: left;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.18);
+        }
+
+        .application-list td {
+            padding: 10px;
+            font-size: 0.84rem;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.08);
+            color: #2c3e4e;
+            vertical-align: top;
+            transition: background 0.25s ease;
+        }
+
+        .application-list tr:nth-child(even) td {
+            background: #fafcfe;
+        }
+
+        .application-list tr:hover td {
+            background: #eef4fb;
+        }
+
+        .application-status {
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            transition: transform 0.25s ease;
+        }
+
+        .application-status:hover {
+            transform: scale(1.06);
+        }
+
+        .application-empty {
+            padding: 14px;
+            background: white;
+            border-radius: 10px;
+            color: #8899aa;
+            font-weight: 600;
+            text-align: center;
+            border: 1px dashed #c8d8e8;
+            animation: fadeInUp 0.35s ease-out;
         }
 
         .message {
@@ -255,6 +480,7 @@
             font-weight: 600;
             color: #1a364e;
             font-size: 0.9rem;
+            animation: fadeInUp 0.45s ease-out;
         }
 
         @media (max-width: 900px) {
@@ -286,6 +512,31 @@
     <script>
         function toggleSidebar() {
             document.getElementById("sidebar").classList.toggle("collapsed");
+        }
+
+        function toggleApplicationDetails(panelId, buttonId) {
+            var panel = document.getElementById(panelId);
+            var button = document.getElementById(buttonId);
+
+            if (!panel) {
+                return false;
+            }
+
+            if (panel.style.display === "none" || panel.style.display === "") {
+                panel.style.display = "block";
+
+                if (button) {
+                    button.value = "▲ Hide Applications";
+                }
+            } else {
+                panel.style.display = "none";
+
+                if (button) {
+                    button.value = "▼ View Applications";
+                }
+            }
+
+            return false;
         }
     </script>
 </head>
@@ -348,12 +599,77 @@
 
                             <asp:TemplateField HeaderText="Action">
                                 <ItemTemplate>
+                                    <input type="button"
+                                        id='btnDetails_<%# Eval("beneficiary_id") %>'
+                                        value="▼ View Applications"
+                                        class="btn-details"
+                                        onclick='return toggleApplicationDetails("appDetails_<%# Eval("beneficiary_id") %>", "btnDetails_<%# Eval("beneficiary_id") %>");' />
+
                                     <asp:Button ID="btnActivate" runat="server"
                                         Text="✔ Activate"
                                         CssClass="btn-activate"
                                         CommandName="ActivateBeneficiary"
                                         CommandArgument='<%# Eval("beneficiary_id") %>'
                                         Visible='<%# Eval("status").ToString() != "Active" %>' />
+
+                                    <div id='appDetails_<%# Eval("beneficiary_id") %>' class="application-details-panel">
+                                        <div class="application-details-title">
+                                            Assistance Application List
+                                        </div>
+
+                                        <asp:Repeater ID="rptApplications" runat="server"
+                                            DataSource='<%# GetAssistanceApplications(Eval("beneficiary_id")) %>'>
+                                            <HeaderTemplate>
+                                                <table class="application-list">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Application ID</th>
+                                                            <th>Assistance Type</th>
+                                                            <th>Preferred Date</th>
+                                                            <th>Amount</th>
+                                                            <th>Urgency</th>
+                                                            <th>Reason</th>
+                                                            <th>Notes</th>
+                                                            <th>Status</th>
+                                                            <th>Date Submitted</th>
+                                                            <th>Date Updated</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                            </HeaderTemplate>
+
+                                            <ItemTemplate>
+                                                <tr>
+                                                    <td><%# Eval("application_id") %></td>
+                                                    <td><%# Eval("assistance_type") %></td>
+                                                    <td><%# Eval("preferred_date", "{0:MMM dd, yyyy}") %></td>
+                                                    <td><%# Eval("estimated_amount_requested") == DBNull.Value ? "N/A" : Eval("estimated_amount_requested", "{0:N2}") %></td>
+                                                    <td><%# Eval("urgency_level") %></td>
+                                                    <td><%# Eval("reason_for_application") %></td>
+                                                    <td><%# Eval("additional_notes") == DBNull.Value || string.IsNullOrWhiteSpace(Eval("additional_notes").ToString()) ? "N/A" : Eval("additional_notes") %></td>
+                                                    <td>
+                                                        <span class="application-status">
+                                                            <%# Eval("status") %>
+                                                        </span>
+                                                    </td>
+                                                    <td><%# Eval("date_submitted", "{0:MMM dd, yyyy hh:mm tt}") %></td>
+                                                    <td><%# Eval("date_updated") == DBNull.Value ? "N/A" : Eval("date_updated", "{0:MMM dd, yyyy hh:mm tt}") %></td>
+                                                </tr>
+                                            </ItemTemplate>
+
+                                            <FooterTemplate>
+                                                    </tbody>
+                                                </table>
+                                            </FooterTemplate>
+                                        </asp:Repeater>
+
+                                        <asp:Panel ID="pnlNoApplications" runat="server"
+                                            Visible='<%# GetAssistanceApplicationCount(Eval("beneficiary_id")) == 0 %>'>
+                                            <div class="application-empty">
+                                                No assistance applications found for this beneficiary.
+                                            </div>
+                                        </asp:Panel>
+                                    </div>
                                 </ItemTemplate>
                             </asp:TemplateField>
                         </Columns>

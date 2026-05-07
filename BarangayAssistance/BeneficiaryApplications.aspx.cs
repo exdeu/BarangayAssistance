@@ -49,32 +49,49 @@ namespace BarangayAssistance
             {
                 string query = @"
                     SELECT
-                        beneficiary_id,
-                        username,
-                        first_name + ' ' + last_name AS full_name,
-                        contact_number,
-                        beneficiary_type,
-                        purok_street,
-                        date_registered,
-                        status
-                    FROM beneficiaries
+                        b.beneficiary_id,
+                        b.username,
+                        b.first_name + ' ' + b.last_name AS full_name,
+                        b.contact_number,
+                        b.beneficiary_type,
+                        b.purok_street,
+                        b.date_registered,
+                        b.status
+                    FROM beneficiaries b
                     WHERE 1 = 1";
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     query += @"
                         AND (
-                            username LIKE @search OR
-                            first_name LIKE @search OR
-                            last_name LIKE @search OR
-                            contact_number LIKE @search OR
-                            beneficiary_type LIKE @search OR
-                            purok_street LIKE @search OR
-                            status LIKE @search
+                            b.username LIKE @search OR
+                            b.first_name LIKE @search OR
+                            b.last_name LIKE @search OR
+                            b.contact_number LIKE @search OR
+                            b.beneficiary_type LIKE @search OR
+                            b.purok_street LIKE @search OR
+                            b.status LIKE @search OR
+                            EXISTS
+                            (
+                                SELECT 1
+                                FROM assistance_applications aa
+                                WHERE aa.beneficiary_id = b.beneficiary_id
+                                AND
+                                (
+                                    aa.assistance_type LIKE @search OR
+                                    aa.urgency_level LIKE @search OR
+                                    aa.status LIKE @search OR
+                                    aa.reason_for_application LIKE @search OR
+                                    aa.additional_notes LIKE @search
+                                )
+                            )
                         )";
                 }
 
-                query += " ORDER BY CASE WHEN status = 'Inactive' THEN 0 ELSE 1 END, date_registered DESC";
+                query += @"
+                    ORDER BY
+                        CASE WHEN b.status = 'Inactive' THEN 0 ELSE 1 END,
+                        b.date_registered DESC";
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
@@ -85,12 +102,95 @@ namespace BarangayAssistance
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
+
                     da.Fill(dt);
 
                     gvBeneficiaries.DataSource = dt;
                     gvBeneficiaries.DataBind();
 
                     lblMessage.Text = dt.Rows.Count + " beneficiary record(s) found.";
+                }
+            }
+        }
+
+        public DataTable GetAssistanceApplications(object beneficiaryIdValue)
+        {
+            DataTable dt = new DataTable();
+
+            if (beneficiaryIdValue == null ||
+                !int.TryParse(beneficiaryIdValue.ToString(), out int beneficiaryId) ||
+                beneficiaryId <= 0)
+            {
+                return dt;
+            }
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+                    SELECT
+                        aa.application_id,
+                        aa.beneficiary_id,
+                        aa.full_name,
+                        aa.beneficiary_type,
+                        aa.contact_number,
+                        aa.assistance_type,
+                        aa.preferred_date,
+                        aa.estimated_amount_requested,
+                        aa.urgency_level,
+                        aa.reason_for_application,
+                        aa.additional_notes,
+                        aa.status,
+                        aa.date_submitted,
+                        aa.date_updated,
+                        b.username,
+                        b.first_name,
+                        b.last_name,
+                        b.contact_number AS beneficiary_contact
+                    FROM assistance_applications aa
+                    INNER JOIN beneficiaries b
+                        ON aa.beneficiary_id = b.beneficiary_id
+                    WHERE aa.beneficiary_id = @beneficiary_id
+                    ORDER BY aa.date_submitted DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value = beneficiaryId;
+
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+
+            return dt;
+        }
+
+        public int GetAssistanceApplicationCount(object beneficiaryIdValue)
+        {
+            if (beneficiaryIdValue == null ||
+                !int.TryParse(beneficiaryIdValue.ToString(), out int beneficiaryId) ||
+                beneficiaryId <= 0)
+            {
+                return 0;
+            }
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+                    SELECT COUNT(*)
+                    FROM assistance_applications aa
+                    INNER JOIN beneficiaries b
+                        ON aa.beneficiary_id = b.beneficiary_id
+                    WHERE b.beneficiary_id = @beneficiary_id";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value = beneficiaryId;
+
+                    con.Open();
+
+                    return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
         }
@@ -192,12 +292,15 @@ namespace BarangayAssistance
                     {
                         notifCmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value = beneficiaryId;
                         notifCmd.Parameters.Add("@title", SqlDbType.NVarChar, 100).Value = "✅ Account Activated";
-                        notifCmd.Parameters.Add("@message", SqlDbType.NVarChar, 500).Value = "Your beneficiary account has been activated. You can now log in and submit assistance applications.";
+                        notifCmd.Parameters.Add("@message", SqlDbType.NVarChar, 500).Value =
+                            "Your beneficiary account has been activated. You can now log in and submit assistance applications.";
+
                         notifCmd.ExecuteNonQuery();
                     }
                 }
 
                 lblMessage.Text = "✅ Beneficiary account activated successfully.";
+
                 LoadBeneficiaries(txtSearch.Text.Trim());
             }
         }
