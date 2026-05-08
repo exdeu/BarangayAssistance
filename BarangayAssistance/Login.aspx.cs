@@ -26,35 +26,6 @@ namespace BarangayAssistance
                 return;
             }
 
-            if (username.Length < 3 || username.Length > 50)
-            {
-                lblMessage.Text = "Username must be between 3 and 50 characters.";
-                return;
-            }
-
-            if (password.Length < 6 || password.Length > 255)
-            {
-                lblMessage.Text = "Password must be between 6 and 255 characters.";
-                return;
-            }
-
-            if (!Regex.IsMatch(username, @"^[a-zA-Z0-9._@-]+$"))
-            {
-                lblMessage.Text = "Username contains invalid characters.";
-                return;
-            }
-
-            if (username.Contains("'") || username.Contains("\"") || username.Contains(";") || username.Contains("--"))
-            {
-                lblMessage.Text = "Username contains invalid characters.";
-                return;
-            }
-
-            if (password.Contains("'") || password.Contains("\"") || password.Contains(";") || password.Contains("--"))
-            {
-                lblMessage.Text = "Password contains invalid characters.";
-                return;
-            }
 
             string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
 
