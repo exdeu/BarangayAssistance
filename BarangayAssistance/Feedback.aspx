@@ -917,8 +917,7 @@ input[type="text"] {
                                 <asp:Panel runat="server"
                                     Visible='<%# Eval("status").ToString() != "Resolved" %>'>
                                     <div class="admin-action-panel">
-                                        <div class="admin-action-label">🛡️ Admin – Send Response</div>
-                                        w
+                                        <div class="admin-action-label">🛡️ Admin – Send Response</div
                                         <asp:TextBox ID="txtReply" runat="server"
                                             TextMode="MultiLine" Rows="2"
                                             placeholder="Type your response here..."

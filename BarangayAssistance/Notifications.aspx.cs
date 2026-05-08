@@ -142,10 +142,13 @@ namespace BarangayAssistance
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
+                // FIXED: Added AND type = 'Beneficiary' so admin notifications
+                // are never shown to beneficiaries
                 string query = @"
                     SELECT *
                     FROM notifications
                     WHERE beneficiary_id = @id
+                    AND type = 'Beneficiary'
                     ORDER BY is_read ASC, date_created DESC";
 
                 SqlCommand cmd = new SqlCommand(query, con);
@@ -172,9 +175,10 @@ namespace BarangayAssistance
             {
                 string query = @"
                     UPDATE notifications
-                    SET is_read = 1,
+                    SET is_read = 0,
                         date_read = GETDATE()
-                    WHERE beneficiary_id = @id";
+                    WHERE beneficiary_id = @id
+                    AND type = 'Beneficiary'";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", beneficiaryId);
@@ -237,7 +241,8 @@ namespace BarangayAssistance
             {
                 string query = @"
                     DELETE FROM notifications
-                    WHERE beneficiary_id = @id";
+                    WHERE beneficiary_id = @id
+                    AND type = 'Beneficiary'";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@id", beneficiaryId);
