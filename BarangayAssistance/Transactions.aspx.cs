@@ -72,7 +72,7 @@ namespace BarangayAssistance
                     pnlDashboardLayout.Visible = false;
                     pnlPublicNav.Visible = true;
                     pnlPublicTransactions.Visible = true;
-
+                    pnlInactivityTimeout.Visible = false;
                     LoadPublicTransactions();
                 }
                 else
@@ -80,7 +80,7 @@ namespace BarangayAssistance
                     pnlDashboardLayout.Visible = true;
                     pnlPublicNav.Visible = false;
                     pnlPublicTransactions.Visible = false;
-
+                    pnlInactivityTimeout.Visible = true;
 
                     if (role == "Beneficiary")
                     {

@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Dashboard.aspx.cs" Inherits="BarangayAssistance.Dashboard" %>
+<%@ Register Src="~/InactivityTimeout.ascx" TagPrefix="uc" TagName="InactivityTimeout" %>
 <%@ Register Src="~/Sidebar.ascx"
     TagPrefix="uc"
     TagName="Sidebar" %>
@@ -419,7 +420,7 @@
 
         </div>
     </div>
-
+    <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
 </form>
 </body>
 </html>

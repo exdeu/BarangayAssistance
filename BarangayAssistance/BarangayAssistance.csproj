@@ -174,6 +174,7 @@
     <Content Include="Contact.aspx" />
     <Content Include="Dashboard.aspx" />
     <Content Include="Feedback.aspx" />
+    <Content Include="InactivityTimeout.ascx" />
     <Content Include="index.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="Logout.aspx" />
@@ -219,6 +220,13 @@
     </Compile>
     <Compile Include="Feedback.aspx.designer.cs">
       <DependentUpon>Feedback.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="InactivityTimeout.ascx.cs">
+      <DependentUpon>InactivityTimeout.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="InactivityTimeout.ascx.designer.cs">
+      <DependentUpon>InactivityTimeout.ascx</DependentUpon>
     </Compile>
     <Compile Include="index.aspx.cs">
       <DependentUpon>index.aspx</DependentUpon>

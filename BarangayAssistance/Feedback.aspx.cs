@@ -22,9 +22,11 @@ namespace BarangayAssistance
                 pnlAdmin.Visible = isAdmin;
                 pnlLoggedIn.Visible = !isAdmin && role != "";
                 pnlLoggedOut.Visible = !isAdmin && role == "";
+                pnlInactivityTimeout.Visible = false;
 
                 if (isAdmin)
                 {
+                    pnlInactivityTimeout.Visible = true;
                     LoadSubmissions();
                 }
                 else
@@ -35,6 +37,7 @@ namespace BarangayAssistance
                     // LOAD USER SUBMISSIONS IF LOGGED IN
                     if (role != "")
                     {
+                        pnlInactivityTimeout.Visible = true;
                         LoadUserSubmissions();
                     }
                 }

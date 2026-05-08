@@ -1,6 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Transactions.aspx.cs" Inherits="BarangayAssistance.Transactions" %>
 <%@ Register Src="~/Sidebar.ascx" TagPrefix="uc" TagName="Sidebar" %>
-
+<%@ Register Src="~/InactivityTimeout.ascx" TagPrefix="uc" TagName="InactivityTimeout" %>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -695,7 +695,9 @@
             </div>
         </div>
     </asp:Panel>
-
+    <asp:Panel ID="pnlInactivityTimeout" runat="server" Visible="false">
+    <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
+</asp:Panel>
 </form>
 </body>
 </html>
