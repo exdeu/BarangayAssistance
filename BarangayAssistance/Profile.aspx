@@ -94,7 +94,6 @@
             opacity: 0.08;
         }
 
-        /* Clickable Avatar */
         .avatar {
             width: 80px;
             height: 80px;
@@ -322,19 +321,17 @@
 
     <div class="wrapper">
 
-        <!-- Sidebar -->
         <uc:Sidebar ID="Sidebar" runat="server" />
 
-        <!-- Hidden upload controls (invisible but still work in code-behind) -->
         <asp:FileUpload ID="fuProfilePicture" runat="server"
             style="display:none;"
             onchange="autoUpload()" />
+
         <asp:Button ID="btnUploadPicture" runat="server"
             Text="Upload"
             style="display:none;"
             OnClick="btnUploadPicture_Click" />
 
-        <!-- Main Content -->
         <div class="main">
 
             <div class="topbar">
@@ -343,12 +340,12 @@
                 <div></div>
             </div>
 
-            <!-- Profile Header with Clickable Avatar -->
             <div class="profile-header">
                 <div class="avatar" onclick="triggerUpload()" title="Click to change profile picture">
                     <asp:Image ID="imgProfilePicture" runat="server" CssClass="profile-img" />
                     <div class="camera-overlay">📷 Change</div>
                 </div>
+
                 <div class="profile-info">
                     <h2><asp:Label ID="lblFullName" runat="server" Text="Loading..." /></h2>
                     <p>
@@ -358,89 +355,112 @@
                 </div>
             </div>
 
-            <!-- Messages -->
             <asp:Label ID="lblSuccess" runat="server" CssClass="msg-success" Visible="false" />
-            <asp:Label ID="lblError"   runat="server" CssClass="msg-error"   Visible="false" />
+            <asp:Label ID="lblError" runat="server" CssClass="msg-error" Visible="false" />
 
-            <!-- Personal Information -->
             <div class="section">
                 <div class="section-title">📋 Personal Information</div>
+
                 <div class="info-grid">
+
                     <div class="info-item">
                         <div class="label">Last Name</div>
                         <div class="value"><asp:Label ID="lblLastName" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">First Name</div>
                         <div class="value"><asp:Label ID="lblFirstName" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Middle Name</div>
                         <div class="value"><asp:Label ID="lblMiddleName" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Date of Birth</div>
                         <div class="value"><asp:Label ID="lblDOB" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Age</div>
                         <div class="value"><asp:Label ID="lblAge" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Sex</div>
                         <div class="value"><asp:Label ID="lblSex" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Civil Status</div>
                         <div class="value"><asp:Label ID="lblCivilStatus" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Contact Number</div>
                         <div class="value"><asp:Label ID="lblContact" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Purok / Street</div>
                         <div class="value"><asp:Label ID="lblPurok" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Household Members</div>
                         <div class="value"><asp:Label ID="lblHousehold" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Monthly Income</div>
                         <div class="value"><asp:Label ID="lblIncome" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Government ID</div>
                         <div class="value"><asp:Label ID="lblGovID" runat="server" /></div>
                     </div>
+
                     <div class="info-item">
                         <div class="label">Email</div>
                         <div class="value"><asp:Label ID="lblEmail" runat="server" /></div>
                     </div>
+
                 </div>
             </div>
 
-            <!-- Edit Contact Info -->
             <div class="section">
                 <div class="section-title">✏️ Update Contact Information</div>
+
                 <div class="form-grid">
+
                     <div class="form-group">
                         <label>Contact Number</label>
                         <asp:TextBox ID="txtContact" runat="server" placeholder="09XXXXXXXXX" />
                     </div>
+
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <asp:TextBox ID="txtEmail" runat="server" TextMode="Email" placeholder="example@email.com" />
+                    </div>
+
                     <div class="form-group">
                         <label>Purok / Street</label>
                         <asp:TextBox ID="txtPurok" runat="server" placeholder="Purok or street name" />
                     </div>
+
                     <div class="form-group">
                         <label>Monthly Income</label>
                         <asp:TextBox ID="txtIncome" runat="server" placeholder="0.00" />
                     </div>
+
                     <div class="form-group">
                         <label>Household Members</label>
                         <asp:TextBox ID="txtHousehold" runat="server" placeholder="0" TextMode="Number" />
                     </div>
+
                 </div>
 
                 <div class="btn-row">
@@ -451,25 +471,32 @@
                 </div>
             </div>
 
-            <!-- Change Password -->
             <div class="section">
                 <div class="section-title">🔐 Change Password</div>
+
                 <div class="form-grid">
+
                     <div class="form-group">
                         <label>Current Password</label>
                         <asp:TextBox ID="txtCurrentPassword" runat="server"
-                            TextMode="Password" placeholder="Enter current password" />
+                            TextMode="Password"
+                            placeholder="Enter current password" />
                     </div>
+
                     <div class="form-group">
                         <label>New Password</label>
                         <asp:TextBox ID="txtNewPassword" runat="server"
-                            TextMode="Password" placeholder="Enter new password" />
+                            TextMode="Password"
+                            placeholder="Enter new password" />
                     </div>
+
                     <div class="form-group">
                         <label>Confirm New Password</label>
                         <asp:TextBox ID="txtConfirmPassword" runat="server"
-                            TextMode="Password" placeholder="Confirm new password" />
+                            TextMode="Password"
+                            placeholder="Confirm new password" />
                     </div>
+
                 </div>
 
                 <div class="btn-row">
@@ -482,7 +509,9 @@
 
         </div>
     </div>
-     <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
+
+    <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
+
 </form>
 </body>
 </html>

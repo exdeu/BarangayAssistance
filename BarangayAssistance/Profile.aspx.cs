@@ -4,7 +4,6 @@ using System.Data.SqlClient;
 using System.Web.UI;
 using System.IO;
 
-
 namespace BarangayAssistance
 {
     public partial class Profile : Page
@@ -14,7 +13,6 @@ namespace BarangayAssistance
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Redirect if not logged in as Beneficiary
             if (Session["role"] == null || Session["role"].ToString() != "Beneficiary")
             {
                 Response.Redirect("Login.aspx");
@@ -47,16 +45,15 @@ namespace BarangayAssistance
                 {
                     cmd.Parameters.AddWithValue("@id", beneficiaryId);
                     con.Open();
+
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     if (reader.Read())
                     {
-                        // Header
                         lblFullName.Text = reader["first_name"] + " " + reader["last_name"];
                         lblBeneficiaryType.Text = reader["beneficiary_type"].ToString();
                         lblUsername.Text = "@" + reader["username"].ToString();
 
-                        // Info grid
                         lblLastName.Text = reader["last_name"].ToString();
                         lblFirstName.Text = reader["first_name"].ToString();
                         lblMiddleName.Text = reader["middle_name"].ToString();
@@ -68,22 +65,36 @@ namespace BarangayAssistance
                         lblContact.Text = reader["contact_number"].ToString();
                         lblPurok.Text = reader["purok_street"].ToString();
                         lblHousehold.Text = reader["household_members"].ToString();
-                        lblIncome.Text = reader["monthly_income"] == DBNull.Value  ? "₱0.00"  : "₱" + Convert.ToDecimal(reader["monthly_income"]).ToString("N2");
+
+                        lblIncome.Text = reader["monthly_income"] == DBNull.Value
+                            ? "₱0.00"
+                            : "₱" + Convert.ToDecimal(reader["monthly_income"]).ToString("N2");
+
                         lblGovID.Text = reader["government_id_presented"].ToString();
                         lblEmail.Text = reader["email"].ToString();
-                        // Pre-fill edit fields
+
                         txtContact.Text = reader["contact_number"].ToString();
                         txtPurok.Text = reader["purok_street"].ToString();
-                        txtIncome.Text = txtIncome.Text = reader["monthly_income"] == DBNull.Value ? "" : reader["monthly_income"].ToString();
-                        txtHousehold.Text = reader["household_members"].ToString();
-                       
-                        string profilePicture = reader["profile_picture"] == DBNull.Value ? "" : reader["profile_picture"].ToString();
+                        txtIncome.Text = reader["monthly_income"] == DBNull.Value
+                            ? ""
+                            : reader["monthly_income"].ToString();
 
-                        imgProfilePicture.ImageUrl = string.IsNullOrWhiteSpace(profilePicture) ? "~/Uploads/ProfilePictures/default.jpg": "~/" + profilePicture;
+                        txtHousehold.Text = reader["household_members"].ToString();
+                        txtEmail.Text = reader["email"].ToString();
+
+                        string profilePicture = reader["profile_picture"] == DBNull.Value
+                            ? ""
+                            : reader["profile_picture"].ToString();
+
+                        imgProfilePicture.ImageUrl =
+                            string.IsNullOrWhiteSpace(profilePicture)
+                            ? "~/Uploads/ProfilePictures/default.jpg"
+                            : "~/" + profilePicture;
                     }
                 }
             }
         }
+
         protected void btnUploadPicture_Click(object sender, EventArgs e)
         {
             if (Session["beneficiary_id"] == null)
@@ -139,9 +150,9 @@ namespace BarangayAssistance
                 using (SqlConnection con = new SqlConnection(connStr))
                 {
                     string query = @"
-                UPDATE beneficiaries
-                SET profile_picture = @profile_picture
-                WHERE beneficiary_id = @id";
+                        UPDATE beneficiaries
+                        SET profile_picture = @profile_picture
+                        WHERE beneficiary_id = @id";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
@@ -166,6 +177,7 @@ namespace BarangayAssistance
                 lblSuccess.Visible = false;
             }
         }
+
         protected void btnUpdate_Click(object sender, EventArgs e)
         {
             int beneficiaryId = Convert.ToInt32(Session["beneficiary_id"]);
@@ -174,36 +186,65 @@ namespace BarangayAssistance
             {
                 using (SqlConnection con = new SqlConnection(connStr))
                 {
-                    string query = @"
-                        UPDATE beneficiaries
-                        SET contact_number    = @contact,
-                            purok_street      = @purok,
-                            monthly_income    = @income,
-                            household_members = @household
-                        WHERE beneficiary_id  = @id";
+                    string checkEmailQuery = @"
+                        SELECT COUNT(*) 
+                        FROM beneficiaries
+                        WHERE email = @email
+                        AND beneficiary_id != @id";
 
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    using (SqlCommand checkCmd = new SqlCommand(checkEmailQuery, con))
                     {
-                        cmd.Parameters.AddWithValue("@contact", txtContact.Text.Trim());
-                        cmd.Parameters.AddWithValue("@purok", txtPurok.Text.Trim());
-                        cmd.Parameters.AddWithValue("@income",
-                            string.IsNullOrWhiteSpace(txtIncome.Text)
-                            ? (object)DBNull.Value
-                            : decimal.Parse(txtIncome.Text));
-                        cmd.Parameters.AddWithValue("@household",
-                            string.IsNullOrWhiteSpace(txtHousehold.Text)
-                            ? (object)DBNull.Value
-                            : int.Parse(txtHousehold.Text));
-                        cmd.Parameters.AddWithValue("@id", beneficiaryId);
+                        checkCmd.Parameters.AddWithValue("@email", txtEmail.Text.Trim());
+                        checkCmd.Parameters.AddWithValue("@id", beneficiaryId);
 
                         con.Open();
-                        cmd.ExecuteNonQuery();
+
+                        int emailExists = (int)checkCmd.ExecuteScalar();
+
+                        if (emailExists > 0)
+                        {
+                            lblError.Text = "❌ Email address is already in use.";
+                            lblError.Visible = true;
+                            lblSuccess.Visible = false;
+                            return;
+                        }
+
+                        string query = @"
+                            UPDATE beneficiaries
+                            SET contact_number    = @contact,
+                                purok_street      = @purok,
+                                monthly_income    = @income,
+                                household_members = @household,
+                                email             = @email
+                            WHERE beneficiary_id = @id";
+
+                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@contact", txtContact.Text.Trim());
+                            cmd.Parameters.AddWithValue("@purok", txtPurok.Text.Trim());
+
+                            cmd.Parameters.AddWithValue("@income",
+                                string.IsNullOrWhiteSpace(txtIncome.Text)
+                                ? (object)DBNull.Value
+                                : decimal.Parse(txtIncome.Text));
+
+                            cmd.Parameters.AddWithValue("@household",
+                                string.IsNullOrWhiteSpace(txtHousehold.Text)
+                                ? (object)DBNull.Value
+                                : int.Parse(txtHousehold.Text));
+
+                            cmd.Parameters.AddWithValue("@email", txtEmail.Text.Trim());
+                            cmd.Parameters.AddWithValue("@id", beneficiaryId);
+
+                            cmd.ExecuteNonQuery();
+                        }
                     }
                 }
 
                 lblSuccess.Text = "✅ Profile updated successfully!";
                 lblSuccess.Visible = true;
                 lblError.Visible = false;
+
                 LoadProfile();
             }
             catch (Exception ex)
@@ -240,17 +281,18 @@ namespace BarangayAssistance
             {
                 using (SqlConnection con = new SqlConnection(connStr))
                 {
-                    // Verify current password
                     string checkQuery = @"
                         SELECT COUNT(*) FROM beneficiaries
                         WHERE beneficiary_id = @id
-                        AND   password_hash  = @current";
+                        AND password_hash = @current";
 
                     using (SqlCommand cmd = new SqlCommand(checkQuery, con))
                     {
                         cmd.Parameters.AddWithValue("@id", beneficiaryId);
                         cmd.Parameters.AddWithValue("@current", txtCurrentPassword.Text.Trim());
+
                         con.Open();
+
                         int count = (int)cmd.ExecuteScalar();
 
                         if (count == 0)
@@ -262,16 +304,16 @@ namespace BarangayAssistance
                         }
                     }
 
-                    // Update password
                     string updateQuery = @"
                         UPDATE beneficiaries
-                        SET password_hash   = @newpass
+                        SET password_hash = @newpass
                         WHERE beneficiary_id = @id";
 
                     using (SqlCommand cmd2 = new SqlCommand(updateQuery, con))
                     {
                         cmd2.Parameters.AddWithValue("@newpass", txtNewPassword.Text.Trim());
                         cmd2.Parameters.AddWithValue("@id", beneficiaryId);
+
                         cmd2.ExecuteNonQuery();
                     }
                 }
