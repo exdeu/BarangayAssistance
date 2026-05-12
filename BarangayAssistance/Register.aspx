@@ -1,11 +1,12 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Register.aspx.cs" Inherits="BarangayAssistance.Register" UnobtrusiveValidationMode="None" %>
-
+<%@ Register Src="~/VerifyOtp.ascx" TagPrefix="uc" TagName="VerifyOtp" %>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AssistSys - Beneficiary Registration</title>
+
     <style>
         * {
             box-sizing: border-box;
@@ -42,8 +43,15 @@
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .card {
@@ -150,6 +158,7 @@
         .f input[type=tel],
         .f input[type=number],
         .f input[type=date],
+        .f input[type=email],
         .f select {
             font-size: 0.9rem;
             color: #2c3e4e;
@@ -348,7 +357,6 @@
             font-weight: 600;
         }
 
-        /* Age field read-only style */
         .f input[readonly] {
             background: #eef4fb;
             color: #1a364e;
@@ -356,44 +364,127 @@
             border-color: #b0c4de;
         }
 
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        .otp-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .otp-box {
+            background: white;
+            width: 380px;
+            max-width: 100%;
+            padding: 30px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            animation: slideUp 0.35s ease-out;
+        }
+
+        .otp-box h2 {
+            margin-bottom: 15px;
+            color: #1a364e;
+        }
+
+        .otp-box p {
+            margin-bottom: 20px;
+            color: #5d6d7e;
+        }
+
+        .otp-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #dde1e7;
+            margin-bottom: 20px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        .otp-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #3498db, #1a364e);
             border-radius: 5px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, #2980b9, #152c40);
         }
 
         @media (max-width: 640px) {
-            .wrap { max-width: 100%; }
-            .body { padding: 1.5rem; }
-            .row2 { grid-template-columns: 1fr; gap: 0; }
-            .footer { padding: 1rem 1.5rem; flex-wrap: wrap; justify-content: center; }
-            .hdr h1 { font-size: 1.4rem; }
+            .wrap {
+                max-width: 100%;
+            }
+
+            .body {
+                padding: 1.5rem;
+            }
+
+            .row2 {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .footer {
+                padding: 1rem 1.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hdr h1 {
+                font-size: 1.4rem;
+            }
         }
 
-        ::-webkit-input-placeholder { color: #bdc3c7; font-size: 0.85rem; }
-        ::-moz-placeholder          { color: #bdc3c7; font-size: 0.85rem; }
-        :-ms-input-placeholder      { color: #bdc3c7; font-size: 0.85rem; }
+        ::-webkit-input-placeholder {
+            color: #bdc3c7;
+            font-size: 0.85rem;
+        }
+
+        ::-moz-placeholder {
+            color: #bdc3c7;
+            font-size: 0.85rem;
+        }
+
+        :-ms-input-placeholder {
+            color: #bdc3c7;
+            font-size: 0.85rem;
+        }
     </style>
 
     <script>
         function calculateAge(dateValue) {
             if (!dateValue) return;
 
-            var today     = new Date();
+            var today = new Date();
             var birthDate = new Date(dateValue);
-            var age       = today.getFullYear() - birthDate.getFullYear();
+            var age = today.getFullYear() - birthDate.getFullYear();
             var monthDiff = today.getMonth() - birthDate.getMonth();
 
-            // Adjust if birthday hasn't occurred yet this year
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
                 age--;
             }
 
-            // Don't allow negative or impossible ages
             if (age < 0 || age > 120) {
                 document.getElementById('<%= txtAge.ClientID %>').value = '';
                 return;
@@ -408,7 +499,6 @@
     <form id="form1" runat="server">
         <div class="wrap">
             <div class="card">
-
                 <div class="hdr">
                     <div class="brgy">Barangay Assistance System</div>
                     <h1>Beneficiary Registration</h1>
@@ -417,9 +507,8 @@
 
                 <div class="body">
                     <asp:Label ID="lblSuccess" runat="server" CssClass="msg-success" Visible="false" />
-                    <asp:Label ID="lblError"   runat="server" CssClass="msg-error"   Visible="false" />
+                    <asp:Label ID="lblError" runat="server" CssClass="msg-error" Visible="false" />
 
-                    <!-- Account Information -->
                     <div class="sec">Account Information</div>
 
                     <div class="row2">
@@ -429,7 +518,8 @@
                             <asp:RequiredFieldValidator ID="rfvUsername" runat="server"
                                 ControlToValidate="txtUsername"
                                 ErrorMessage="Username is required."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
 
                         <div class="f">
@@ -438,27 +528,47 @@
                             <asp:RequiredFieldValidator ID="rfvPassword" runat="server"
                                 ControlToValidate="txtPassword"
                                 ErrorMessage="Password is required."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
                     </div>
 
-                    <div class="f">
-                        <label>Confirm Password <span>*</span></label>
-                        <asp:TextBox ID="txtConfirmPassword" runat="server" TextMode="Password" placeholder="Confirm password" MaxLength="50" />
-                        <asp:RequiredFieldValidator ID="rfvConfirmPassword" runat="server"
-                            ControlToValidate="txtConfirmPassword"
-                            ErrorMessage="Confirm password is required."
-                            CssClass="val-error" Display="Dynamic" />
-                        <asp:CompareValidator ID="cvPassword" runat="server"
-                            ControlToValidate="txtConfirmPassword"
-                            ControlToCompare="txtPassword"
-                            ErrorMessage="Passwords do not match."
-                            CssClass="val-error" Display="Dynamic" />
+                    <div class="row2">
+                        <div class="f">
+                            <label>Confirm Password <span>*</span></label>
+                            <asp:TextBox ID="txtConfirmPassword" runat="server" TextMode="Password" placeholder="Confirm password" MaxLength="50" />
+                            <asp:RequiredFieldValidator ID="rfvConfirmPassword" runat="server"
+                                ControlToValidate="txtConfirmPassword"
+                                ErrorMessage="Confirm password is required."
+                                CssClass="val-error"
+                                Display="Dynamic" />
+                            <asp:CompareValidator ID="cvPassword" runat="server"
+                                ControlToValidate="txtConfirmPassword"
+                                ControlToCompare="txtPassword"
+                                ErrorMessage="Passwords do not match."
+                                CssClass="val-error"
+                                Display="Dynamic" />
+                        </div>
+
+                        <div class="f">
+                            <label>Email Address <span>*</span></label>
+                            <asp:TextBox ID="txtEmail" runat="server" TextMode="Email" placeholder="example@email.com" MaxLength="150" />
+                            <asp:RequiredFieldValidator ID="rfvEmail" runat="server"
+                                ControlToValidate="txtEmail"
+                                ErrorMessage="Email is required."
+                                CssClass="val-error"
+                                Display="Dynamic" />
+                            <asp:RegularExpressionValidator ID="revEmail" runat="server"
+                                ControlToValidate="txtEmail"
+                                ValidationExpression="^[^@\s]+@[^@\s]+\.[^@\s]+$"
+                                ErrorMessage="Enter a valid email address."
+                                CssClass="val-error"
+                                Display="Dynamic" />
+                        </div>
                     </div>
 
                     <div class="divider"></div>
 
-                    <!-- Personal Information -->
                     <div class="sec">Personal Information</div>
 
                     <div class="row2">
@@ -468,7 +578,8 @@
                             <asp:RequiredFieldValidator ID="rfvLastName" runat="server"
                                 ControlToValidate="txtLastName"
                                 ErrorMessage="Last name is required."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
 
                         <div class="f">
@@ -477,7 +588,8 @@
                             <asp:RequiredFieldValidator ID="rfvFirstName" runat="server"
                                 ControlToValidate="txtFirstName"
                                 ErrorMessage="First name is required."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
                     </div>
 
@@ -489,26 +601,27 @@
 
                         <div class="f">
                             <label>Date of Birth <span>*</span></label>
-                            <asp:TextBox ID="txtDateOfBirth" runat="server" TextMode="Date"
-                                onchange="calculateAge(this.value)" />
+                            <asp:TextBox ID="txtDateOfBirth" runat="server" TextMode="Date" onchange="calculateAge(this.value)" />
                             <asp:RequiredFieldValidator ID="rfvDOB" runat="server"
                                 ControlToValidate="txtDateOfBirth"
                                 ErrorMessage="Date of birth is required."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
                     </div>
 
                     <div class="row2">
                         <div class="f">
                             <label>Age</label>
-                            <!-- readonly: auto-filled by calculateAge() -->
-                            <asp:TextBox ID="txtAge" runat="server" TextMode="Number"
-                                placeholder="Age" ReadOnly="true" />
+                            <asp:TextBox ID="txtAge" runat="server" TextMode="Number" placeholder="Age" ReadOnly="true" />
                             <asp:RangeValidator ID="rvAge" runat="server"
                                 ControlToValidate="txtAge"
-                                MinimumValue="1" MaximumValue="120" Type="Integer"
+                                MinimumValue="1"
+                                MaximumValue="120"
+                                Type="Integer"
                                 ErrorMessage="Enter a valid age from 1 to 120."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
 
                         <div class="f">
@@ -517,6 +630,7 @@
                                 <label class="ropt">
                                     <asp:RadioButton ID="rbMale" runat="server" GroupName="Sex" Text="Male" />
                                 </label>
+
                                 <label class="ropt">
                                     <asp:RadioButton ID="rbFemale" runat="server" GroupName="Sex" Text="Female" />
                                 </label>
@@ -532,7 +646,8 @@
                                 ControlToValidate="txtContact"
                                 ValidationExpression="^(09|\+639)\d{9}$"
                                 ErrorMessage="Enter a valid PH mobile number."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
 
                         <div class="f">
@@ -549,7 +664,6 @@
 
                     <div class="divider"></div>
 
-                    <!-- Address -->
                     <div class="sec">Address</div>
 
                     <div class="f">
@@ -558,7 +672,8 @@
                         <asp:RequiredFieldValidator ID="rfvPurok" runat="server"
                             ControlToValidate="txtPurok"
                             ErrorMessage="Purok / Street is required."
-                            CssClass="val-error" Display="Dynamic" />
+                            CssClass="val-error"
+                            Display="Dynamic" />
                     </div>
 
                     <div class="row2">
@@ -568,12 +683,16 @@
                             <asp:RequiredFieldValidator ID="rfvHousehold" runat="server"
                                 ControlToValidate="txtHouseholdSize"
                                 ErrorMessage="Required."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                             <asp:RangeValidator ID="rvHousehold" runat="server"
                                 ControlToValidate="txtHouseholdSize"
-                                MinimumValue="1" MaximumValue="50" Type="Integer"
+                                MinimumValue="1"
+                                MaximumValue="50"
+                                Type="Integer"
                                 ErrorMessage="Enter 1 to 50."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
 
                         <div class="f">
@@ -583,13 +702,13 @@
                                 ControlToValidate="txtIncome"
                                 ValidationExpression="^\d+(\.\d{1,2})?$"
                                 ErrorMessage="Enter a valid amount."
-                                CssClass="val-error" Display="Dynamic" />
+                                CssClass="val-error"
+                                Display="Dynamic" />
                         </div>
                     </div>
 
                     <div class="divider"></div>
 
-                    <!-- Classification -->
                     <div class="sec">Classification</div>
 
                     <div class="f">
@@ -607,7 +726,8 @@
                             ControlToValidate="ddlBeneficiaryType"
                             InitialValue=""
                             ErrorMessage="Please select a beneficiary type."
-                            CssClass="val-error" Display="Dynamic" />
+                            CssClass="val-error"
+                            Display="Dynamic" />
                     </div>
 
                     <div class="f">
@@ -633,7 +753,8 @@
                     <asp:CustomValidator ID="cvConsent" runat="server"
                         OnServerValidate="cvConsent_ServerValidate"
                         ErrorMessage="You must agree to the declaration before submitting."
-                        CssClass="val-error" Display="Dynamic" />
+                        CssClass="val-error"
+                        Display="Dynamic" />
                 </div>
 
                 <div class="footer">
@@ -641,14 +762,22 @@
                         NavigateUrl="index.aspx"
                         CssClass="btn btn-home"
                         Text="Back to Home" />
-                    <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn"
-                        OnClick="btnClear_Click" CausesValidation="false" />
-                    <asp:Button ID="btnSubmit" runat="server" Text="Register →" CssClass="btn btn-primary"
+
+                    <asp:Button ID="btnClear" runat="server"
+                        Text="Clear"
+                        CssClass="btn"
+                        OnClick="btnClear_Click"
+                        CausesValidation="false" />
+
+                    <asp:Button ID="btnSubmit" runat="server"
+                        Text="Register →"
+                        CssClass="btn btn-primary"
                         OnClick="btnSubmit_Click" />
                 </div>
-
             </div>
         </div>
+        <uc:VerifyOtp ID="VerifyOtpControl"
+            runat="server" />
     </form>
 </body>
 </html>

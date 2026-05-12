@@ -183,6 +183,7 @@
     <Content Include="Register.aspx" />
     <Content Include="Sidebar.ascx" />
     <Content Include="Transactions.aspx" />
+    <Content Include="VerifyOtp.ascx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -284,6 +285,13 @@
     </Compile>
     <Compile Include="Transactions.aspx.designer.cs">
       <DependentUpon>Transactions.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="VerifyOtp.ascx.cs">
+      <DependentUpon>VerifyOtp.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="VerifyOtp.ascx.designer.cs">
+      <DependentUpon>VerifyOtp.ascx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

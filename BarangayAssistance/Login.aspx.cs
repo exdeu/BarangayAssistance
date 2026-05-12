@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Web.UI;
-using System.Configuration;
+using System.Net;
+using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Web.UI;
 
 namespace BarangayAssistance
 {
@@ -11,6 +13,7 @@ namespace BarangayAssistance
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            VerifyOtpControl.OtpVerified += VerifyOtpControl_OtpVerified;
         }
 
         protected void btnLogin_Click(object sender, EventArgs e)
@@ -67,11 +70,12 @@ namespace BarangayAssistance
                     // =========================
                     // CHECK ADMIN ACCOUNT
                     // =========================
-                    string adminQuery = @"SELECT admin_id, full_name 
-                                      FROM admins 
-                                      WHERE username = @username 
-                                      AND password_hash = @password 
-                                      AND status = 'Active'";
+                    string adminQuery = @"
+                        SELECT admin_id, full_name
+                        FROM admins
+                        WHERE username = @username
+                          AND password_hash = @password
+                          AND status = 'Active'";
 
                     using (SqlCommand cmd = new SqlCommand(adminQuery, conn))
                     {
@@ -96,10 +100,10 @@ namespace BarangayAssistance
                             // LOAD ADMIN NOTIFICATION COUNT
                             // =========================
                             string adminNotifQuery = @"
-                            SELECT COUNT(*) 
-                            FROM notifications
-                            WHERE type = 'Admin'
-                            AND is_read = 0";
+                                SELECT COUNT(*) 
+                                FROM notifications
+                                WHERE type = 'Admin'
+                                AND is_read = 0";
 
                             using (SqlCommand notifCmd = new SqlCommand(adminNotifQuery, conn))
                             {
@@ -107,7 +111,8 @@ namespace BarangayAssistance
                                 Session["NotificationCount"] = notifCount;
                             }
 
-                            Response.Redirect("Dashboard.aspx");
+                            Response.Redirect("Dashboard.aspx", false);
+                            Context.ApplicationInstance.CompleteRequest();
                             return;
                         }
 
@@ -117,10 +122,15 @@ namespace BarangayAssistance
                     // =========================
                     // CHECK BENEFICIARY ACCOUNT
                     // =========================
-                    string userQuery = @"SELECT beneficiary_id, first_name, last_name, status
-                                     FROM beneficiaries 
-                                     WHERE username = @username 
-                                     AND password_hash = @password";
+                    string userQuery = @"
+                        SELECT beneficiary_id,
+                               first_name,
+                               last_name,
+                               status,
+                               email
+                        FROM beneficiaries
+                        WHERE username = @username
+                          AND password_hash = @password";
 
                     using (SqlCommand cmd2 = new SqlCommand(userQuery, conn))
                     {
@@ -138,41 +148,38 @@ namespace BarangayAssistance
                             if (status != "Active")
                             {
                                 reader2.Close();
+
                                 lblMessage.Text = "Your account is inactive. Please contact the barangay office.";
                                 return;
                             }
 
-                            int beneficiaryId = Convert.ToInt32(reader2["beneficiary_id"]);
+                            string beneficiaryEmail = reader2["email"].ToString();
 
-                            Session.Clear();
+                            if (string.IsNullOrWhiteSpace(beneficiaryEmail))
+                            {
+                                reader2.Close();
 
-                            Session["UserID"] = beneficiaryId.ToString();
-                            Session["beneficiary_id"] = beneficiaryId.ToString();
-                            Session["FullName"] = reader2["first_name"].ToString()
-                                                  + " " + reader2["last_name"].ToString();
-                            Session["role"] = "Beneficiary";
+                                lblMessage.Text = "This account has no email for OTP verification.";
+                                return;
+                            }
+
+                            string beneficiaryId = reader2["beneficiary_id"].ToString();
+
+                            string fullName =
+                                reader2["first_name"].ToString()
+                                + " "
+                                + reader2["last_name"].ToString();
 
                             reader2.Close();
 
-                            // =========================
-                            // LOAD BENEFICIARY NOTIFICATION COUNT
-                            // =========================
-                            string beneficiaryNotifQuery = @"
-                            SELECT COUNT(*)
-                            FROM notifications
-                            WHERE beneficiary_id = @beneficiary_id
-                            AND is_read = 0";
+                            StorePendingLogin(
+                                beneficiaryId,
+                                fullName,
+                                beneficiaryEmail
+                            );
 
-                            using (SqlCommand notifCmd = new SqlCommand(beneficiaryNotifQuery, conn))
-                            {
-                                notifCmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value = beneficiaryId;
+                            SendLoginOtp(beneficiaryEmail);
 
-                                int notifCount = Convert.ToInt32(notifCmd.ExecuteScalar());
-
-                                Session["NotificationCount"] = notifCount;
-                            }
-
-                            Response.Redirect("Dashboard.aspx");
                             return;
                         }
 
@@ -182,10 +189,134 @@ namespace BarangayAssistance
 
                 lblMessage.Text = "Invalid username or password.";
             }
-            catch
+            catch (Exception ex)
             {
-                lblMessage.Text = "Login failed. Please try again.";
+                lblMessage.Text = "Login failed: " + ex.Message;
             }
+        }
+
+        private void StorePendingLogin(
+            string beneficiaryId,
+            string fullName,
+            string email)
+        {
+            Session["PendingLoginBeneficiaryID"] = beneficiaryId;
+            Session["PendingLoginFullName"] = fullName;
+            Session["PendingLoginEmail"] = email;
+        }
+
+        private void SendLoginOtp(string email)
+        {
+            Random rnd = new Random();
+
+            string otp = rnd.Next(100000, 999999).ToString();
+
+            Session["EmailOtp"] = otp;
+            Session["EmailOtpExpiry"] = DateTime.Now.AddMinutes(5);
+
+            SendOtpEmail(email, otp);
+
+            lblMessage.Text = "OTP has been sent to your email.";
+
+            VerifyOtpControl.Show();
+        }
+
+        private void VerifyOtpControl_OtpVerified(object sender, EventArgs e)
+        {
+            if (Session["PendingLoginBeneficiaryID"] == null ||
+                Session["PendingLoginFullName"] == null)
+            {
+                lblMessage.Text = "Login session expired. Please login again.";
+                return;
+            }
+
+            string beneficiaryId =
+                Session["PendingLoginBeneficiaryID"].ToString();
+
+            string fullName =
+                Session["PendingLoginFullName"].ToString();
+
+            Session.Clear();
+
+            Session["UserID"] = beneficiaryId;
+            Session["beneficiary_id"] = beneficiaryId;
+            Session["FullName"] = fullName;
+            Session["role"] = "Beneficiary";
+
+            LoadBeneficiaryNotificationCount(beneficiaryId);
+
+            Response.Redirect("Dashboard.aspx", false);
+            Context.ApplicationInstance.CompleteRequest();
+        }
+
+        private void LoadBeneficiaryNotificationCount(string beneficiaryId)
+        {
+            string connStr =
+                ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+
+                string beneficiaryNotifQuery = @"
+                    SELECT COUNT(*)
+                    FROM notifications
+                    WHERE beneficiary_id = @beneficiary_id
+                    AND is_read = 0";
+
+                using (SqlCommand notifCmd =
+                    new SqlCommand(beneficiaryNotifQuery, conn))
+                {
+                    notifCmd.Parameters.Add(
+                        "@beneficiary_id",
+                        SqlDbType.Int).Value = Convert.ToInt32(beneficiaryId);
+
+                    int notifCount =
+                        Convert.ToInt32(notifCmd.ExecuteScalar());
+
+                    Session["NotificationCount"] = notifCount;
+                }
+            }
+        }
+
+        private void SendOtpEmail(string recipientEmail, string otp)
+        {
+            string senderEmail =
+                ConfigurationManager.AppSettings["SmtpEmail"];
+
+            string senderPassword =
+                ConfigurationManager.AppSettings["SmtpPassword"];
+
+            MailMessage mail = new MailMessage();
+
+            mail.From = new MailAddress(
+                senderEmail,
+                "Barangay Assistance System");
+
+            mail.To.Add(recipientEmail);
+
+            mail.Subject = "Login OTP Verification";
+
+            mail.Body =
+                "Your login OTP code is: "
+                + otp
+                + "\n\nThis code will expire in 5 minutes.";
+
+            SmtpClient smtp =
+                new SmtpClient("smtp.gmail.com", 587);
+
+            smtp.EnableSsl = true;
+            smtp.UseDefaultCredentials = false;
+
+            smtp.Credentials =
+                new NetworkCredential(
+                    senderEmail,
+                    senderPassword);
+
+            smtp.DeliveryMethod =
+                SmtpDeliveryMethod.Network;
+
+            smtp.Send(mail);
         }
     }
 }

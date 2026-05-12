@@ -39,7 +39,7 @@ namespace BarangayAssistance
                         date_of_birth, age, sex, civil_status,
                         contact_number, purok_street, household_members,
                         monthly_income, beneficiary_type, government_id_presented,
-                        profile_picture
+                        profile_picture, email
                     FROM beneficiaries
                     WHERE beneficiary_id = @id";
 
@@ -70,13 +70,13 @@ namespace BarangayAssistance
                         lblHousehold.Text = reader["household_members"].ToString();
                         lblIncome.Text = reader["monthly_income"] == DBNull.Value  ? "₱0.00"  : "₱" + Convert.ToDecimal(reader["monthly_income"]).ToString("N2");
                         lblGovID.Text = reader["government_id_presented"].ToString();
-
+                        lblEmail.Text = reader["email"].ToString();
                         // Pre-fill edit fields
                         txtContact.Text = reader["contact_number"].ToString();
                         txtPurok.Text = reader["purok_street"].ToString();
                         txtIncome.Text = txtIncome.Text = reader["monthly_income"] == DBNull.Value ? "" : reader["monthly_income"].ToString();
                         txtHousehold.Text = reader["household_members"].ToString();
-
+                       
                         string profilePicture = reader["profile_picture"] == DBNull.Value ? "" : reader["profile_picture"].ToString();
 
                         imgProfilePicture.ImageUrl = string.IsNullOrWhiteSpace(profilePicture) ? "~/Uploads/ProfilePictures/default.jpg": "~/" + profilePicture;

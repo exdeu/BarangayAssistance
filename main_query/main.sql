@@ -27,7 +27,8 @@ CREATE TABLE beneficiaries (
     profile_picture VARCHAR(255) NULL,
 
     date_registered DATETIME NOT NULL DEFAULT GETDATE(),
-    status VARCHAR(30) NOT NULL DEFAULT 'Active'
+    status VARCHAR(30) NOT NULL DEFAULT 'Active',
+    email VARCHAR(150) NOT NULL DEFAULT ''
 );
 
 CREATE TABLE assistance_applications (

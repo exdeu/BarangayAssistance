@@ -414,6 +414,10 @@
                         <div class="label">Government ID</div>
                         <div class="value"><asp:Label ID="lblGovID" runat="server" /></div>
                     </div>
+                    <div class="info-item">
+                        <div class="label">Email</div>
+                        <div class="value"><asp:Label ID="lblEmail" runat="server" /></div>
+                    </div>
                 </div>
             </div>
 

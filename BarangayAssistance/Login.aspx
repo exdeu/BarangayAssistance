@@ -1,5 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="BarangayAssistance.Login" %>
-
+<%@ Register Src="~/VerifyOtp.ascx" TagPrefix="uc" TagName="VerifyOtp" %>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -323,7 +323,8 @@
         </div>
 
     </div>
-
+    <uc:VerifyOtp ID="VerifyOtpControl"
+    runat="server" />
 </form>
 </body>
 </html>
