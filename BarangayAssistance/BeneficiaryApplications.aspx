@@ -21,99 +21,17 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
             color: #2c3e4e;
             line-height: 1.6;
-            animation: pageFadeIn 0.55s ease-out;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #3498db, #1a364e);
-            border-radius: 5px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #2980b9, #152c40);
-        }
-
-        @keyframes pageFadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-18px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(24px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-18px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes scaleFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.97);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes softPulse {
-            0% {
-                box-shadow: 0 0 0 rgba(52,152,219,0);
-            }
-            50% {
-                box-shadow: 0 0 0 4px rgba(52,152,219,0.08);
-            }
-            100% {
-                box-shadow: 0 0 0 rgba(52,152,219,0);
-            }
         }
 
         .wrapper {
             display: flex;
             min-height: 100vh;
-            animation: fadeInLeft 0.55s ease-out;
         }
 
         .main {
             flex: 1;
             padding: 30px;
             overflow-x: auto;
-            animation: fadeInUp 0.65s ease-out;
         }
 
         .topbar {
@@ -125,13 +43,6 @@
             padding: 15px 25px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-            animation: fadeInDown 0.6s ease-out;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .topbar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
 
         .menu-btn {
@@ -142,17 +53,6 @@
             border: none;
             padding: 10px 14px;
             border-radius: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .menu-btn:hover {
-            transform: translateY(-2px) scale(1.04);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-        }
-
-        .menu-btn:active {
-            transform: scale(0.96);
         }
 
         .topbar h3 {
@@ -168,13 +68,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.07);
             border: 1px solid rgba(52, 152, 219, 0.1);
             margin-top: 20px;
-            animation: scaleFadeIn 0.7s ease-out 0.15s backwards;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .section:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 14px 34px rgba(0,0,0,0.09);
         }
 
         .section-title {
@@ -183,9 +76,7 @@
             color: #1a364e;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 3px solid transparent;
-            border-image: linear-gradient(90deg, #3498db, #5dade2) 1;
-            animation: fadeInLeft 0.6s ease-out 0.25s backwards;
+            border-bottom: 3px solid #3498db;
         }
 
         .actions {
@@ -193,26 +84,17 @@
             gap: 12px;
             flex-wrap: wrap;
             margin-bottom: 25px;
-            animation: fadeInUp 0.6s ease-out 0.3s backwards;
         }
 
         .search-box {
             padding: 12px 16px;
             border: 2px solid #e1e8ed;
             border-radius: 50px;
-            min-width: 280px;
+            min-width: 240px;
             font-family: inherit;
             outline: none;
             background: white;
-            transition: all 0.3s ease;
             color: #2c3e4e;
-        }
-
-        .search-box:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
-            transform: translateY(-1px);
-            animation: softPulse 1.2s ease-in-out;
         }
 
         .btn {
@@ -224,18 +106,7 @@
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             font-family: inherit;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-        .btn:active {
-            transform: scale(0.96);
         }
 
         .btn-outline {
@@ -244,19 +115,14 @@
             border: 2px solid #1a364e;
         }
 
-        .btn-outline:hover {
-            background: #f5f7fa;
-        }
-
         .grid-container {
             overflow-x: auto;
-            animation: fadeInUp 0.7s ease-out 0.4s backwards;
         }
 
         .gridview {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
+            min-width: 1100px;
             margin-top: 10px;
         }
 
@@ -268,15 +134,6 @@
             font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .gridview th:first-child {
-            border-radius: 10px 0 0 10px;
-        }
-
-        .gridview th:last-child {
-            border-radius: 0 10px 10px 0;
         }
 
         .gridview td {
@@ -284,21 +141,8 @@
             border-bottom: 1px solid rgba(52, 152, 219, 0.08);
             font-size: 0.9rem;
             color: #2c3e4e;
-            transition: background 0.25s ease, transform 0.25s ease;
+            vertical-align: top;
         }
-
-        .gridview tr {
-            animation: fadeInUp 0.45s ease-out backwards;
-        }
-
-        .gridview tr:nth-child(1) { animation-delay: 0.05s; }
-        .gridview tr:nth-child(2) { animation-delay: 0.1s; }
-        .gridview tr:nth-child(3) { animation-delay: 0.15s; }
-        .gridview tr:nth-child(4) { animation-delay: 0.2s; }
-        .gridview tr:nth-child(5) { animation-delay: 0.25s; }
-        .gridview tr:nth-child(6) { animation-delay: 0.3s; }
-        .gridview tr:nth-child(7) { animation-delay: 0.35s; }
-        .gridview tr:nth-child(8) { animation-delay: 0.4s; }
 
         .gridview tr:nth-child(even) td {
             background-color: #f8fafd;
@@ -315,7 +159,6 @@
             font-size: 0.78rem;
             font-weight: 700;
             display: inline-block;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .status-active {
@@ -328,12 +171,6 @@
             color: #856404;
         }
 
-        .status-active:hover,
-        .status-inactive:hover {
-            transform: scale(1.06);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-        }
-
         .btn-activate {
             background: linear-gradient(135deg, #198754, #157347);
             color: white;
@@ -344,16 +181,6 @@
             font-size: 0.8rem;
             font-weight: 600;
             font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        .btn-activate:hover {
-            transform: translateY(-1px) scale(1.04);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .btn-activate:active {
-            transform: scale(0.95);
         }
 
         .btn-details {
@@ -366,49 +193,92 @@
             font-size: 0.8rem;
             font-weight: 600;
             font-family: inherit;
-            transition: all 0.3s ease;
             margin-right: 6px;
+            margin-bottom: 6px;
         }
 
-        .btn-details:hover {
-            transform: translateY(-1px) scale(1.04);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .btn-details:active {
-            transform: scale(0.95);
-        }
-
-        .application-details-panel {
+        .details-panel {
             display: none;
             margin-top: 12px;
-            padding: 15px;
+            padding: 18px;
             background: #f8fafd;
             border: 1px solid rgba(52, 152, 219, 0.18);
             border-left: 5px solid #3498db;
             border-radius: 14px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-            animation: detailsSlideDown 0.35s ease-out;
-            transform-origin: top;
         }
 
-        @keyframes detailsSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-8px) scaleY(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scaleY(1);
-            }
-        }
-
-        .application-details-title {
-            font-weight: 700;
+        .details-title {
+            font-weight: 800;
             color: #1a364e;
             margin-bottom: 12px;
             font-size: 0.95rem;
-            animation: fadeInLeft 0.35s ease-out;
+        }
+
+        .beneficiary-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid #dcecf8;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .info-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1a364e;
+        }
+
+        .document-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .document-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: #1a364e;
+            border: 1px solid #c8e4fb;
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .document-link:hover {
+            background: #eef4fb;
+        }
+
+        .document-empty,
+        .application-empty {
+            padding: 14px;
+            background: white;
+            border-radius: 10px;
+            color: #8899aa;
+            font-weight: 600;
+            text-align: center;
+            border: 1px dashed #c8d8e8;
+            margin-bottom: 15px;
         }
 
         .application-list {
@@ -418,7 +288,6 @@
             background: white;
             border-radius: 10px;
             overflow: hidden;
-            animation: fadeInUp 0.4s ease-out 0.1s backwards;
         }
 
         .application-list th {
@@ -427,7 +296,6 @@
             padding: 10px;
             font-size: 0.78rem;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
             text-align: left;
             border-bottom: 1px solid rgba(52, 152, 219, 0.18);
         }
@@ -438,15 +306,6 @@
             border-bottom: 1px solid rgba(52, 152, 219, 0.08);
             color: #2c3e4e;
             vertical-align: top;
-            transition: background 0.25s ease;
-        }
-
-        .application-list tr:nth-child(even) td {
-            background: #fafcfe;
-        }
-
-        .application-list tr:hover td {
-            background: #eef4fb;
         }
 
         .application-status {
@@ -457,22 +316,6 @@
             display: inline-block;
             background: #fff3cd;
             color: #856404;
-            transition: transform 0.25s ease;
-        }
-
-        .application-status:hover {
-            transform: scale(1.06);
-        }
-
-        .application-empty {
-            padding: 14px;
-            background: white;
-            border-radius: 10px;
-            color: #8899aa;
-            font-weight: 600;
-            text-align: center;
-            border: 1px dashed #c8d8e8;
-            animation: fadeInUp 0.35s ease-out;
         }
 
         .message {
@@ -481,7 +324,6 @@
             font-weight: 600;
             color: #1a364e;
             font-size: 0.9rem;
-            animation: fadeInUp 0.45s ease-out;
         }
 
         @media (max-width: 900px) {
@@ -503,10 +345,6 @@
                 align-items: flex-start;
                 gap: 10px;
             }
-
-            .topbar h3 {
-                font-size: 1rem;
-            }
         }
     </style>
 
@@ -515,7 +353,7 @@
             document.getElementById("sidebar").classList.toggle("collapsed");
         }
 
-        function toggleApplicationDetails(panelId, buttonId) {
+        function toggleBeneficiaryDetails(panelId, buttonId) {
             var panel = document.getElementById(panelId);
             var button = document.getElementById(buttonId);
 
@@ -527,13 +365,13 @@
                 panel.style.display = "block";
 
                 if (button) {
-                    button.value = "▲ Hide Applications";
+                    button.value = "▲ Hide Details";
                 }
             } else {
                 panel.style.display = "none";
 
                 if (button) {
-                    button.value = "▼ View Applications";
+                    button.value = "▼ View Details";
                 }
             }
 
@@ -544,13 +382,10 @@
 
 <body>
 <form id="form1" runat="server">
-
     <div class="wrapper">
-
         <uc:Sidebar ID="Sidebar" runat="server" />
 
         <div class="main">
-
             <div class="topbar">
                 <button type="button" class="menu-btn" onclick="toggleSidebar()">☰</button>
                 <h3>👥 Beneficiary Accounts</h3>
@@ -560,57 +395,51 @@
             <div class="section">
                 <div class="section-title">Beneficiary Accounts</div>
 
-               <div class="actions">
+                <div class="actions">
+                    <asp:TextBox ID="txtSearch" runat="server"
+                        CssClass="search-box"
+                        placeholder="Search name, username, contact..." />
 
-    <!-- SEARCH TEXT -->
-    <asp:TextBox ID="txtSearch" runat="server"
-        CssClass="search-box"
-        placeholder="Search name, username, contact..." />
+                    <asp:DropDownList ID="ddlStatus" runat="server" CssClass="search-box">
+                        <asp:ListItem Text="All Status" Value="" />
+                        <asp:ListItem Text="Active" Value="Active" />
+                        <asp:ListItem Text="Inactive" Value="Inactive" />
+                    </asp:DropDownList>
 
-    <!-- FILTER: STATUS -->
-    <asp:DropDownList ID="ddlStatus" runat="server" CssClass="search-box">
-        <asp:ListItem Text="All Status" Value="" />
-        <asp:ListItem Text="Active" Value="Active" />
-        <asp:ListItem Text="Inactive" Value="Inactive" />
-    </asp:DropDownList>
+                    <asp:DropDownList ID="ddlBeneficiaryType" runat="server" CssClass="search-box">
+                        <asp:ListItem Text="All Beneficiary Types" Value="" />
+                        <asp:ListItem Text="Senior Citizen" Value="Senior Citizen" />
+                        <asp:ListItem Text="PWD" Value="PWD" />
+                        <asp:ListItem Text="Solo Parent" Value="Solo Parent" />
+                        <asp:ListItem Text="Indigent Family" Value="Indigent" />
+                        <asp:ListItem Text="Displaced Worker" Value="Displaced Worker" />
+                        <asp:ListItem Text="Calamity Victim" Value="Calamity Victim" />
+                    </asp:DropDownList>
 
-    <!-- FILTER: BENEFICIARY TYPE -->
-    <asp:DropDownList ID="ddlBeneficiaryType" runat="server" CssClass="search-box">
-        <asp:ListItem Text="All Beneficiary Types" Value="" />
-        <asp:ListItem Text="Senior Citizen" Value="Senior Citizen" />
-        <asp:ListItem Text="PWD" Value="PWD" />
-        <asp:ListItem Text="Solo Parent" Value="Solo Parent" />
-        <asp:ListItem Text="Low Income Family" Value="Low Income Family" />
-        <asp:ListItem Text="Unemployed" Value="Unemployed" />
-    </asp:DropDownList>
+                    <asp:DropDownList ID="ddlSex" runat="server" CssClass="search-box">
+                        <asp:ListItem Text="All Sex" Value="" />
+                        <asp:ListItem Text="Male" Value="Male" />
+                        <asp:ListItem Text="Female" Value="Female" />
+                    </asp:DropDownList>
 
-    <!-- FILTER: SEX -->
-    <asp:DropDownList ID="ddlSex" runat="server" CssClass="search-box">
-        <asp:ListItem Text="All Sex" Value="" />
-        <asp:ListItem Text="Male" Value="Male" />
-        <asp:ListItem Text="Female" Value="Female" />
-    </asp:DropDownList>
+                    <asp:DropDownList ID="ddlCivilStatus" runat="server" CssClass="search-box">
+                        <asp:ListItem Text="All Civil Status" Value="" />
+                        <asp:ListItem Text="Single" Value="Single" />
+                        <asp:ListItem Text="Married" Value="Married" />
+                        <asp:ListItem Text="Widowed" Value="Widowed" />
+                        <asp:ListItem Text="Separated" Value="Separated" />
+                    </asp:DropDownList>
 
-    <!-- FILTER: CIVIL STATUS -->
-    <asp:DropDownList ID="ddlCivilStatus" runat="server" CssClass="search-box">
-        <asp:ListItem Text="All Civil Status" Value="" />
-        <asp:ListItem Text="Single" Value="Single" />
-        <asp:ListItem Text="Married" Value="Married" />
-        <asp:ListItem Text="Widowed" Value="Widowed" />
-        <asp:ListItem Text="Separated" Value="Separated" />
-    </asp:DropDownList>
+                    <asp:Button ID="btnSearch" runat="server"
+                        Text="🔍 Search"
+                        CssClass="btn"
+                        OnClick="btnSearch_Click" />
 
-    <asp:Button ID="btnSearch" runat="server"
-        Text="🔍 Search"
-        CssClass="btn"
-        OnClick="btnSearch_Click" />
-
-    <asp:Button ID="btnClear" runat="server"
-        Text="✖ Clear"
-        CssClass="btn btn-outline"
-        OnClick="btnClear_Click" />
-
-</div>
+                    <asp:Button ID="btnClear" runat="server"
+                        Text="✖ Clear"
+                        CssClass="btn btn-outline"
+                        OnClick="btnClear_Click" />
+                </div>
 
                 <div class="grid-container">
                     <asp:GridView ID="gvBeneficiaries" runat="server"
@@ -641,9 +470,9 @@
                                 <ItemTemplate>
                                     <input type="button"
                                         id='btnDetails_<%# Eval("beneficiary_id") %>'
-                                        value="▼ View Applications"
+                                        value="▼ View Details"
                                         class="btn-details"
-                                        onclick='return toggleApplicationDetails("appDetails_<%# Eval("beneficiary_id") %>", "btnDetails_<%# Eval("beneficiary_id") %>");' />
+                                        onclick='return toggleBeneficiaryDetails("beneficiaryDetails_<%# Eval("beneficiary_id") %>", "btnDetails_<%# Eval("beneficiary_id") %>");' />
 
                                     <asp:Button ID="btnActivate" runat="server"
                                         Text="✔ Activate"
@@ -652,10 +481,72 @@
                                         CommandArgument='<%# Eval("beneficiary_id") %>'
                                         Visible='<%# Eval("status").ToString() != "Active" %>' />
 
-                                    <div id='appDetails_<%# Eval("beneficiary_id") %>' class="application-details-panel">
-                                        <div class="application-details-title">
-                                            Assistance Application List
+                                    <div id='beneficiaryDetails_<%# Eval("beneficiary_id") %>' class="details-panel">
+                                        <div class="details-title">Beneficiary Information</div>
+
+                                        <div class="beneficiary-info-grid">
+                                            <div class="info-card">
+                                                <span class="info-label">Full Name</span>
+                                                <span class="info-value"><%# Eval("full_name") %></span>
+                                            </div>
+
+                                            <div class="info-card">
+                                                <span class="info-label">Email</span>
+                                                <span class="info-value"><%# Eval("email") %></span>
+                                            </div>
+
+                                            <div class="info-card">
+                                                <span class="info-label">Date of Birth</span>
+                                                <span class="info-value"><%# Eval("date_of_birth", "{0:MMM dd, yyyy}") %></span>
+                                            </div>
+
+                                            <div class="info-card">
+                                                <span class="info-label">Age</span>
+                                                <span class="info-value"><%# Eval("age") %></span>
+                                            </div>
+
+                                            <div class="info-card">
+                                                <span class="info-label">Sex</span>
+                                                <span class="info-value"><%# Eval("sex") %></span>
+                                            </div>
+
+                                            <div class="info-card">
+                                                <span class="info-label">Civil Status</span>
+                                                <span class="info-value"><%# Eval("civil_status") %></span>
+                                            </div>
+                                            <div class="info-card">
+                                                <span class="info-label">Monthly Income</span>
+                                                <span class="info-value"><%# Eval("monthly_income") == DBNull.Value ? "N/A" : Eval("monthly_income", "{0:N2}") %></span>
+                                            </div>
                                         </div>
+
+                                        <div class="details-title">Uploaded Documents</div>
+
+                                        <asp:Repeater ID="rptDocuments" runat="server"
+                                            DataSource='<%# GetBeneficiaryDocuments(Eval("username")) %>'>
+                                            <HeaderTemplate>
+                                                <div class="document-list">
+                                            </HeaderTemplate>
+
+                                            <ItemTemplate>
+                                                <a class="document-link" href='<%# Eval("FileUrl") %>' target="_blank">
+                                                    📄 <%# Eval("FileName") %>
+                                                </a>
+                                            </ItemTemplate>
+
+                                            <FooterTemplate>
+                                                </div>
+                                            </FooterTemplate>
+                                        </asp:Repeater>
+
+                                        <asp:Panel ID="pnlNoDocuments" runat="server"
+                                            Visible='<%# GetBeneficiaryDocumentCount(Eval("username")) == 0 %>'>
+                                            <div class="document-empty">
+                                                No uploaded documents found for this beneficiary.
+                                            </div>
+                                        </asp:Panel>
+
+                                        <div class="details-title">Assistance Application List</div>
 
                                         <asp:Repeater ID="rptApplications" runat="server"
                                             DataSource='<%# GetAssistanceApplications(Eval("beneficiary_id")) %>'>
@@ -718,9 +609,9 @@
 
                 <asp:Label ID="lblMessage" runat="server" CssClass="message" />
             </div>
-
         </div>
     </div>
+
     <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
 </form>
 </body>

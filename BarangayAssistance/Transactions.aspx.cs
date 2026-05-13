@@ -2,511 +2,406 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
+using System.Web.UI.WebControls;
 
 namespace BarangayAssistance
 {
     public partial class Transactions : System.Web.UI.Page
     {
-        private bool ShowingMyTransactions
-        {
-            get { return ViewState["ShowingMyTransactions"] != null && (bool)ViewState["ShowingMyTransactions"]; }
-            set { ViewState["ShowingMyTransactions"] = value; }
-        }
-        private void LoadPublicTransactions()
-        {
-            string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
+        private readonly string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
 
-            StringBuilder query = new StringBuilder(@"
-        SELECT
-            full_name,
-            assistance_type,
-            estimated_amount_requested,
-            date_submitted,
-            status
-        FROM assistance_applications
-        WHERE status IN ('Approved', 'Released')
-    ");
-
-            using (SqlConnection conn = new SqlConnection(connStr))
-            using (SqlCommand cmd = new SqlCommand())
-            {
-                cmd.Connection = conn;
-
-                AddPublicTypeFilter(query, cmd);
-                AddPublicStatusFilter(query, cmd);
-
-                if (!string.IsNullOrWhiteSpace(pubDateFrom.Text))
-                {
-                    query.Append(" AND CAST(date_submitted AS DATE) >= @pubDateFrom");
-                    cmd.Parameters.AddWithValue("@pubDateFrom", DateTime.Parse(pubDateFrom.Text).Date);
-                }
-
-                if (!string.IsNullOrWhiteSpace(pubDateTo.Text))
-                {
-                    query.Append(" AND CAST(date_submitted AS DATE) <= @pubDateTo");
-                    cmd.Parameters.AddWithValue("@pubDateTo", DateTime.Parse(pubDateTo.Text).Date);
-                }
-
-                query.Append(" ORDER BY date_submitted DESC");
-                cmd.CommandText = query.ToString();
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                gvPublicTransactions.DataSource = dt;
-                gvPublicTransactions.DataBind();
-
-                LoadPublicDashboardSummary();
-            }
-        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                string role = Session["role"] == null ? "" : Session["role"].ToString();
+                bool isLoggedIn = Session["role"] != null;
 
-                if (string.IsNullOrEmpty(role))
-                {
-                    pnlDashboardLayout.Visible = false;
-                    pnlPublicNav.Visible = true;
-                    pnlPublicTransactions.Visible = true;
-                    pnlInactivityTimeout.Visible = false;
-                    LoadPublicTransactions();
-                }
-                else
-                {
-                    pnlDashboardLayout.Visible = true;
-                    pnlPublicNav.Visible = false;
-                    pnlPublicTransactions.Visible = false;
-                    pnlInactivityTimeout.Visible = true;
+                pnlPublicNav.Visible = !isLoggedIn;
+                pnlSidebar.Visible = isLoggedIn;
+                pnlTopbar.Visible = isLoggedIn;
+                pnlTimeout.Visible = isLoggedIn;
 
-                    if (role == "Beneficiary")
-                    {
-                        btnMyTransactions.Visible = true;
-                        ShowingMyTransactions = true;
-                        LoadTransactions(true);
-                    }
-                    else
-                    {
-                        btnMyTransactions.Visible = false;
-                        ShowingMyTransactions = false;
-                        LoadTransactions(false);
-                    }
-                }
+                lblWelcome.Text = isLoggedIn
+                    ? (Session["FullName"] == null ? Session["role"].ToString() : Session["FullName"].ToString())
+                    : "Public Viewer";
+
+                LoadTransactions();
             }
         }
 
-        public bool IsAdmin()
+        private void LoadTransactions(string search = "", string status = "", string assistanceType = "")
         {
-            return Session["role"] != null && Session["role"].ToString() == "Admin";
-        }
+            search = search.Trim();
 
-        private void LoadTransactions(bool beneficiaryOnly)
-        {
-            string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
-
-            StringBuilder query = new StringBuilder(@"
-                SELECT
-                    application_id,
-                    full_name,
-                    beneficiary_type,
-                    assistance_type,
-                    estimated_amount_requested,
-                    urgency_level,
-                    status,
-                    date_submitted
-                FROM assistance_applications
-                WHERE 1 = 1
-            ");
-
-            using (SqlConnection conn = new SqlConnection(connStr))
-            using (SqlCommand cmd = new SqlCommand())
+            if (search.Length > 100)
             {
-                cmd.Connection = conn;
-
-                // Filter by beneficiary if needed
-                if (beneficiaryOnly)
-                {
-                    if (Session["UserID"] == null)
-                    {
-                        lblMessage.Text = "Please login to view your transactions.";
-                        return;
-                    }
-
-                    query.Append(" AND beneficiary_id = @beneficiary_id");
-                    cmd.Parameters.AddWithValue("@beneficiary_id",
-                        Convert.ToInt32(Session["UserID"]));
-                }
-
-                // Type filters
-                AddTypeFilter(query, cmd);
-
-                // Status filters
-                AddStatusFilter(query, cmd);
-
-                // Date filters
-                if (!string.IsNullOrWhiteSpace(txtDateFrom.Text))
-                {
-                    query.Append(" AND CAST(date_submitted AS DATE) >= @dateFrom");
-                    cmd.Parameters.AddWithValue("@dateFrom",
-                        DateTime.Parse(txtDateFrom.Text).Date);
-                }
-
-                if (!string.IsNullOrWhiteSpace(txtDateTo.Text))
-                {
-                    query.Append(" AND CAST(date_submitted AS DATE) <= @dateTo");
-                    cmd.Parameters.AddWithValue("@dateTo",
-                        DateTime.Parse(txtDateTo.Text).Date);
-                }
-
-                query.Append(" ORDER BY date_submitted DESC");
-                cmd.CommandText = query.ToString();
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                gvTransactions.DataSource = dt;
-                gvTransactions.DataBind();
-
-                lblMessage.Text = dt.Rows.Count + " application(s) found.";
-            }
-        }
-
-        private void AddTypeFilter(StringBuilder query, SqlCommand cmd)
-        {
-            StringBuilder values = new StringBuilder();
-            int count = 0;
-
-            AddFilterValue(values, cmd, ref count, chkMedical.Checked, "Medical", "type");
-            AddFilterValue(values, cmd, ref count, chkFinancial.Checked, "Financial", "type");
-            AddFilterValue(values, cmd, ref count, chkBurial.Checked, "Burial", "type");
-            AddFilterValue(values, cmd, ref count, chkEducational.Checked, "Educational", "type");
-            AddFilterValue(values, cmd, ref count, chkFood.Checked, "Food", "type");
-            AddFilterValue(values, cmd, ref count, chkEmergency.Checked, "Emergency", "type");
-
-            if (count > 0)
-                query.Append(" AND assistance_type IN (" + values + ")");
-        }
-
-        private void AddStatusFilter(StringBuilder query, SqlCommand cmd)
-        {
-            StringBuilder values = new StringBuilder();
-            int count = 0;
-
-            AddFilterValue(values, cmd, ref count, chkPending.Checked, "Pending", "status");
-            AddFilterValue(values, cmd, ref count, chkApproved.Checked, "Approved", "status");
-            AddFilterValue(values, cmd, ref count, chkRejected.Checked, "Rejected", "status");
-            AddFilterValue(values, cmd, ref count, chkReleased.Checked, "Released", "status");
-
-            if (count > 0)
-                query.Append(" AND status IN (" + values + ")");
-        }
-
-        private void AddFilterValue(StringBuilder values, SqlCommand cmd,
-            ref int count, bool isChecked, string value, string prefix)
-        {
-            if (isChecked)
-            {
-                string paramName = "@" + prefix + count;
-                if (count > 0) values.Append(", ");
-                values.Append(paramName);
-                cmd.Parameters.AddWithValue(paramName, value);
-                count++;
-            }
-        }
-
-        protected void btnApplyFilter_Click(object sender, EventArgs e)
-        {
-            LoadTransactions(ShowingMyTransactions);
-        }
-
-        protected void btnClearFilter_Click(object sender, EventArgs e)
-        {
-            chkMedical.Checked = false;
-            chkFinancial.Checked = false;
-            chkBurial.Checked = false;
-            chkEducational.Checked = false;
-            chkFood.Checked = false;
-            chkEmergency.Checked = false;
-            chkPending.Checked = false;
-            chkApproved.Checked = false;
-            chkRejected.Checked = false;
-            chkReleased.Checked = false;
-            txtDateFrom.Text = "";
-            txtDateTo.Text = "";
-
-            LoadTransactions(ShowingMyTransactions);
-        }
-
-        protected void btnMyTransactions_Click(object sender, EventArgs e)
-        {
-            ShowingMyTransactions = true;
-            LoadTransactions(true);
-        }
-
-        protected void gvTransactions_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
-        {
-            if (e.CommandName != "ApproveApplication" && e.CommandName != "RejectApplication")
+                lblMessage.Text = "⚠️ Search text must not exceed 100 characters.";
                 return;
+            }
 
+            if (!string.IsNullOrWhiteSpace(search) &&
+                !Regex.IsMatch(search, @"^[a-zA-Z0-9\s.,@_+\-'/ñÑ]+$"))
+            {
+                lblMessage.Text = "⚠️ Search contains invalid characters.";
+                return;
+            }
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                StringBuilder query = new StringBuilder(@"
+                    SELECT
+                        aa.application_id,
+                        aa.beneficiary_id,
+                        b.username,
+                        aa.full_name,
+                        aa.beneficiary_type,
+                        aa.contact_number,
+                        aa.assistance_type,
+                        aa.preferred_date,
+                        aa.estimated_amount_requested,
+                        aa.urgency_level,
+                        aa.reason_for_application,
+                        aa.additional_notes,
+                        aa.status,
+                        aa.date_submitted,
+                        aa.date_updated
+                    FROM assistance_applications aa
+                    INNER JOIN beneficiaries b
+                        ON aa.beneficiary_id = b.beneficiary_id
+                    WHERE 1 = 1
+                ");
+
+                if (IsBeneficiary())
+                {
+                    query.Append(" AND aa.beneficiary_id = @beneficiary_id");
+                }
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query.Append(@"
+                        AND
+                        (
+                            aa.full_name LIKE @search OR
+                            b.username LIKE @search OR
+                            aa.beneficiary_type LIKE @search OR
+                            aa.contact_number LIKE @search OR
+                            aa.assistance_type LIKE @search OR
+                            aa.urgency_level LIKE @search OR
+                            aa.status LIKE @search OR
+                            aa.reason_for_application LIKE @search
+                        )");
+                }
+
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    query.Append(" AND aa.status = @status");
+                }
+
+                if (!string.IsNullOrWhiteSpace(assistanceType))
+                {
+                    query.Append(" AND aa.assistance_type = @assistance_type");
+                }
+
+                query.Append(" ORDER BY aa.date_submitted DESC");
+
+                using (SqlCommand cmd = new SqlCommand(query.ToString(), con))
+                {
+                    if (IsBeneficiary())
+                    {
+                        if (Session["beneficiary_id"] == null)
+                        {
+                            lblMessage.Text = "⚠️ Beneficiary session was not found.";
+                            return;
+                        }
+
+                        cmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value =
+                            Convert.ToInt32(Session["beneficiary_id"]);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        cmd.Parameters.Add("@search", SqlDbType.NVarChar, 150).Value = "%" + search + "%";
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(status))
+                    {
+                        cmd.Parameters.Add("@status", SqlDbType.NVarChar, 30).Value = status;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(assistanceType))
+                    {
+                        cmd.Parameters.Add("@assistance_type", SqlDbType.NVarChar, 50).Value = assistanceType;
+                    }
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+
+                    da.Fill(dt);
+
+                    gvTransactions.DataSource = dt;
+                    gvTransactions.DataBind();
+
+                    lblMessage.Text = dt.Rows.Count + " transaction record(s) found.";
+                }
+            }
+        }
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            LoadTransactions(
+                txtSearch.Text.Trim(),
+                ddlStatus.SelectedValue,
+                ddlAssistanceType.SelectedValue);
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            txtSearch.Text = "";
+            ddlStatus.SelectedIndex = 0;
+            ddlAssistanceType.SelectedIndex = 0;
+
+            LoadTransactions();
+        }
+
+        protected void gvTransactions_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
             if (!IsAdmin())
             {
-                lblMessage.Text = "⚠️ Only admins can do this.";
+                lblMessage.Text = "⚠️ Only admins are allowed to approve or reject applications.";
                 return;
             }
 
-            int appId = Convert.ToInt32(e.CommandArgument);
-            bool isApprove = e.CommandName == "ApproveApplication";
-            string newStatus = isApprove ? "Approved" : "Rejected";
-
-            string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
-
-            using (SqlConnection conn = new SqlConnection(connStr))
+            if (e.CommandName == "ApproveApplication" || e.CommandName == "RejectApplication")
             {
-                conn.Open();
-
-                SqlTransaction transaction = conn.BeginTransaction();
-
-                try
+                if (e.CommandArgument == null ||
+                    !int.TryParse(e.CommandArgument.ToString(), out int applicationId) ||
+                    applicationId <= 0)
                 {
+                    lblMessage.Text = "⚠️ Invalid application selected.";
+                    return;
+                }
+
+                string newStatus = e.CommandName == "ApproveApplication" ? "Approved" : "Rejected";
+
+                using (SqlConnection con = new SqlConnection(connStr))
+                {
+                    con.Open();
+
                     string updateQuery = @"
-                UPDATE assistance_applications
-                SET status = @status,
-                    date_updated = GETDATE()
-                WHERE application_id = @application_id
-                AND status = 'Pending'";
+                        UPDATE assistance_applications
+                        SET status = @status,
+                            date_updated = GETDATE()
+                        WHERE application_id = @application_id
+                          AND status = 'Pending'";
 
-                    int rowsAffected;
-
-                    using (SqlCommand cmd = new SqlCommand(updateQuery, conn, transaction))
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, con))
                     {
-                        cmd.Parameters.AddWithValue("@status", newStatus);
-                        cmd.Parameters.AddWithValue("@application_id", appId);
+                        cmd.Parameters.Add("@status", SqlDbType.NVarChar, 30).Value = newStatus;
+                        cmd.Parameters.Add("@application_id", SqlDbType.Int).Value = applicationId;
 
-                        rowsAffected = cmd.ExecuteNonQuery();
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        if (rowsAffected == 0)
+                        {
+                            lblMessage.Text = "⚠️ Application was not found or already processed.";
+                            LoadTransactions(txtSearch.Text.Trim(), ddlStatus.SelectedValue, ddlAssistanceType.SelectedValue);
+                            return;
+                        }
                     }
 
-                    if (rowsAffected == 0)
-                    {
-                        transaction.Rollback();
-                        lblMessage.Text = "⚠️ This application was already processed or does not exist.";
-                        return;
-                    }
+                    string getBeneficiaryQuery = @"
+                        SELECT beneficiary_id, assistance_type
+                        FROM assistance_applications
+                        WHERE application_id = @application_id";
 
                     int beneficiaryId = 0;
-                    string fullName = "";
-                    string assistanceType = "";
+                    string selectedAssistanceType = "";
 
-                    string selectQuery = @"
-                SELECT beneficiary_id, full_name, assistance_type
-                FROM assistance_applications
-                WHERE application_id = @application_id";
-
-                    using (SqlCommand cmd = new SqlCommand(selectQuery, conn, transaction))
+                    using (SqlCommand getCmd = new SqlCommand(getBeneficiaryQuery, con))
                     {
-                        cmd.Parameters.AddWithValue("@application_id", appId);
+                        getCmd.Parameters.Add("@application_id", SqlDbType.Int).Value = applicationId;
 
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        using (SqlDataReader reader = getCmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
                                 beneficiaryId = Convert.ToInt32(reader["beneficiary_id"]);
-                                fullName = reader["full_name"].ToString();
-                                assistanceType = reader["assistance_type"].ToString();
+                                selectedAssistanceType = reader["assistance_type"].ToString();
                             }
                         }
                     }
 
-                    string beneficiaryTitle = isApprove
-                        ? "Application Approved"
-                        : "Application Rejected";
-
-                    string beneficiaryMessage = isApprove
-                        ? "Your " + assistanceType + " assistance application has been approved. Please wait for claiming instructions from the barangay office."
-                        : "Your " + assistanceType + " assistance application has been rejected. Please visit the barangay office for more information.";
-
-                    InsertNotification(
-                        conn,
-                        transaction,
-                        beneficiaryId,
-                        beneficiaryTitle,
-                        beneficiaryMessage,
-                        "Beneficiary"
-                    );
-
-                    string adminTitle = isApprove
-                        ? "Application Approved"
-                        : "Application Rejected";
-
-                    string adminMessage = isApprove
-                        ? "Application #" + appId + " for " + fullName + " (" + assistanceType + ") has been approved."
-                        : "Application #" + appId + " for " + fullName + " (" + assistanceType + ") has been rejected.";
-
-                    InsertNotification(
-                        conn,
-                        transaction,
-                        null,
-                        adminTitle,
-                        adminMessage,
-                        "Admin"
-                    );
-
-                    transaction.Commit();
-
-                    lblMessage.Text = isApprove
-                        ? "✅ Application approved and notification saved."
-                        : "❌ Application rejected and notification saved.";
-
-                    LoadTransactions(ShowingMyTransactions);
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    lblMessage.Text = "Error: " + ex.Message;
-                }
-            }
-        }
-        private void InsertNotification( SqlConnection conn, SqlTransaction transaction, int? beneficiaryId, string title, string message, string type)
-        {
-            string query = @"
-                INSERT INTO notifications
-                (beneficiary_id, title, message, type, is_read, date_created, date_read)
-                VALUES
-                (@beneficiary_id, @title, @message, @type, 0, GETDATE(), NULL)";
-
-            using (SqlCommand cmd = new SqlCommand(query, conn, transaction))
-            {
-                if (beneficiaryId.HasValue)
-                    cmd.Parameters.AddWithValue("@beneficiary_id", beneficiaryId.Value);
-                else
-                    cmd.Parameters.AddWithValue("@beneficiary_id", DBNull.Value);
-
-                cmd.Parameters.AddWithValue("@title", title);
-                cmd.Parameters.AddWithValue("@message", message);
-                cmd.Parameters.AddWithValue("@type", type);
-
-                cmd.ExecuteNonQuery();
-            }
-        }
-        private void AddPublicTypeFilter(StringBuilder query, SqlCommand cmd)
-        {
-            StringBuilder values = new StringBuilder();
-            int count = 0;
-
-            AddFilterValue(values, cmd, ref count, pubChkMedical.Checked, "Medical", "pubType");
-            AddFilterValue(values, cmd, ref count, pubChkFinancial.Checked, "Financial", "pubType");
-            AddFilterValue(values, cmd, ref count, pubChkBurial.Checked, "Burial", "pubType");
-            AddFilterValue(values, cmd, ref count, pubChkEducational.Checked, "Educational", "pubType");
-            AddFilterValue(values, cmd, ref count, pubChkFood.Checked, "Food", "pubType");
-            AddFilterValue(values, cmd, ref count, pubChkEmergency.Checked, "Emergency", "pubType");
-
-            if (count > 0)
-                query.Append(" AND assistance_type IN (" + values + ")");
-        }
-
-        private void AddPublicStatusFilter(StringBuilder query, SqlCommand cmd)
-        {
-            StringBuilder values = new StringBuilder();
-            int count = 0;
-
-            AddFilterValue(values, cmd, ref count, pubChkApproved.Checked, "Approved", "pubStatus");
-            AddFilterValue(values, cmd, ref count, pubChkReleased.Checked, "Released", "pubStatus");
-
-            if (count > 0)
-                query.Append(" AND status IN (" + values + ")");
-        }
-        private void LoadPublicDashboardSummary()
-        {
-            string connStr = ConfigurationManager.ConnectionStrings["BarangayDB"].ConnectionString;
-
-            string query = @"
-                SELECT
-                    COUNT(*) AS TotalRecords,
-
-                    ISNULL(SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END),0) AS ApprovedCount,
-                    ISNULL(SUM(CASE WHEN status = 'Released' THEN 1 ELSE 0 END),0) AS ReleasedCount,
-
-                    ISNULL(SUM(estimated_amount_requested), 0) AS TotalAmount,
-
-                    ISNULL(AVG(estimated_amount_requested), 0) AS AvgAmount,
-                    ISNULL(MAX(estimated_amount_requested), 0) AS MaxAmount,
-
-                    ISNULL(SUM(CASE WHEN assistance_type = 'Medical' THEN 1 ELSE 0 END),0) AS MedicalCount,
-                    ISNULL(SUM(CASE WHEN assistance_type = 'Financial' THEN 1 ELSE 0 END),0) AS FinancialCount,
-
-                    ISNULL(SUM(CASE 
-                        WHEN date_submitted >= DATEADD(DAY, -7, GETDATE()) 
-                        THEN 1 ELSE 0 END),0) AS RecentCount
-
-                FROM assistance_applications
-                WHERE status IN ('Approved', 'Released')
-                ";
-
-            using (SqlConnection conn = new SqlConnection(connStr))
-            using (SqlCommand cmd = new SqlCommand(query, conn))
-            {
-                conn.Open();
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
+                    if (beneficiaryId > 0)
                     {
-                        int total = Convert.ToInt32(reader["TotalRecords"]);
-                        int approved = Convert.ToInt32(reader["ApprovedCount"]);
-                        int released = Convert.ToInt32(reader["ReleasedCount"]);
+                        string notifQuery = @"
+                            INSERT INTO notifications
+                            (
+                                beneficiary_id,
+                                title,
+                                message,
+                                type,
+                                is_read,
+                                date_created
+                            )
+                            VALUES
+                            (
+                                @beneficiary_id,
+                                @title,
+                                @message,
+                                'Assistance',
+                                0,
+                                GETDATE()
+                            )";
 
-                        decimal totalAmount = Convert.ToDecimal(reader["TotalAmount"]);
-                        decimal avgAmount = Convert.ToDecimal(reader["AvgAmount"]);
-                        decimal maxAmount = Convert.ToDecimal(reader["MaxAmount"]);
+                        using (SqlCommand notifCmd = new SqlCommand(notifQuery, con))
+                        {
+                            notifCmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value = beneficiaryId;
+                            notifCmd.Parameters.Add("@title", SqlDbType.NVarChar, 100).Value =
+                                "Application " + newStatus;
 
-                        int medical = Convert.ToInt32(reader["MedicalCount"]);
-                        int financial = Convert.ToInt32(reader["FinancialCount"]);
-                        int recent = Convert.ToInt32(reader["RecentCount"]);
+                            notifCmd.Parameters.Add("@message", SqlDbType.NVarChar, 500).Value =
+                                "Your " + selectedAssistanceType + " assistance application has been " + newStatus.ToLower() + ".";
 
-                        // existing
-                        lblPublicTotal.Text = total.ToString();
-                        lblPublicApproved.Text = approved.ToString();
-                        lblPublicReleased.Text = released.ToString();
-                        lblPublicAmount.Text = "₱" + totalAmount.ToString("N2");
-
-                        // new
-                        lblPublicAverage.Text = "₱" + avgAmount.ToString("N2");
-                        lblPublicHighest.Text = "₱" + maxAmount.ToString("N2");
-                        lblPublicMedical.Text = medical.ToString();
-                        lblPublicFinancial.Text = financial.ToString();
-                        lblPublicRecent.Text = recent.ToString();
-
-                        // approval rate
-                        double rate = total > 0 ? (approved * 100.0) / total : 0;
-                        lblPublicApprovalRate.Text = rate.ToString("0.00") + "%";
+                            notifCmd.ExecuteNonQuery();
+                        }
                     }
                 }
+
+                lblMessage.Text = "✅ Application " + newStatus.ToLower() + " successfully.";
+
+                LoadTransactions(
+                    txtSearch.Text.Trim(),
+                    ddlStatus.SelectedValue,
+                    ddlAssistanceType.SelectedValue);
             }
         }
-        protected void btnPublicApplyFilter_Click(object sender, EventArgs e)
+
+        public bool IsPublicView()
         {
-            LoadPublicTransactions();
+            return Session["role"] == null;
         }
 
-        protected void btnPublicClearFilter_Click(object sender, EventArgs e)
+        public bool IsAdmin()
         {
-            pubChkMedical.Checked = false;
-            pubChkFinancial.Checked = false;
-            pubChkBurial.Checked = false;
-            pubChkEducational.Checked = false;
-            pubChkFood.Checked = false;
-            pubChkEmergency.Checked = false;
+            return Session["role"] != null &&
+                   Session["role"].ToString().Equals("Admin", StringComparison.OrdinalIgnoreCase);
+        }
 
-            pubChkApproved.Checked = false;
-            pubChkReleased.Checked = false;
+        public bool IsBeneficiary()
+        {
+            return Session["role"] != null &&
+                   Session["role"].ToString().Equals("Beneficiary", StringComparison.OrdinalIgnoreCase);
+        }
 
-            pubDateFrom.Text = "";
-            pubDateTo.Text = "";
+        public string GetStatusClass(object statusValue)
+        {
+            string status = statusValue == null ? "" : statusValue.ToString();
 
-            LoadPublicTransactions();
+            if (status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+            {
+                return "status-approved";
+            }
+
+            if (status.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                return "status-rejected";
+            }
+
+            if (status.Equals("Released", StringComparison.OrdinalIgnoreCase))
+            {
+                return "status-released";
+            }
+
+            return "status-pending";
+        }
+
+        public DataTable GetApplicationDocuments(object usernameValue, object applicationIdValue)
+        {
+            DataTable dt = new DataTable();
+
+            dt.Columns.Add("FileName", typeof(string));
+            dt.Columns.Add("FileUrl", typeof(string));
+
+            if (usernameValue == null ||
+                applicationIdValue == null ||
+                string.IsNullOrWhiteSpace(usernameValue.ToString()) ||
+                string.IsNullOrWhiteSpace(applicationIdValue.ToString()))
+            {
+                return dt;
+            }
+
+            string username = SanitizeFolderName(usernameValue.ToString());
+            string applicationId = SanitizeFolderName(applicationIdValue.ToString());
+
+            string applicationFolder = Server.MapPath("~/Records/" + username + "/" + applicationId + "/");
+
+            if (!Directory.Exists(applicationFolder))
+            {
+                return dt;
+            }
+
+            string[] allowedExtensions =
+            {
+                ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".pdf", ".doc", ".docx"
+            };
+
+            foreach (string filePath in Directory.GetFiles(applicationFolder))
+            {
+                string extension = Path.GetExtension(filePath).ToLower();
+
+                bool allowed = false;
+
+                foreach (string allowedExtension in allowedExtensions)
+                {
+                    if (extension == allowedExtension)
+                    {
+                        allowed = true;
+                        break;
+                    }
+                }
+
+                if (!allowed)
+                {
+                    continue;
+                }
+
+                string fileName = Path.GetFileName(filePath);
+
+                string fileUrl = ResolveUrl("~/Records/"
+                    + HttpUtility.UrlPathEncode(username)
+                    + "/"
+                    + HttpUtility.UrlPathEncode(applicationId)
+                    + "/"
+                    + HttpUtility.UrlPathEncode(fileName));
+
+                dt.Rows.Add(fileName, fileUrl);
+            }
+
+            return dt;
+        }
+
+        public int GetApplicationDocumentCount(object usernameValue, object applicationIdValue)
+        {
+            return GetApplicationDocuments(usernameValue, applicationIdValue).Rows.Count;
+        }
+
+        private string SanitizeFolderName(string folderName)
+        {
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                return "";
+            }
+
+            foreach (char invalidChar in Path.GetInvalidFileNameChars())
+            {
+                folderName = folderName.Replace(invalidChar.ToString(), "");
+            }
+
+            return folderName.Trim();
         }
     }
 }

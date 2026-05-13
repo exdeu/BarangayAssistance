@@ -1,5 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Assistance_Application.aspx.cs" Inherits="BarangayAssistance.Assistance_Application" UnobtrusiveValidationMode="None" %>
 <%@ Register Src="~/InactivityTimeout.ascx" TagPrefix="uc" TagName="InactivityTimeout" %>
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -50,18 +51,6 @@
             min-height: calc(100vh - 4rem);
             margin: 0 auto;
             display: flex;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .card {
@@ -84,17 +73,6 @@
             overflow: hidden;
         }
 
-        .hdr::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-            transform: rotate(30deg);
-        }
-
         .hdr .sub {
             font-size: 11px;
             font-weight: 700;
@@ -102,8 +80,6 @@
             text-transform: uppercase;
             color: #8ab3cf;
             margin-bottom: 6px;
-            position: relative;
-            z-index: 1;
         }
 
         .hdr h1 {
@@ -111,16 +87,11 @@
             color: #ffffff;
             margin-bottom: 6px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            position: relative;
-            z-index: 1;
         }
 
         .hdr p {
             font-size: 0.85rem;
             color: #c8dcee;
-            position: relative;
-            z-index: 1;
         }
 
         .body {
@@ -177,6 +148,7 @@
         .f input[type=text],
         .f input[type=number],
         .f input[type=date],
+        .f input[type=file],
         .f select,
         .f textarea {
             font-size: 0.9rem;
@@ -204,18 +176,45 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
-        .f input:hover,
-        .f select:hover,
-        .f textarea:hover {
-            border-color: #b0c4de;
+        .upload-box {
+            border: 2px dashed #3498db;
+            border-radius: 16px;
+            padding: 18px;
+            background: linear-gradient(135deg, #f8fbff, #eef6ff);
         }
 
-        .f select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235d6d7e' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 38px;
+        .upload-note {
+            font-size: 0.78rem;
+            color: #6f7f8f;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .file-list {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid #c8e4fb;
+        }
+
+        .file-list.show {
+            display: block;
+        }
+
+        .file-list-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #1a364e;
+            margin-bottom: 6px;
+        }
+
+        .file-item {
+            font-size: 0.82rem;
+            color: #2c3e4e;
+            padding: 4px 0;
+            word-break: break-word;
         }
 
         .divider {
@@ -234,12 +233,6 @@
             border-radius: 12px;
             margin-bottom: 1.2rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .consent:hover {
-            border-color: #3498db;
-            background: white;
         }
 
         .consent input[type=checkbox] {
@@ -303,21 +296,10 @@
             font-family: inherit;
         }
 
-        .btn:hover {
-            background: #f0f0f0;
-            transform: translateY(-2px);
-        }
-
         .btn-primary {
             background: linear-gradient(135deg, #1a364e, #152c40);
             color: white;
             border-color: #1a364e;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #152c40, #0f2333);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .val-error {
@@ -325,28 +307,6 @@
             color: #e74c3c;
             margin-top: 4px;
             font-weight: 600;
-        }
-
-        ::-webkit-input-placeholder {
-            color: #bdc3c7;
-            font-size: 0.85rem;
-        }
-
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #3498db, #1a364e);
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #2980b9, #152c40);
         }
 
         @media (max-width: 640px) {
@@ -384,10 +344,32 @@
             }
         }
     </style>
+
+    <script>
+        function showSelectedFiles(input) {
+            var fileListBox = document.getElementById("selectedFilesBox");
+            var fileList = document.getElementById("selectedFilesList");
+
+            fileList.innerHTML = "";
+
+            if (input.files && input.files.length > 0) {
+                fileListBox.classList.add("show");
+
+                for (var i = 0; i < input.files.length; i++) {
+                    var item = document.createElement("div");
+                    item.className = "file-item";
+                    item.innerText = "📄 " + input.files[i].name;
+                    fileList.appendChild(item);
+                }
+            } else {
+                fileListBox.classList.remove("show");
+            }
+        }
+    </script>
 </head>
 
 <body>
-<form id="form1" runat="server">
+<form id="form1" runat="server" enctype="multipart/form-data">
     <div class="wrap">
         <div class="card">
             <div class="hdr">
@@ -420,7 +402,8 @@
                             ControlToValidate="ddlAssistanceType"
                             InitialValue=""
                             ErrorMessage="Please select an assistance type."
-                            CssClass="val-error" Display="Dynamic" />
+                            CssClass="val-error"
+                            Display="Dynamic" />
                     </div>
 
                     <div class="f">
@@ -429,7 +412,8 @@
                         <asp:RequiredFieldValidator ID="rfvPreferredDate" runat="server"
                             ControlToValidate="txtPreferredDate"
                             ErrorMessage="Preferred date is required."
-                            CssClass="val-error" Display="Dynamic" />
+                            CssClass="val-error"
+                            Display="Dynamic" />
                     </div>
                 </div>
 
@@ -452,7 +436,8 @@
                             ControlToValidate="ddlUrgency"
                             InitialValue=""
                             ErrorMessage="Please select urgency level."
-                            CssClass="val-error" Display="Dynamic" />
+                            CssClass="val-error"
+                            Display="Dynamic" />
                     </div>
                 </div>
 
@@ -462,12 +447,33 @@
                     <asp:RequiredFieldValidator ID="rfvReason" runat="server"
                         ControlToValidate="txtReason"
                         ErrorMessage="Reason is required."
-                        CssClass="val-error" Display="Dynamic" />
+                        CssClass="val-error"
+                        Display="Dynamic" />
                 </div>
 
                 <div class="f">
                     <label>Additional Notes</label>
                     <asp:TextBox ID="txtNotes" runat="server" TextMode="MultiLine" placeholder="Add extra information if needed" />
+                </div>
+
+                <div class="f">
+                    <label>Supporting Documents</label>
+
+                    <div class="upload-box">
+                        <asp:FileUpload ID="fuApplicationDocuments"
+                            runat="server"
+                            AllowMultiple="true"
+                            onchange="showSelectedFiles(this)" />
+
+                        <div class="upload-note">
+                            You may upload multiple files. Accepted files: JPG, JPEG, PNG, WEBP, PDF, DOC, DOCX. Maximum size per file: 5 MB.
+                        </div>
+
+                        <div id="selectedFilesBox" class="file-list">
+                            <div class="file-list-title">Selected Files</div>
+                            <div id="selectedFilesList"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="divider"></div>
@@ -480,7 +486,8 @@
                 <asp:CustomValidator ID="cvDeclaration" runat="server"
                     OnServerValidate="cvDeclaration_ServerValidate"
                     ErrorMessage="You must agree to the declaration before submitting."
-                    CssClass="val-error" Display="Dynamic" />
+                    CssClass="val-error"
+                    Display="Dynamic" />
             </div>
 
             <div class="footer">
@@ -489,14 +496,22 @@
                     CssClass="btn"
                     CausesValidation="false"
                     OnClick="btnBack_Click" />
-                <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn"
-                    CausesValidation="false" OnClick="btnClear_Click" />
-                <asp:Button ID="btnSubmit" runat="server" Text="Submit Application" CssClass="btn btn-primary"
+
+                <asp:Button ID="btnClear" runat="server"
+                    Text="Clear"
+                    CssClass="btn"
+                    CausesValidation="false"
+                    OnClick="btnClear_Click" />
+
+                <asp:Button ID="btnSubmit" runat="server"
+                    Text="Submit Application"
+                    CssClass="btn btn-primary"
                     OnClick="btnSubmit_Click" />
             </div>
         </div>
     </div>
-      <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
+
+    <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
 </form>
 </body>
 </html>

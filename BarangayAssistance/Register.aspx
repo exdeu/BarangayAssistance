@@ -1,5 +1,6 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Register.aspx.cs" Inherits="BarangayAssistance.Register" UnobtrusiveValidationMode="None" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Register.aspx.cs" Inherits="BarangayAssistance.Register" UnobtrusiveValidationMode="None" %>
 <%@ Register Src="~/VerifyOtp.ascx" TagPrefix="uc" TagName="VerifyOtp" %>
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -159,6 +160,7 @@
         .f input[type=number],
         .f input[type=date],
         .f input[type=email],
+        .f input[type=file],
         .f select {
             font-size: 0.9rem;
             color: #2c3e4e;
@@ -326,24 +328,14 @@
             transform: translateY(-2px);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #1a364e, #152c40);
-            color: white;
-            border-color: #1a364e;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #152c40, #0f2333);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
+        .btn-primary,
         .btn-home {
             background: linear-gradient(135deg, #1a364e, #152c40);
             color: white;
             border-color: #1a364e;
         }
 
+        .btn-primary:hover,
         .btn-home:hover {
             background: linear-gradient(135deg, #152c40, #0f2333);
             transform: translateY(-2px);
@@ -357,11 +349,134 @@
             font-weight: 600;
         }
 
+        .hint {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
         .f input[readonly] {
             background: #eef4fb;
             color: #1a364e;
             cursor: not-allowed;
             border-color: #b0c4de;
+        }
+
+        .upload-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .upload-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #2c3e4e;
+            margin-bottom: 8px;
+        }
+
+        .upload-label span {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        .upload-wrapper {
+            position: relative;
+            border: 2px dashed #3498db;
+            border-radius: 16px;
+            padding: 28px 20px;
+            background: linear-gradient(135deg, #f8fbff, #eef6ff);
+            text-align: center;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .upload-wrapper:hover {
+            border-color: #1a364e;
+            background: linear-gradient(135deg, #ffffff, #eef6ff);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.14);
+        }
+
+        .custom-file-upload {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .upload-info {
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 12px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #1a364e, #3498db);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 18px rgba(26, 54, 78, 0.25);
+        }
+
+        .upload-icon svg {
+            width: 30px;
+            height: 30px;
+            display: block;
+        }
+
+        .upload-text {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #1a364e;
+            margin-bottom: 5px;
+        }
+
+        .upload-note {
+            display: block;
+            font-size: 0.78rem;
+            color: #6f7f8f;
+            line-height: 1.4;
+        }
+
+        .selected-file {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #eef7ff;
+            border: 1px solid #c8e4fb;
+            color: #1a364e;
+            font-size: 0.82rem;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .selected-file.show {
+            display: flex;
+        }
+
+        .selected-file-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            background: #1a364e;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 13px;
         }
 
         .otp-modal {
@@ -492,11 +607,24 @@
 
             document.getElementById('<%= txtAge.ClientID %>').value = age;
         }
+
+        function showSelectedFileName(fileInput) {
+            var fileNameBox = document.getElementById('selectedFileName');
+            var fileNameText = document.getElementById('selectedFileText');
+
+            if (fileInput.files && fileInput.files.length > 0) {
+                fileNameText.innerText = fileInput.files[0].name;
+                fileNameBox.classList.add('show');
+            } else {
+                fileNameText.innerText = '';
+                fileNameBox.classList.remove('show');
+            }
+        }
     </script>
 </head>
 
 <body>
-    <form id="form1" runat="server">
+    <form id="form1" runat="server" enctype="multipart/form-data">
         <div class="wrap">
             <div class="card">
                 <div class="hdr">
@@ -743,6 +871,45 @@
                         </asp:DropDownList>
                     </div>
 
+                    <div class="upload-group">
+                        <label class="upload-label">Upload Valid ID <span>*</span></label>
+
+                        <div class="upload-wrapper">
+                            <asp:FileUpload
+                                ID="fuIdPicture"
+                                runat="server"
+                                CssClass="custom-file-upload"
+                                onchange="showSelectedFileName(this)" />
+
+                            <div class="upload-info">
+                                <div class="upload-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M7 3.75h7.2L19 8.55v11.7H7V3.75Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                        <path d="M14 3.75v5h5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                        <path d="M9.75 14.25l1.65-1.65 2.1 2.1 1.05-1.05 1.7 1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M10.5 10.75h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+                                    </svg>
+                                </div>
+                                <span class="upload-text">Choose your ID picture</span>
+                                <small class="upload-note">Accepted file types: JPG, JPEG, PNG, WEBP. Maximum file size: 5 MB.</small>
+                            </div>
+                        </div>
+
+                        <div id="selectedFileName" class="selected-file">
+                            <span class="selected-file-icon">✓</span>
+                            <span id="selectedFileText"></span>
+                        </div>
+
+                        <asp:RequiredFieldValidator
+                            ID="rfvIdPicture"
+                            runat="server"
+                            ControlToValidate="fuIdPicture"
+                            InitialValue=""
+                            ErrorMessage="Valid ID picture is required."
+                            CssClass="val-error"
+                            Display="Dynamic" />
+                    </div>
+
                     <div class="divider"></div>
 
                     <label class="consent">
@@ -770,14 +937,14 @@
                         CausesValidation="false" />
 
                     <asp:Button ID="btnSubmit" runat="server"
-                        Text="Register →"
+                        Text="Register"
                         CssClass="btn btn-primary"
                         OnClick="btnSubmit_Click" />
                 </div>
             </div>
         </div>
-        <uc:VerifyOtp ID="VerifyOtpControl"
-            runat="server" />
+
+        <uc:VerifyOtp ID="VerifyOtpControl" runat="server" />
     </form>
 </body>
 </html>

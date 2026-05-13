@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -73,6 +74,11 @@ namespace BarangayAssistance
                     return;
                 }
 
+                if (!ValidateIdPictureUpload())
+                {
+                    return;
+                }
+
                 string connectionString = ConfigurationManager
                     .ConnectionStrings["BarangayDB"].ConnectionString;
 
@@ -133,6 +139,7 @@ namespace BarangayAssistance
                     }
 
                     StoreRegistrationData();
+                    SaveIdPictureToTemporaryFolder(username);
 
                     Random rnd = new Random();
 
@@ -151,6 +158,7 @@ namespace BarangayAssistance
                 }
                 catch (Exception ex)
                 {
+                    DeleteTemporaryIdPicture();
                     lblError.Text = "❌ Failed to send OTP: " + ex.Message;
                     lblError.Visible = true;
                     lblSuccess.Visible = false;
@@ -190,8 +198,137 @@ namespace BarangayAssistance
             }
         }
 
+        private bool ValidateIdPictureUpload()
+        {
+            if (!fuIdPicture.HasFile)
+            {
+                lblError.Text = "❌ Please upload a picture of your ID.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return false;
+            }
+
+            string extension = Path.GetExtension(fuIdPicture.FileName).ToLowerInvariant();
+            string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+
+            bool allowed = false;
+
+            foreach (string allowedExtension in allowedExtensions)
+            {
+                if (extension == allowedExtension)
+                {
+                    allowed = true;
+                    break;
+                }
+            }
+
+            if (!allowed)
+            {
+                lblError.Text = "❌ Invalid ID picture format. Please upload JPG, JPEG, PNG, GIF, BMP, or WEBP.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return false;
+            }
+
+            int maxFileSize = 5 * 1024 * 1024;
+
+            if (fuIdPicture.PostedFile.ContentLength > maxFileSize)
+            {
+                lblError.Text = "❌ ID picture must not exceed 5 MB.";
+                lblError.Visible = true;
+                lblSuccess.Visible = false;
+                return false;
+            }
+
+            return true;
+        }
+
+        private void SaveIdPictureToTemporaryFolder(string username)
+        {
+            DeleteTemporaryIdPicture();
+
+            string extension = Path.GetExtension(fuIdPicture.FileName).ToLowerInvariant();
+            string tempFolder = Server.MapPath("~/Records/_Temp");
+
+            if (!Directory.Exists(tempFolder))
+            {
+                Directory.CreateDirectory(tempFolder);
+            }
+
+            string tempFileName = username + "_" + Guid.NewGuid().ToString("N") + extension;
+            string tempFilePath = Path.Combine(tempFolder, tempFileName);
+
+            fuIdPicture.SaveAs(tempFilePath);
+
+            Session["reg_id_temp_path"] = tempFilePath;
+            Session["reg_id_extension"] = extension;
+        }
+
+        private string SaveIdPictureToUserRecords()
+        {
+            if (Session["reg_id_temp_path"] == null || Session["reg_id_extension"] == null)
+            {
+                throw new Exception("ID picture was not found. Please upload your ID picture again.");
+            }
+
+            string tempFilePath = Session["reg_id_temp_path"].ToString();
+
+            if (!File.Exists(tempFilePath))
+            {
+                throw new Exception("ID picture file is missing. Please upload your ID picture again.");
+            }
+
+            string username = Session["reg_username"].ToString();
+            string extension = Session["reg_id_extension"].ToString();
+            string recordsFolder = Server.MapPath("~/Records");
+            string userFolder = Path.Combine(recordsFolder, username);
+
+            if (!Directory.Exists(recordsFolder))
+            {
+                Directory.CreateDirectory(recordsFolder);
+            }
+
+            if (!Directory.Exists(userFolder))
+            {
+                Directory.CreateDirectory(userFolder);
+            }
+
+            string finalFileName = username + "_ID_Picture" + extension;
+            string finalFilePath = Path.Combine(userFolder, finalFileName);
+
+            if (File.Exists(finalFilePath))
+            {
+                File.Delete(finalFilePath);
+            }
+
+            File.Move(tempFilePath, finalFilePath);
+
+            Session.Remove("reg_id_temp_path");
+            Session.Remove("reg_id_extension");
+
+            return "~/Records/" + username + "/" + finalFileName;
+        }
+
+        private void DeleteTemporaryIdPicture()
+        {
+            if (Session["reg_id_temp_path"] != null)
+            {
+                string tempFilePath = Session["reg_id_temp_path"].ToString();
+
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
+
+            Session.Remove("reg_id_temp_path");
+            Session.Remove("reg_id_extension");
+        }
+
         private void RegisterBeneficiary()
         {
+            SaveIdPictureToUserRecords();
+
             string connectionString = ConfigurationManager
                 .ConnectionStrings["BarangayDB"].ConnectionString;
 
@@ -396,6 +533,7 @@ namespace BarangayAssistance
 
             Session.Remove("EmailOtp");
             Session.Remove("EmailOtpExpiry");
+            DeleteTemporaryIdPicture();
         }
 
         protected void cvConsent_ServerValidate(object source, ServerValidateEventArgs args)

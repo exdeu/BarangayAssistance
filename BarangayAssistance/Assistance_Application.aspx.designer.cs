@@ -132,6 +132,15 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.TextBox txtNotes;
 
         /// <summary>
+        /// fuApplicationDocuments control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload fuApplicationDocuments;
+
+        /// <summary>
         /// chkDeclaration control.
         /// </summary>
         /// <remarks>

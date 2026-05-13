@@ -2,7 +2,9 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace BarangayAssistance
 {
@@ -29,11 +31,11 @@ namespace BarangayAssistance
         }
 
         private void LoadBeneficiaries(
-     string search = "",
-     string status = "",
-     string beneficiaryType = "",
-     string sex = "",
-     string civilStatus = "")
+            string search = "",
+            string status = "",
+            string beneficiaryType = "",
+            string sex = "",
+            string civilStatus = "")
         {
             search = search.Trim();
 
@@ -53,96 +55,109 @@ namespace BarangayAssistance
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-            SELECT
-                b.beneficiary_id,
-                b.username,
-                b.first_name + ' ' + b.last_name AS full_name,
-                b.contact_number,
-                b.beneficiary_type,
-                b.purok_street,
-                b.date_registered,
-                b.status
-            FROM beneficiaries b
-            WHERE 1 = 1";
+                SELECT
+                    b.beneficiary_id,
+                    b.username,
+                    b.email,
+                    b.first_name,
+                    b.middle_name,
+                    b.last_name,
+                    LTRIM(RTRIM(
+                        b.first_name + ' ' +
+                        ISNULL(NULLIF(b.middle_name, ''), '') + ' ' +
+                        b.last_name
+                    )) AS full_name,
+                    b.date_of_birth,
 
-                // SEARCH
+                    DATEDIFF(YEAR, b.date_of_birth, GETDATE()) -
+                    CASE
+                        WHEN DATEADD(YEAR,
+                            DATEDIFF(YEAR, b.date_of_birth, GETDATE()),
+                            b.date_of_birth) > GETDATE()
+                        THEN 1
+                        ELSE 0
+                    END AS age,
+
+                    b.sex,
+                    b.contact_number,
+                    b.civil_status,
+                    b.purok_street,
+                    b.monthly_income,
+                    b.beneficiary_type,
+                    b.date_registered,
+                    b.status
+                FROM beneficiaries b
+                WHERE 1 = 1";
+
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     query += @"
-                AND
-                (
-                    b.username LIKE @search OR
-                    b.first_name LIKE @search OR
-                    b.last_name LIKE @search OR
-                    b.contact_number LIKE @search OR
-                    b.purok_street LIKE @search OR
-                    b.beneficiary_type LIKE @search
-                )";
+                        AND
+                        (
+                            b.username LIKE @search OR
+                            b.email LIKE @search OR
+                            b.first_name LIKE @search OR
+                            b.middle_name LIKE @search OR
+                            b.last_name LIKE @search OR
+                            b.contact_number LIKE @search OR
+                            b.purok_street LIKE @search OR
+                            b.beneficiary_type LIKE @search
+                        )";
                 }
 
-                // STATUS FILTER
                 if (!string.IsNullOrWhiteSpace(status))
                 {
                     query += " AND b.status = @status";
                 }
 
-                // BENEFICIARY TYPE FILTER
                 if (!string.IsNullOrWhiteSpace(beneficiaryType))
                 {
                     query += " AND b.beneficiary_type = @beneficiaryType";
                 }
 
-                // SEX FILTER
                 if (!string.IsNullOrWhiteSpace(sex))
                 {
                     query += " AND b.sex = @sex";
                 }
 
-                // CIVIL STATUS FILTER
                 if (!string.IsNullOrWhiteSpace(civilStatus))
                 {
                     query += " AND b.civil_status = @civilStatus";
                 }
 
                 query += @"
-            ORDER BY
-                CASE WHEN b.status = 'Inactive' THEN 0 ELSE 1 END,
-                b.date_registered DESC";
+                    ORDER BY
+                        CASE WHEN b.status = 'Inactive' THEN 0 ELSE 1 END,
+                        b.date_registered DESC";
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     if (!string.IsNullOrWhiteSpace(search))
                     {
-                        cmd.Parameters.Add("@search", SqlDbType.NVarChar, 150)
-                            .Value = "%" + search + "%";
+                        cmd.Parameters.Add("@search", SqlDbType.NVarChar, 150).Value = "%" + search + "%";
                     }
 
                     if (!string.IsNullOrWhiteSpace(status))
                     {
-                        cmd.Parameters.Add("@status", SqlDbType.NVarChar, 30)
-                            .Value = status;
+                        cmd.Parameters.Add("@status", SqlDbType.NVarChar, 30).Value = status;
                     }
 
                     if (!string.IsNullOrWhiteSpace(beneficiaryType))
                     {
-                        cmd.Parameters.Add("@beneficiaryType", SqlDbType.NVarChar, 50)
-                            .Value = beneficiaryType;
+                        cmd.Parameters.Add("@beneficiaryType", SqlDbType.NVarChar, 50).Value = beneficiaryType;
                     }
 
                     if (!string.IsNullOrWhiteSpace(sex))
                     {
-                        cmd.Parameters.Add("@sex", SqlDbType.NVarChar, 10)
-                            .Value = sex;
+                        cmd.Parameters.Add("@sex", SqlDbType.NVarChar, 10).Value = sex;
                     }
 
                     if (!string.IsNullOrWhiteSpace(civilStatus))
                     {
-                        cmd.Parameters.Add("@civilStatus", SqlDbType.NVarChar, 30)
-                            .Value = civilStatus;
+                        cmd.Parameters.Add("@civilStatus", SqlDbType.NVarChar, 30).Value = civilStatus;
                     }
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
-
                     DataTable dt = new DataTable();
 
                     da.Fill(dt);
@@ -153,6 +168,75 @@ namespace BarangayAssistance
                     lblMessage.Text = dt.Rows.Count + " beneficiary record(s) found.";
                 }
             }
+        }
+
+        public DataTable GetBeneficiaryDocuments(object usernameValue)
+        {
+            DataTable dt = new DataTable();
+
+            dt.Columns.Add("FileName", typeof(string));
+            dt.Columns.Add("FileUrl", typeof(string));
+
+            if (usernameValue == null || string.IsNullOrWhiteSpace(usernameValue.ToString()))
+            {
+                return dt;
+            }
+
+            string username = usernameValue.ToString();
+            string safeUsername = SanitizeFolderName(username);
+
+            string recordsFolder = Server.MapPath("~/Records/");
+            string userFolder = Path.Combine(recordsFolder, safeUsername);
+
+            if (!Directory.Exists(userFolder))
+            {
+                return dt;
+            }
+
+            string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".pdf" };
+
+            foreach (string filePath in Directory.GetFiles(userFolder))
+            {
+                string extension = Path.GetExtension(filePath).ToLower();
+
+                bool allowed = false;
+
+                foreach (string allowedExtension in allowedExtensions)
+                {
+                    if (extension == allowedExtension)
+                    {
+                        allowed = true;
+                        break;
+                    }
+                }
+
+                if (!allowed)
+                {
+                    continue;
+                }
+
+                string fileName = Path.GetFileName(filePath);
+                string fileUrl = ResolveUrl("~/Records/" + HttpUtility.UrlPathEncode(safeUsername) + "/" + HttpUtility.UrlPathEncode(fileName));
+
+                dt.Rows.Add(fileName, fileUrl);
+            }
+
+            return dt;
+        }
+
+        public int GetBeneficiaryDocumentCount(object usernameValue)
+        {
+            return GetBeneficiaryDocuments(usernameValue).Rows.Count;
+        }
+
+        private string SanitizeFolderName(string folderName)
+        {
+            foreach (char invalidChar in Path.GetInvalidFileNameChars())
+            {
+                folderName = folderName.Replace(invalidChar.ToString(), "");
+            }
+
+            return folderName.Trim();
         }
 
         public DataTable GetAssistanceApplications(object beneficiaryIdValue)
@@ -291,12 +375,19 @@ namespace BarangayAssistance
                     {
                         checkCmd.Parameters.Add("@beneficiary_id", SqlDbType.Int).Value = beneficiaryId;
 
-                        int existingInactive = (int)checkCmd.ExecuteScalar();
+                        int existingInactive = Convert.ToInt32(checkCmd.ExecuteScalar());
 
                         if (existingInactive == 0)
                         {
                             lblMessage.Text = "⚠️ Beneficiary was not found or is already active.";
-                            LoadBeneficiaries(txtSearch.Text.Trim());
+
+                            LoadBeneficiaries(
+                                txtSearch.Text.Trim(),
+                                ddlStatus.SelectedValue,
+                                ddlBeneficiaryType.SelectedValue,
+                                ddlSex.SelectedValue,
+                                ddlCivilStatus.SelectedValue);
+
                             return;
                         }
                     }
@@ -316,7 +407,14 @@ namespace BarangayAssistance
                         if (rowsAffected == 0)
                         {
                             lblMessage.Text = "⚠️ Beneficiary account could not be activated.";
-                            LoadBeneficiaries(txtSearch.Text.Trim());
+
+                            LoadBeneficiaries(
+                                txtSearch.Text.Trim(),
+                                ddlStatus.SelectedValue,
+                                ddlBeneficiaryType.SelectedValue,
+                                ddlSex.SelectedValue,
+                                ddlCivilStatus.SelectedValue);
+
                             return;
                         }
                     }
@@ -354,7 +452,12 @@ namespace BarangayAssistance
 
                 lblMessage.Text = "✅ Beneficiary account activated successfully.";
 
-                LoadBeneficiaries(txtSearch.Text.Trim());
+                LoadBeneficiaries(
+                    txtSearch.Text.Trim(),
+                    ddlStatus.SelectedValue,
+                    ddlBeneficiaryType.SelectedValue,
+                    ddlSex.SelectedValue,
+                    ddlCivilStatus.SelectedValue);
             }
         }
     }

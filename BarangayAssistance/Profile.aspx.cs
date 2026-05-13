@@ -34,7 +34,14 @@ namespace BarangayAssistance
                 string query = @"
                     SELECT 
                         username, first_name, last_name, middle_name,
-                        date_of_birth, age, sex, civil_status,
+                        date_of_birth, DATEDIFF(YEAR, date_of_birth, GETDATE()) -
+                        CASE
+                            WHEN DATEADD(YEAR,
+                                DATEDIFF(YEAR, date_of_birth, GETDATE()),
+                                date_of_birth) > GETDATE()
+                            THEN 1
+                            ELSE 0
+                        END AS age, sex, civil_status,
                         contact_number, purok_street, household_members,
                         monthly_income, beneficiary_type, government_id_presented,
                         profile_picture, email

@@ -1,6 +1,7 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Transactions.aspx.cs" Inherits="BarangayAssistance.Transactions" %>
 <%@ Register Src="~/Sidebar.ascx" TagPrefix="uc" TagName="Sidebar" %>
 <%@ Register Src="~/InactivityTimeout.ascx" TagPrefix="uc" TagName="InactivityTimeout" %>
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -9,11 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,23 +19,8 @@
             line-height: 1.6;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #3498db, #1a364e);
-            border-radius: 5px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #2980b9, #152c40);
-        }
-
         .navbar {
             background: rgba(26,54,78,0.95);
-            backdrop-filter: blur(10px);
             color: white;
             padding: 1rem 5%;
             display: flex;
@@ -53,10 +35,7 @@
         .public-logo {
             font-size: 1.6rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #fff, #a8c8e8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: white;
         }
 
         .public-nav-links a {
@@ -65,21 +44,28 @@
             margin-left: 2rem;
             font-size: 1rem;
             font-weight: 500;
-            transition: color 0.3s;
         }
 
-        .public-nav-links a:hover {
-            color: #5dade2;
-        }
+        .public-nav-links a:hover { color: #5dade2; }
 
         .wrapper {
             display: flex;
             min-height: 100vh;
         }
 
+        .public-wrapper {
+            display: block;
+            min-height: 100vh;
+        }
+
         .main {
             flex: 1;
             padding: 30px;
+            overflow-x: auto;
+        }
+
+        .public-main {
+            padding: 40px 5%;
             overflow-x: auto;
         }
 
@@ -92,12 +78,6 @@
             padding: 15px 25px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-            animation: fadeInDown 0.6s ease-out;
-        }
-
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-15px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         .menu-btn {
@@ -108,13 +88,6 @@
             border: none;
             padding: 10px 14px;
             border-radius: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .menu-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
         }
 
         .topbar h3 {
@@ -128,14 +101,8 @@
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.07);
-            border: 1px solid rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52,152,219,0.1);
             margin-top: 20px;
-            animation: fadeInUp 0.7s ease-out 0.2s backwards;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         .section-title {
@@ -144,83 +111,7 @@
             color: #1a364e;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 3px solid transparent;
-            border-image: linear-gradient(90deg, #3498db, #5dade2) 1;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .filter-box {
-            background: white;
-            padding: 22px 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid rgba(52, 152, 219, 0.12);
-            transition: all 0.3s ease;
-        }
-
-        .filter-box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 32px rgba(0,0,0,0.09);
-            border-color: rgba(52, 152, 219, 0.3);
-        }
-
-        .filter-box h4 {
-            margin-bottom: 15px;
-            color: #5d6d7e;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 700;
-        }
-
-        .checkbox-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 16px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-            color: #2c3e4e;
-            gap: 6px;
-            cursor: pointer;
-        }
-
-        .checkbox-item input[type=checkbox] {
-            accent-color: #3498db;
-            width: 15px;
-            height: 15px;
-        }
-
-        .date-row {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .date-row input {
-            padding: 10px 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-family: inherit;
-            background: white;
-            transition: all 0.3s ease;
-            color: #2c3e4e;
-        }
-
-        .date-row input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+            border-bottom: 3px solid #3498db;
         }
 
         .actions {
@@ -228,6 +119,17 @@
             gap: 12px;
             flex-wrap: wrap;
             margin-bottom: 25px;
+        }
+
+        .search-box {
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 50px;
+            min-width: 240px;
+            font-family: inherit;
+            outline: none;
+            background: white;
+            color: #2c3e4e;
         }
 
         .btn {
@@ -239,14 +141,7 @@
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             font-family: inherit;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
         .btn-outline {
@@ -255,18 +150,12 @@
             border: 2px solid #1a364e;
         }
 
-        .btn-outline:hover {
-            background: #f5f7fa;
-        }
-
-        .grid-container {
-            overflow-x: auto;
-        }
+        .grid-container { overflow-x: auto; }
 
         .gridview {
             width: 100%;
-            min-width: 800px;
             border-collapse: collapse;
+            min-width: 1200px;
             margin-top: 10px;
         }
 
@@ -278,34 +167,23 @@
             font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .gridview th:first-child {
-            border-radius: 10px 0 0 10px;
-        }
-
-        .gridview th:last-child {
-            border-radius: 0 10px 10px 0;
         }
 
         .gridview td {
             padding: 12px;
-            border-bottom: 1px solid rgba(52, 152, 219, 0.08);
+            border-bottom: 1px solid rgba(52,152,219,0.08);
             font-size: 0.9rem;
             color: #2c3e4e;
+            vertical-align: top;
         }
 
-        .gridview tr:nth-child(even) td {
-            background-color: #f8fafd;
-        }
+        .gridview tr:nth-child(even) td { background-color: #f8fafd; }
+        .gridview tr:hover td { background-color: #eef4fb; }
 
-        .gridview tr:hover td {
-            background-color: #eef4fb;
-            transition: background 0.2s ease;
-        }
-
-        .badge {
+        .status-pending,
+        .status-approved,
+        .status-rejected,
+        .status-released {
             padding: 4px 12px;
             border-radius: 50px;
             font-size: 0.78rem;
@@ -313,32 +191,14 @@
             display: inline-block;
         }
 
-        .badge-pending  { background: #fff3cd; color: #856404; }
-        .badge-approved { background: #d1e7dd; color: #0f5132; }
-        .badge-rejected { background: #f8d7da; color: #842029; }
-        .badge-released { background: #cff4fc; color: #055160; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d1e7dd; color: #0f5132; }
+        .status-rejected { background: #f8d7da; color: #842029; }
+        .status-released { background: #cff4fc; color: #055160; }
 
-        .btn-approve {
-            background: linear-gradient(135deg, #198754, #157347);
-            color: white;
-            border: none;
-            padding: 7px 15px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-right: 5px;
-            font-family: inherit;
-        }
-
-        .btn-approve:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
+        .btn-details,
+        .btn-approve,
         .btn-reject {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
             color: white;
             border: none;
             padding: 7px 15px;
@@ -346,13 +206,95 @@
             cursor: pointer;
             font-size: 0.8rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            margin-right: 5px;
+            margin-bottom: 6px;
             font-family: inherit;
         }
 
-        .btn-reject:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        .btn-details { background: linear-gradient(135deg, #6c757d, #495057); }
+        .btn-approve { background: linear-gradient(135deg, #198754, #157347); }
+        .btn-reject { background: linear-gradient(135deg, #dc3545, #bb2d3b); }
+
+        .transaction-details-panel {
+            display: none;
+            margin-top: 12px;
+            padding: 16px;
+            background: #f8fafd;
+            border: 1px solid rgba(52,152,219,0.18);
+            border-left: 5px solid #3498db;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        .details-title {
+            font-weight: 800;
+            color: #1a364e;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .detail-card {
+            background: white;
+            border: 1px solid #dcecf8;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 14px;
+        }
+
+        .detail-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1a364e;
+            word-break: break-word;
+        }
+
+        .document-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .document-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: #1a364e;
+            border: 1px solid #c8e4fb;
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .document-link:hover { background: #eef4fb; }
+
+        .document-empty {
+            padding: 14px;
+            background: white;
+            border-radius: 10px;
+            color: #8899aa;
+            font-weight: 600;
+            text-align: center;
+            border: 1px dashed #c8d8e8;
         }
 
         .message {
@@ -363,24 +305,15 @@
             font-size: 0.9rem;
         }
 
-        @media (max-width: 1100px) {
-            .filters {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
         @media (max-width: 900px) {
-            .filters {
-                grid-template-columns: 1fr;
-            }
+            .main,
+            .public-main { padding: 15px; }
 
-            .main {
-                padding: 15px;
-            }
+            .actions { flex-direction: column; }
 
-            .navbar {
-                flex-direction: column;
-                gap: 10px;
+            .search-box {
+                width: 100%;
+                min-width: 100%;
             }
 
             .topbar {
@@ -389,15 +322,56 @@
                 gap: 10px;
             }
 
-            .topbar h3 {
-                font-size: 1rem;
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .public-nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .public-nav-links a {
+                margin-left: 0;
             }
         }
     </style>
 
     <script>
         function toggleSidebar() {
-            document.getElementById("sidebar").classList.toggle("collapsed");
+            var sidebar = document.getElementById("sidebar");
+
+            if (sidebar) {
+                sidebar.classList.toggle("collapsed");
+            }
+        }
+
+        function toggleTransactionDetails(panelId, buttonId) {
+            var panel = document.getElementById(panelId);
+            var button = document.getElementById(buttonId);
+
+            if (!panel) {
+                return false;
+            }
+
+            if (panel.style.display === "none" || panel.style.display === "") {
+                panel.style.display = "block";
+
+                if (button) {
+                    button.value = "▲ Hide Details";
+                }
+            } else {
+                panel.style.display = "none";
+
+                if (button) {
+                    button.value = "▼ View Details";
+                }
+            }
+
+            return false;
         }
     </script>
 </head>
@@ -413,291 +387,229 @@
                 <a href="Login.aspx">Login</a>
                 <a href="Register.aspx">Register</a>
                 <a href="Transactions.aspx">Transactions</a>
-                  <a href="Contact.aspx">About Us</a>
+                <a href="Contact.aspx">About Us</a>
                 <a href="Feedback.aspx">Feedback</a>
             </div>
         </div>
     </asp:Panel>
 
-    <asp:Panel ID="pnlPublicTransactions" runat="server" Visible="false">
-        <div class="main" style="padding:40px 5%;">
-            <div class="section">
-                <div class="section-title">🌐 Public Transactions Overview</div>
+    <div class='<%= IsPublicView() ? "public-wrapper" : "wrapper" %>'>
 
-                <p style="margin-bottom:20px; color:#5d6d7e;">
-                    View approved and released assistance records. Login to manage or apply.
-                </p>
-               <!-- PUBLIC DASHBOARD CARDS -->
-<div class="cards" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:25px;">
+        <asp:Panel ID="pnlSidebar" runat="server" Visible="false">
+            <uc:Sidebar ID="Sidebar" runat="server" />
+        </asp:Panel>
 
-    <div class="filter-box">
-        <h4>Total Public Records</h4>
-        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-            <asp:Label ID="lblPublicTotal" runat="server" Text="0" />
-        </p>
-    </div>
+        <div class='<%= IsPublicView() ? "public-main" : "main" %>'>
 
-    <div class="filter-box">
-        <h4>Approved</h4>
-        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-            <asp:Label ID="lblPublicApproved" runat="server" Text="0" />
-        </p>
-    </div>
-
-    <div class="filter-box">
-        <h4>Released</h4>
-        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-            <asp:Label ID="lblPublicReleased" runat="server" Text="0" />
-        </p>
-    </div>
-
-    <div class="filter-box">
-        <h4>Total Amount</h4>
-        <p style="font-size:2rem;font-weight:800;color:#1a364e;">
-            <asp:Label ID="lblPublicAmount" runat="server" Text="₱0.00" />
-        </p>
-    </div>
-
-</div>
-
-<!-- NEW INSIGHT CARDS -->
-<div class="cards" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:25px;">
-
-    <div class="filter-box">
-        <h4>Average Assistance</h4>
-        <p style="font-size:1.8rem;font-weight:800;color:#2980b9;">
-            <asp:Label ID="lblPublicAverage" runat="server" Text="₱0.00" />
-        </p>
-    </div>
-
-    <div class="filter-box">
-        <h4>Highest Assistance</h4>
-        <p style="font-size:1.8rem;font-weight:800;color:#27ae60;">
-            <asp:Label ID="lblPublicHighest" runat="server" Text="₱0.00" />
-        </p>
-    </div>
-
-    <div class="filter-box">
-        <h4>Medical Cases</h4>
-        <p style="font-size:1.8rem;font-weight:800;color:#8e44ad;">
-            <asp:Label ID="lblPublicMedical" runat="server" Text="0" />
-        </p>
-    </div>
-
-    <div class="filter-box">
-        <h4>Financial Cases</h4>
-        <p style="font-size:1.8rem;font-weight:800;color:#e67e22;">
-            <asp:Label ID="lblPublicFinancial" runat="server" Text="0" />
-        </p>
-    </div>
-
-</div>
-
-<!-- THIRD ROW -->
-<div class="cards" style="display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-bottom:25px;">
-
-    <div class="filter-box">
-        <h4>Last 7 Days Transactions</h4>
-        <p style="font-size:1.8rem;font-weight:800;color:#c0392b;">
-            <asp:Label ID="lblPublicRecent" runat="server" Text="0" />
-        </p>
-    </div>
-
-    <div class="filter-box">
-        <h4>Approval Rate</h4>
-        <p style="font-size:1.8rem;font-weight:800;color:#16a085;">
-            <asp:Label ID="lblPublicApprovalRate" runat="server" Text="0%" />
-        </p>
-    </div>
-
-</div>
-                <div class="filters">
-                    <div class="filter-box">
-                        <h4>Assistance Type</h4>
-                        <div class="checkbox-grid">
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkMedical" runat="server" />Medical</label>
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkFinancial" runat="server" />Financial</label>
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkBurial" runat="server" />Burial</label>
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkEducational" runat="server" />Educational</label>
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkFood" runat="server" />Food</label>
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkEmergency" runat="server" />Emergency</label>
-                        </div>
-                    </div>
-
-                    <div class="filter-box">
-                        <h4>Status</h4>
-                        <div class="checkbox-grid">
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkApproved" runat="server" />Approved</label>
-                            <label class="checkbox-item"><asp:CheckBox ID="pubChkReleased" runat="server" />Released</label>
-                        </div>
-                    </div>
-
-                    <div class="filter-box">
-                        <h4>Date Range</h4>
-                        <div class="date-row">
-                            <asp:TextBox ID="pubDateFrom" runat="server" TextMode="Date" />
-                            <asp:TextBox ID="pubDateTo" runat="server" TextMode="Date" />
-                        </div>
-                    </div>
+            <asp:Panel ID="pnlTopbar" runat="server" Visible="false">
+                <div class="topbar">
+                    <button type="button" class="menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h3>📋 Assistance Transactions</h3>
+                    <asp:Label ID="lblWelcome" runat="server"></asp:Label>
                 </div>
+            </asp:Panel>
+
+            <div class="section">
+                <div class="section-title">Transaction Records</div>
 
                 <div class="actions">
-                    <asp:Button ID="btnPublicApplyFilter" runat="server"
-                        Text="🔍 Apply Filter"
-                        CssClass="btn"
-                        OnClick="btnPublicApplyFilter_Click" />
+                    <asp:TextBox ID="txtSearch" runat="server"
+                        CssClass="search-box"
+                        placeholder="Search name, assistance type, status..." />
 
-                    <asp:Button ID="btnPublicClearFilter" runat="server"
-                        Text="✖ Clear Filter"
+                    <asp:DropDownList ID="ddlStatus" runat="server" CssClass="search-box">
+                        <asp:ListItem Text="All Status" Value="" />
+                        <asp:ListItem Text="Pending" Value="Pending" />
+                        <asp:ListItem Text="Approved" Value="Approved" />
+                        <asp:ListItem Text="Rejected" Value="Rejected" />
+                        <asp:ListItem Text="Released" Value="Released" />
+                    </asp:DropDownList>
+
+                    <asp:DropDownList ID="ddlAssistanceType" runat="server" CssClass="search-box">
+                        <asp:ListItem Text="All Assistance Types" Value="" />
+                        <asp:ListItem Text="Medical" Value="Medical" />
+                        <asp:ListItem Text="Financial" Value="Financial" />
+                        <asp:ListItem Text="Burial" Value="Burial" />
+                        <asp:ListItem Text="Educational" Value="Educational" />
+                        <asp:ListItem Text="Food" Value="Food" />
+                        <asp:ListItem Text="Emergency" Value="Emergency" />
+                    </asp:DropDownList>
+
+                    <asp:Button ID="btnSearch" runat="server"
+                        Text="🔍 Search"
+                        CssClass="btn"
+                        OnClick="btnSearch_Click" />
+
+                    <asp:Button ID="btnClear" runat="server"
+                        Text="✖ Clear"
                         CssClass="btn btn-outline"
-                        OnClick="btnPublicClearFilter_Click" />
+                        CausesValidation="false"
+                        OnClick="btnClear_Click" />
                 </div>
+
                 <div class="grid-container">
-                    <asp:GridView ID="gvPublicTransactions" runat="server"
+                    <asp:GridView ID="gvTransactions" runat="server"
                         AutoGenerateColumns="False"
                         CssClass="gridview"
                         GridLines="None"
-                        EmptyDataText="No public records available.">
+                        EmptyDataText="No transaction records found."
+                        OnRowCommand="gvTransactions_RowCommand">
+
                         <Columns>
+                            <asp:BoundField DataField="application_id" HeaderText="Application ID" />
                             <asp:BoundField DataField="full_name" HeaderText="Beneficiary" />
-                            <asp:BoundField DataField="assistance_type" HeaderText="Type" />
-                            <asp:BoundField DataField="estimated_amount_requested" HeaderText="Amount" DataFormatString="{0:₱#,##0.00}" />
-                            <asp:BoundField DataField="date_submitted" HeaderText="Date" DataFormatString="{0:MMM dd, yyyy}" />
-                            <asp:BoundField DataField="status" HeaderText="Status" />
+                            <asp:BoundField DataField="assistance_type" HeaderText="Assistance Type" />
+                            <asp:BoundField DataField="preferred_date" HeaderText="Preferred Date" DataFormatString="{0:MMM dd, yyyy}" />
+                            <asp:BoundField DataField="estimated_amount_requested" HeaderText="Amount" DataFormatString="₱{0:N2}" />
+                            <asp:BoundField DataField="urgency_level" HeaderText="Urgency" />
+                            <asp:BoundField DataField="date_submitted" HeaderText="Date Submitted" DataFormatString="{0:MMM dd, yyyy hh:mm tt}" />
+
+                            <asp:TemplateField HeaderText="Status">
+                                <ItemTemplate>
+                                    <span class='<%# GetStatusClass(Eval("status")) %>'>
+                                        <%# Eval("status") %>
+                                    </span>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+
+                            <asp:TemplateField HeaderText="Action">
+                                <ItemTemplate>
+                                    <input type="button"
+                                        id='btnDetails_<%# Eval("application_id") %>'
+                                        value="▼ View Details"
+                                        class="btn-details"
+                                        onclick='return toggleTransactionDetails("transactionDetails_<%# Eval("application_id") %>", "btnDetails_<%# Eval("application_id") %>");' />
+
+                                    <asp:Button ID="btnApprove" runat="server"
+                                        Text="✔ Approve"
+                                        CssClass="btn-approve"
+                                        CommandName="ApproveApplication"
+                                        CommandArgument='<%# Eval("application_id") %>'
+                                        Visible='<%# IsAdmin() && Eval("status").ToString() == "Pending" %>' />
+
+                                    <asp:Button ID="btnReject" runat="server"
+                                        Text="✖ Reject"
+                                        CssClass="btn-reject"
+                                        CommandName="RejectApplication"
+                                        CommandArgument='<%# Eval("application_id") %>'
+                                        Visible='<%# IsAdmin() && Eval("status").ToString() == "Pending" %>' />
+
+                                    <div id='transactionDetails_<%# Eval("application_id") %>' class="transaction-details-panel">
+                                        <div class="details-title">Application Details</div>
+
+                                        <div class="details-grid">
+                                            <div class="detail-card">
+                                                <span class="detail-label">Application ID</span>
+                                                <span class="detail-value"><%# Eval("application_id") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Beneficiary</span>
+                                                <span class="detail-value"><%# Eval("full_name") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Username</span>
+                                                <span class="detail-value"><%# Eval("username") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Beneficiary Type</span>
+                                                <span class="detail-value"><%# Eval("beneficiary_type") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Contact Number</span>
+                                                <span class="detail-value"><%# Eval("contact_number") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Assistance Type</span>
+                                                <span class="detail-value"><%# Eval("assistance_type") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Preferred Date</span>
+                                                <span class="detail-value"><%# Eval("preferred_date") == DBNull.Value ? "N/A" : Eval("preferred_date", "{0:MMM dd, yyyy}") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Amount Requested</span>
+                                                <span class="detail-value"><%# Eval("estimated_amount_requested") == DBNull.Value ? "N/A" : Eval("estimated_amount_requested", "₱{0:N2}") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Urgency</span>
+                                                <span class="detail-value"><%# Eval("urgency_level") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Status</span>
+                                                <span class="detail-value"><%# Eval("status") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Date Submitted</span>
+                                                <span class="detail-value"><%# Eval("date_submitted") == DBNull.Value ? "N/A" : Eval("date_submitted", "{0:MMM dd, yyyy hh:mm tt}") %></span>
+                                            </div>
+
+                                            <div class="detail-card">
+                                                <span class="detail-label">Date Updated</span>
+                                                <span class="detail-value"><%# Eval("date_updated") == DBNull.Value ? "N/A" : Eval("date_updated", "{0:MMM dd, yyyy hh:mm tt}") %></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="details-title">Reason for Application</div>
+                                        <div class="detail-card">
+                                            <%# Eval("reason_for_application") == DBNull.Value || string.IsNullOrWhiteSpace(Eval("reason_for_application").ToString()) ? "N/A" : Eval("reason_for_application") %>
+                                        </div>
+
+                                        <div class="details-title">Additional Notes</div>
+                                        <div class="detail-card">
+                                            <%# Eval("additional_notes") == DBNull.Value || string.IsNullOrWhiteSpace(Eval("additional_notes").ToString()) ? "N/A" : Eval("additional_notes") %>
+                                        </div>
+
+                                        <div class="details-title">Supporting Documents</div>
+
+                                        <asp:Repeater ID="rptApplicationDocuments" runat="server"
+                                            DataSource='<%# GetApplicationDocuments(Eval("username"), Eval("application_id")) %>'>
+                                            <HeaderTemplate>
+                                                <div class="document-list">
+                                            </HeaderTemplate>
+
+                                            <ItemTemplate>
+                                                <a class="document-link" href='<%# Eval("FileUrl") %>' target="_blank">
+                                                    📄 <%# Eval("FileName") %>
+                                                </a>
+                                            </ItemTemplate>
+
+                                            <FooterTemplate>
+                                                </div>
+                                            </FooterTemplate>
+                                        </asp:Repeater>
+
+                                        <asp:Panel ID="pnlNoApplicationDocuments" runat="server"
+                                            Visible='<%# GetApplicationDocumentCount(Eval("username"), Eval("application_id")) == 0 %>'>
+                                            <div class="document-empty">
+                                                No supporting documents uploaded for this application.
+                                            </div>
+                                        </asp:Panel>
+                                    </div>
+                                </ItemTemplate>
+                            </asp:TemplateField>
                         </Columns>
                     </asp:GridView>
                 </div>
+
+                <asp:Label ID="lblMessage" runat="server" CssClass="message" />
             </div>
         </div>
+    </div>
+
+    <asp:Panel ID="pnlTimeout" runat="server" Visible="false">
+        <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
     </asp:Panel>
 
-    <asp:Panel ID="pnlDashboardLayout" runat="server">
-        <div class="wrapper">
-
-            <uc:Sidebar ID="Sidebar" runat="server" />
-
-            <div class="main">
-
-                <asp:Panel ID="pnlTopbar" runat="server">
-                    <div class="topbar">
-                        <button type="button" class="menu-btn" onclick="toggleSidebar()">☰</button>
-                        <h3>💳 Transactions</h3>
-                        <div></div>
-                    </div>
-                </asp:Panel>
-
-                <div class="section">
-                    <div class="section-title">🔍 Filter Transactions</div>
-
-                    <div class="filters">
-                        <div class="filter-box">
-                            <h4>Assistance Type</h4>
-                            <div class="checkbox-grid">
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkMedical" runat="server" />Medical
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkFinancial" runat="server" />Financial
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkBurial" runat="server" />Burial
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkEducational" runat="server" />Educational
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkFood" runat="server" />Food
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkEmergency" runat="server" />Emergency
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="filter-box">
-                            <h4>Status</h4>
-                            <div class="checkbox-grid">
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkPending" runat="server" />Pending
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkApproved" runat="server" />Approved
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkRejected" runat="server" />Rejected
-                                </label>
-                                <label class="checkbox-item">
-                                    <asp:CheckBox ID="chkReleased" runat="server" />Released
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="filter-box">
-                            <h4>Date Range</h4>
-                            <div class="date-row">
-                                <asp:TextBox ID="txtDateFrom" runat="server" TextMode="Date" />
-                                <asp:TextBox ID="txtDateTo" runat="server" TextMode="Date" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="actions">
-                        <asp:Button ID="btnApplyFilter" runat="server"
-                            Text="🔍 Apply Filter" CssClass="btn"
-                            OnClick="btnApplyFilter_Click" />
-                        <asp:Button ID="btnClearFilter" runat="server"
-                            Text="✖ Clear Filter" CssClass="btn btn-outline"
-                            OnClick="btnClearFilter_Click" />
-                        <asp:Button ID="btnMyTransactions" runat="server"
-                            Text="👤 My Transactions" CssClass="btn"
-                            Visible="false"
-                            OnClick="btnMyTransactions_Click" />
-                    </div>
-
-                    <div class="grid-container">
-                        <asp:GridView ID="gvTransactions" runat="server"
-                            AutoGenerateColumns="False"
-                            CssClass="gridview"
-                            GridLines="None"
-                            EmptyDataText="No transactions found."
-                            OnRowCommand="gvTransactions_RowCommand">
-                            <Columns>
-                                <asp:BoundField DataField="application_id" HeaderText="ID" />
-                                <asp:BoundField DataField="full_name" HeaderText="Name" />
-                                <asp:BoundField DataField="assistance_type" HeaderText="Type" />
-                                <asp:BoundField DataField="estimated_amount_requested" HeaderText="Amount" DataFormatString="{0:₱#,##0.00}" />
-                                <asp:BoundField DataField="urgency_level" HeaderText="Urgency" />
-                                <asp:BoundField DataField="date_submitted" HeaderText="Date" DataFormatString="{0:MMM dd, yyyy}" />
-                                <asp:BoundField DataField="status" HeaderText="Status" />
-
-                                <asp:TemplateField HeaderText="Action">
-                                    <ItemTemplate>
-                                        <asp:Button ID="btnApprove" runat="server"
-                                            Text="✔ Approve"
-                                            CssClass="btn-approve"
-                                            CommandName="ApproveApplication"
-                                            CommandArgument='<%# Eval("application_id") %>'
-                                            Visible='<%# IsAdmin() && Eval("status").ToString() == "Pending" %>' />
-                                        <asp:Button ID="btnReject" runat="server"
-                                            Text="✖ Reject"
-                                            CssClass="btn-reject"
-                                            CommandName="RejectApplication"
-                                            CommandArgument='<%# Eval("application_id") %>'
-                                            Visible='<%# IsAdmin() && Eval("status").ToString() == "Pending" %>' />
-                                    </ItemTemplate>
-                                </asp:TemplateField>
-                            </Columns>
-                        </asp:GridView>
-                    </div>
-
-                    <asp:Label ID="lblMessage" runat="server" CssClass="message" />
-                </div>
-            </div>
-        </div>
-    </asp:Panel>
-    <asp:Panel ID="pnlInactivityTimeout" runat="server" Visible="false">
-    <uc:InactivityTimeout ID="InactivityTimeout1" runat="server" />
-</asp:Panel>
 </form>
 </body>
 </html>

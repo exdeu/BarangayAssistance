@@ -348,6 +348,24 @@ namespace BarangayAssistance
         protected global::System.Web.UI.WebControls.DropDownList ddlGovID;
 
         /// <summary>
+        /// fuIdPicture control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload fuIdPicture;
+
+        /// <summary>
+        /// rfvIdPicture control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvIdPicture;
+
+        /// <summary>
         /// chkConsent control.
         /// </summary>
         /// <remarks>
