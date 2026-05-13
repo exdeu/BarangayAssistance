@@ -916,20 +916,25 @@ input[type="text"] {
 
                                 <asp:Panel runat="server"
                                     Visible='<%# Eval("status").ToString() != "Resolved" %>'>
+
                                     <div class="admin-action-panel">
-                                        <div class="admin-action-label">🛡️ Admin – Send Response</div
+                                        <div class="admin-action-label">🛡️ Admin – Send Response</div>
+
                                         <asp:TextBox ID="txtReply" runat="server"
-                                            TextMode="MultiLine" Rows="2"
+                                            TextMode="MultiLine"
+                                            Rows="2"
                                             placeholder="Type your response here..."
-                                            style="border-radius:10px; border:1.5px solid #adc8e5; font-family:inherit;
-                                                   font-size:0.93rem; padding:10px 13px; width:100%; resize:vertical; outline:none;" />
+                                            Style="border-radius:10px; border:1.5px solid #adc8e5; font-family:inherit;
+                                                    font-size:0.93rem; padding:10px 13px; width:100%; resize:vertical; outline:none;" />
 
                                         <asp:Button ID="btnReply" runat="server"
                                             Text="Send Response"
                                             CommandName="Reply"
                                             CommandArgument='<%# Eval("complaint_id") %>'
-                                            CssClass="btn-reply" />
+                                            CssClass="btn-reply"
+                                            CausesValidation="false" />
                                     </div>
+
                                 </asp:Panel>
 
                             </div>

@@ -48,9 +48,9 @@ namespace BarangayAssistance
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-            SELECT *
-            FROM complaints_feedback
-            ORDER BY date_submitted DESC";
+                SELECT *
+                FROM complaints_feedback
+                ORDER BY date_submitted DESC";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, con);
 
@@ -101,12 +101,9 @@ namespace BarangayAssistance
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string query = @"
-            SELECT *
-            FROM complaints_feedback
-            WHERE status = 'Resolved'
-              AND admin_response IS NOT NULL
-              AND admin_response <> ''
-            ORDER BY date_resolved DESC";
+                SELECT *
+                FROM complaints_feedback
+                ORDER BY date_submitted DESC";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, con);
 
@@ -320,66 +317,75 @@ namespace BarangayAssistance
                 return;
             }
 
-            if (e.CommandName == "Reply")
+            if (e.CommandName != "Reply")
             {
-                int complaintId = Convert.ToInt32(e.CommandArgument);
+                return;
+            }
 
-                TextBox txtReply = (TextBox)e.Item.FindControl("txtReply");
+            if (e.CommandArgument == null ||
+                !int.TryParse(e.CommandArgument.ToString(), out int complaintId) ||
+                complaintId <= 0)
+            {
+                lblAdminError.Text = "⚠️ Invalid feedback selected.";
+                lblAdminError.Visible = true;
+                lblAdminSuccess.Visible = false;
+                return;
+            }
 
-                if (txtReply == null)
+            TextBox txtReply = e.Item.FindControl("txtReply") as TextBox;
+
+            if (txtReply == null)
+            {
+                lblAdminError.Text = "⚠️ Reply textbox not found.";
+                lblAdminError.Visible = true;
+                lblAdminSuccess.Visible = false;
+                return;
+            }
+
+            string replyText = txtReply.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(replyText))
+            {
+                lblAdminError.Text = "⚠️ Reply cannot be empty.";
+                lblAdminError.Visible = true;
+                lblAdminSuccess.Visible = false;
+                return;
+            }
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                string query = @"
+            UPDATE complaints_feedback
+            SET admin_response = @reply,
+                status = 'Resolved',
+                date_resolved = GETDATE()
+            WHERE complaint_id = @id";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
                 {
-                    lblAdminError.Text = "⚠️ Reply textbox not found.";
-                    lblAdminError.Visible = true;
-                    lblAdminSuccess.Visible = false;
-                    return;
-                }
+                    cmd.Parameters.AddWithValue("@reply", replyText);
+                    cmd.Parameters.AddWithValue("@id", complaintId);
 
-                string replyText = txtReply.Text.Trim();
+                    con.Open();
 
-                if (string.IsNullOrWhiteSpace(replyText))
-                {
-                    lblAdminError.Text = "⚠️ Reply cannot be empty.";
-                    lblAdminError.Visible = true;
-                    lblAdminSuccess.Visible = false;
-                    return;
-                }
+                    int rows = cmd.ExecuteNonQuery();
 
-                using (SqlConnection con = new SqlConnection(connStr))
-                {
-                    string query = @"
-                        UPDATE complaints_feedback
-                        SET admin_response = @reply,
-                            admin_reply = @reply,
-                            status = 'Resolved',
-                            date_resolved = GETDATE()
-                        WHERE complaint_id = @id";
-
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    if (rows > 0)
                     {
-                        cmd.Parameters.AddWithValue("@reply", replyText);
-                        cmd.Parameters.AddWithValue("@id", complaintId);
-
-                        con.Open();
-
-                        int rows = cmd.ExecuteNonQuery();
-
-                        if (rows > 0)
-                        {
-                            lblAdminSuccess.Text = "✅ Response sent successfully!";
-                            lblAdminSuccess.Visible = true;
-                            lblAdminError.Visible = false;
-                        }
-                        else
-                        {
-                            lblAdminError.Text = "⚠️ No record updated.";
-                            lblAdminError.Visible = true;
-                            lblAdminSuccess.Visible = false;
-                        }
+                        lblAdminSuccess.Text = "✅ Response sent successfully!";
+                        lblAdminSuccess.Visible = true;
+                        lblAdminError.Visible = false;
+                    }
+                    else
+                    {
+                        lblAdminError.Text = "⚠️ Response was not saved. Feedback record not found.";
+                        lblAdminError.Visible = true;
+                        lblAdminSuccess.Visible = false;
                     }
                 }
-
-                LoadSubmissions();
             }
+
+            LoadSubmissions();
         }
     }
 }
